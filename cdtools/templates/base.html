@@ -8,14 +8,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css?family=Amiko" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+  <script src="https://code.jquery.com/jquery.min.js"></script>
+  <script type="text/javascript" src="/static/js/main.js" async></script>
   <title>{% block title %}{% endblock %}</title>
 </head>
 
 <body>
   <header>
-    Circular Dichroism
-  </header>
-  <nav></nav>
+    CDTools<div id="navicon">&#9776;</div>
+  </header><nav><ul><li>
+    Home</li><li>Single Run</li><li>Thermal Melt</li><li>About
+  </li></ul></nav>
+
   <main>
     {% block main %}
     {% endblock %}
