@@ -5,9 +5,10 @@ body {
 
 header {
   background-color: #2c3e50;
+  font-family: "Baloo";
   color: #FFFFFF;
   font-size: 200%;
-  line-height: 1.8;
+  line-height: 80px;;
   padding: 0px 30px;
   letter-spacing: 0px;
 }
@@ -20,8 +21,8 @@ nav {
 
 #navicon {
   float: right;
-  padding-left: 5%;
-  padding-right: 5%;
+  margin-left: 5%;
+  margin-right: 5%;
   cursor: pointer;
 }
 
@@ -31,6 +32,7 @@ nav ul {
   padding: 0px;
   background-color: #34495E;
   width: 100%;
+  font-size: 110%;
 }
 
 nav li {
@@ -49,4 +51,48 @@ nav a {
 nav a:hover {
   color: #111111;
   transition: 0.5s
+}
+
+@media only screen and (min-width: 568px) {
+  /* iPad and up */
+
+}
+
+
+@media only screen and (min-width: 769px) {
+  /* Small Desktop screens and up */
+
+  #navicon {
+    display: none;
+  }
+
+  nav {
+    display: inline;
+    line-height: 80px;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background-color: rgba(0, 0, 0, 0);
+    text-align: right;
+  }
+
+  nav ul {
+    background-color: inherit;
+  }
+
+  nav li {
+    display: inline;
+    border: 0px;
+    background-color: inherit;
+    padding-left: 2%;
+    padding-right: 2%;
+    font-size: 80%;
+  }
+
+  nav a {
+    display: inline-block;
+    padding-left: 4%;
+    padding-right: 4%;
+  }
+
 }
