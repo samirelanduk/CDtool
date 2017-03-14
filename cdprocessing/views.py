@@ -6,4 +6,6 @@ def home_page(request):
 
 
 def single_run(request):
-    return render(request, "single.html")
+    if request.method == "POST":
+        return render(request, "single.html", {"display_chart": True})
+    return render(request, "single.html", {"display_chart": False})

@@ -5,10 +5,30 @@
 {% block main %}
 <div id="file-input">
   <div id="blank-entry">
-    <form>
+    <form method="POST">
       <input type="file">
+      {% csrf_token %}
+      <input type="submit">
     </form>
   </div>
   <div id="sample-entry"></div>
+</div>
+
+<div id="output">
+  <div id="chart"></div>
+  {% if display_chart %}
+  <script>
+  $(function () {
+    $('#chart').highcharts({
+      chart: {
+        type: 'line'
+      },
+      title: {
+        text: 'Single Run'
+      }
+    });
+  })
+  </script>
+  {% endif %}
 </div>
 {% endblock %}
