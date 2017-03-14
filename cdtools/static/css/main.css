@@ -46,10 +46,11 @@ nav li {
 nav a {
   color: #FFFFFF;
   text-decoration: none;
+  padding: 0px;
 }
 
 nav a:hover {
-  color: #111111;
+  color: #000000;
   transition: 0.5s
 }
 
@@ -91,8 +92,6 @@ nav a:hover {
 
   nav a {
     display: inline-block;
-    padding-left: 4%;
-    padding-right: 4%;
   }
 
 }
