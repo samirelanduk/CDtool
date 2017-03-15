@@ -5,6 +5,9 @@ def clean_file(lines):
 
 
 def extract_series(lines):
+    """Takes the lines from a datafile and identifies the actual series lines
+    within it."""
+    
     # What are all the lines which begin with a number?
     lines_that_start_with_numbers = []
     for index, line in enumerate(lines):
@@ -38,3 +41,16 @@ def extract_series(lines):
     # Get the corresponding lines and return
     lines = [lines[index] for index in cluster]
     return lines
+
+
+def get_wavelengths(lines):
+    """Takes the file lines corresponding to a CD scan, and extracts the
+    wavelengths from it as a list of floats."""
+
+    wavelengths = []
+    for line in lines:
+        try:
+            wavelengths.append(float(line.split()[0]))
+        except ValueError:
+            pass
+    return wavelengths

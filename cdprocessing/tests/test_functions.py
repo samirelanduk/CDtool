@@ -1,5 +1,5 @@
 from django.test import TestCase
-from cdprocessing.functions import clean_file, extract_series
+from cdprocessing.functions import clean_file, extract_series, get_wavelengths
 
 class FileCleaningTests(TestCase):
 
@@ -160,3 +160,43 @@ class SeriesExtractionTests(TestCase):
          "251.000  0.017  0.129  1.013  0.000  258.1  19.99",
          "250.000  -0.038  0.129  1.013  -0.000  258.8  19.99"
         ])
+
+
+
+class WavelengthsExtractionTests(TestCase):
+
+    def test_can_get_wavelengths_from_series(self):
+        wavelengths = get_wavelengths([
+         "258.000 0.081 0.105 1.013 0.001 252.7 19.99",
+         "257.000  0.267  0.219  1.013  0.003  253.6  19.98",
+         "256.000  0.190  0.098  1.013  0.002  254.4  19.98",
+         "255.000  0.034  0.084  1.013  0.000  255.1  19.99",
+         "254.000  0.245  0.289  1.013  0.002  255.9  19.99",
+         "253.000  0.036  0.060  1.013  0.000  256.6  19.98",
+         "252.000  0.086  0.096  1.013  0.001  257.4  19.98",
+         "251.000  0.017  0.129  1.013  0.000  258.1  19.99",
+         "250.000  -0.038  0.129  1.013  -0.000  258.8  19.99"
+        ])
+        self.assertEqual(
+         wavelengths,
+         [258.0, 257.0, 256.0, 255.0, 254.0, 253.0, 252.0, 251.0, 250.0]
+        )
+
+
+    def test_can_get_wavelengths_from_series_with_header(self):
+        wavelengths = get_wavelengths([
+         "X  CD_Signal  CD_Error  CD(Abs)  CD_Delta  CD_Dynode  Jacket_Temp.",
+         "258.000 0.081 0.105 1.013 0.001 252.7 19.99",
+         "257.000  0.267  0.219  1.013  0.003  253.6  19.98",
+         "256.000  0.190  0.098  1.013  0.002  254.4  19.98",
+         "255.000  0.034  0.084  1.013  0.000  255.1  19.99",
+         "254.000  0.245  0.289  1.013  0.002  255.9  19.99",
+         "253.000  0.036  0.060  1.013  0.000  256.6  19.98",
+         "252.000  0.086  0.096  1.013  0.001  257.4  19.98",
+         "251.000  0.017  0.129  1.013  0.000  258.1  19.99",
+         "250.000  -0.038  0.129  1.013  -0.000  258.8  19.99"
+        ])
+        self.assertEqual(
+         wavelengths,
+         [258.0, 257.0, 256.0, 255.0, 254.0, 253.0, 252.0, 251.0, 250.0]
+        )
