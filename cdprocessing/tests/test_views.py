@@ -18,5 +18,15 @@ class SingleRunPageViewTests(ViewTest):
     def test_chart_display_on_post(self):
         response = self.client.get("/single/")
         self.assertFalse(response.context["display_chart"])
-        response = self.client.post("/single/")
+        response = self.client.post("/single/", data={
+         "file": ViewTest.single_scan_file
+        })
         self.assertTrue(response.context["display_chart"])
+
+
+    def test_single_run_view_can_pull_min_and_max_wavelength_from_single_scan(self):
+        response = self.client.post("/single/", data={
+         "file": ViewTest.single_scan_file
+        })
+        self.assertEqual(response.context["min"], 275)
+        self.assertEqual(response.context["max"], 279)

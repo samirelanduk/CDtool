@@ -5,15 +5,15 @@
 {% block main %}
 <div id="file-input">
   <div id="blank-entry">
-    <form method="POST">
-      <input type="file">
+    <form method="POST" enctype="multipart/form-data">
+      <input name="file" type="file">
       {% csrf_token %}
       <input type="submit">
     </form>
   </div>
   <div id="sample-entry"></div>
 </div>
-
+{{ contents }}
 <div id="output">
   <div id="chart"></div>
   {% if display_chart %}
@@ -21,11 +21,20 @@
   $(function () {
     $('#chart').highcharts({
       chart: {
-        type: 'line'
+        type: 'line',
+        borderWidth: 5
       },
       title: {
         text: 'Single Run'
-      }
+      },
+      credits: {
+        enabled: false
+      },
+      xAxis: {
+        min: 100,
+        max: 200
+      },
+      series: [{}]
     });
   })
   </script>

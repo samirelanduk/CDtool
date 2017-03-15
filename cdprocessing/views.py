@@ -7,5 +7,5 @@ def home_page(request):
 
 def single_run(request):
     if request.method == "POST":
-        return render(request, "single.html", {"display_chart": True})
+        return render(request, "single.html", {"display_chart": True, "contents": list(request.FILES["file"])})
     return render(request, "single.html", {"display_chart": False})

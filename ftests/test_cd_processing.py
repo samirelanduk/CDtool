@@ -41,3 +41,9 @@ class SingleRunAnalysisTests(FunctionalTest):
         output_section = self.browser.find_element_by_id("output")
         chart = output_section.find_element_by_id("chart")
         self.assertGreater(chart.value_of_css_property("height"), "0px")
+
+        # The x axis goes from 190 to 280
+        x_axis = chart.find_element_by_class_name("highcharts-xaxis-labels")
+        x_labels = x_axis.find_elements_by_tag_name("text")
+        self.assertEqual(x_labels[0].text, "190")
+        self.assertEqual(x_labels[-1].text, "280")
