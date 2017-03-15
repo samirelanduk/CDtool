@@ -34,7 +34,10 @@
         max: {{ max }}
       },
       series: [{
-         data: {{ series }}
+         data: {{ series }},
+         marker: {
+           enabled: false
+         }
       }]
     });
   })

@@ -1,4 +1,4 @@
-from cdtools.tests import ViewTest
+from cdtool.tests import ViewTest
 
 class HomePageViewTests(ViewTest):
 

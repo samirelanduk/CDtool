@@ -1,4 +1,4 @@
-from cdtools.tests import UrlTest
+from cdtool.tests import UrlTest
 from cdprocessing import views
 
 class CdProcessingUrlTests(UrlTest):
