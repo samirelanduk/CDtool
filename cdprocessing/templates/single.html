@@ -13,7 +13,6 @@
   </div>
   <div id="sample-entry"></div>
 </div>
-{{ contents }}
 <div id="output">
   <div id="chart"></div>
   {% if display_chart %}
@@ -31,8 +30,8 @@
         enabled: false
       },
       xAxis: {
-        min: 100,
-        max: 200
+        min: {{ min }},
+        max: {{ max }}
       },
       series: [{}]
     });

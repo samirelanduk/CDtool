@@ -1,4 +1,5 @@
 from .base import FunctionalTest
+from time import sleep
 
 class SingleRunAnalysisTests(FunctionalTest):
 
@@ -25,7 +26,7 @@ class SingleRunAnalysisTests(FunctionalTest):
 
         # The user uploads a data file with one blank scan in it
         file_input.send_keys(
-         self.current_location + "ftests/test_data/single-blank.dat"
+         self.current_location + "/test_data/single-blank.dat"
         )
         submit_button = form.find_elements_by_tag_name("input")[-1]
         self.assertEqual(submit_button.get_attribute("type"), "submit")

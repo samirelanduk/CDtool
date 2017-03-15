@@ -11,5 +11,9 @@ def single_run(request):
         lines = clean_file(list(request.FILES["file"]))
         series = extract_series(lines)
         wavelengths = get_wavelengths(series)
-        return render(request, "single.html", {"display_chart": True, "contents": wavelengths})
+        return render(request, "single.html", {
+         "display_chart": True,
+         "min": min(wavelengths),
+         "max": max(wavelengths)
+        })
     return render(request, "single.html", {"display_chart": False})
