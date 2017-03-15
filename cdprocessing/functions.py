@@ -7,7 +7,7 @@ def clean_file(lines):
 def extract_series(lines):
     """Takes the lines from a datafile and identifies the actual series lines
     within it."""
-    
+
     # What are all the lines which begin with a number?
     lines_that_start_with_numbers = []
     for index, line in enumerate(lines):
@@ -54,3 +54,13 @@ def get_wavelengths(lines):
         except ValueError:
             pass
     return wavelengths
+
+
+def get_absorbance(lines):
+    absorbances = []
+    for line in lines:
+        try:
+            absorbances.append([float(line.split()[0]), float(line.split()[1])])
+        except ValueError:
+            pass
+    return absorbances

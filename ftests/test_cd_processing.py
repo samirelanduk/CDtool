@@ -48,3 +48,6 @@ class SingleRunAnalysisTests(FunctionalTest):
         x_labels = x_axis.find_elements_by_tag_name("text")
         self.assertEqual(x_labels[0].text, "190")
         self.assertEqual(x_labels[-1].text, "280")
+
+        # There is a line series
+        line = chart.find_element_by_class_name("highcharts-graph")
