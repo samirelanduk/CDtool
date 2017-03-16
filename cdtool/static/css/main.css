@@ -54,6 +54,15 @@ nav a:hover {
   transition: 0.5s
 }
 
+#blank-entry, #sample-entry {
+  width: 100%;
+  padding: 30px;
+  border: 2px solid pink;
+  border-radius: 4px;
+  box-sizing: border-box;
+  display: block;
+}
+
 @media only screen and (min-width: 568px) {
   /* iPad and up */
 
@@ -92,6 +101,19 @@ nav a:hover {
 
   nav a {
     display: inline-block;
+  }
+
+  #blank-entry, #sample-entry {
+    width: 40%;
+    padding: 30px;
+    border: 2px solid pink;
+    border-radius: 4px;
+    box-sizing: border-box;
+    display: inline-block;
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-top: 20px;
+    margin-bottom: 20px;
   }
 
 }

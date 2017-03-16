@@ -9,7 +9,7 @@ def home_page(request):
 
 def single_run(request):
     if request.method == "POST":
-        lines = clean_file(list(request.FILES["file"]))
+        lines = clean_file(list(request.FILES["blank"]))
         series = extract_series(lines)
         wavelengths = get_wavelengths(series)
         absorbances = get_absorbance(series)

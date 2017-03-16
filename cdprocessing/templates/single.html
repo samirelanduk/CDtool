@@ -4,14 +4,20 @@
 
 {% block main %}
 <div id="file-input">
-  <div id="blank-entry">
-    <form method="POST" enctype="multipart/form-data">
-      <input name="file" type="file">
+  <form method="POST" enctype="multipart/form-data">
+    <div id="blank-entry">
+        <h2>Blank</h2>
+        <input name="blank" type="file">
+        {% csrf_token %}
+        <input type="submit">
+    </div><div id="sample-entry">
+      <h2>Sample</h2>
+      <input name="sample" type="file">
       {% csrf_token %}
       <input type="submit">
-    </form>
-  </div>
-  <div id="sample-entry"></div>
+    </div>
+  </form>
+
 </div>
 <div id="output">
   <div id="chart"></div>
@@ -21,7 +27,9 @@
     $('#chart').highcharts({
       chart: {
         type: 'line',
-        borderWidth: 5
+        borderWidth: 1,
+        plotBorderWidth: 1,
+        margin: [50, 75, 50, 75]
       },
       title: {
         text: 'Single Run'
@@ -29,9 +37,26 @@
       credits: {
         enabled: false
       },
+      legend: {
+        enabled: false
+      },
       xAxis: {
         min: {{ min }},
-        max: {{ max }}
+        max: {{ max }},
+        tickLength: -10,
+        title: {
+          text: "Wavelength (nm)",
+          style: {"font-weight": "bold"}
+        }
+      },
+      yAxis: {
+        gridLineWidth: 0,
+        tickWidth: 1,
+        tickLength: -10,
+        title: {
+          text: "Absorbance",
+          style: {"font-weight": "bold"}
+        }
       },
       series: [{
          data: {{ series }},
