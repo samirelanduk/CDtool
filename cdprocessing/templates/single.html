@@ -4,9 +4,9 @@
 
 {% block main %}
 
-<form id="file-input" method="POST">
+<form id="file-input" method="POST" enctype="multipart/form-data">
   <div id="blank-input">
-    <input type="file">
+    <input name="blank" type="file">
     {% csrf_token %}
     <input type="submit">
   </div>
@@ -22,7 +22,12 @@
     $('#chart').highcharts({
       title: {
         text: "Blank"
-      }
+      },
+      xAxis: {
+        min: {{ min }},
+        max: {{ max }}
+      },
+      series: [{}]
     });
   });
   </script>

@@ -4,63 +4,30 @@ def clean_file(lines):
     return [line.decode().strip() for line in lines if line.strip()]
 
 
-def extract_series(lines):
-    """Takes the lines from a datafile and identifies the actual series lines
-    within it."""
-
-    # What are all the lines which begin with a number?
-    lines_that_start_with_numbers = []
-    for index, line in enumerate(lines):
-        try:
-            float(line.split()[0])
-            lines_that_start_with_numbers.append(index)
-        except ValueError:
-            pass
-
-    # Cluster these line numbers into consecutive chunks
-    cluster = []
-    clusters = []
-    for index, line_num in enumerate(lines_that_start_with_numbers[:-1]):
-        cluster.append(line_num)
-        if lines_that_start_with_numbers[index + 1] > line_num + 1:
-            clusters.append(cluster)
-            cluster = []
-    cluster.append(lines_that_start_with_numbers[-1])
-    clusters.append(cluster)
-
-    # Which is the biggest cluster?
-    cluster = sorted(clusters, key=lambda k: len(k))[-1]
-
-    # Should a header be extracted?
-    chunk_count = len(lines[cluster[0]].split())
-    if cluster[0] != 0:
-        header_line = lines[cluster[0] - 1]
-        if len(header_line.split()) == chunk_count:
-            cluster = [cluster[0] - 1] + cluster
-
-    # Get the corresponding lines and return
-    lines = [lines[index] for index in cluster]
-    return lines
-
-
-def get_wavelengths(lines):
-    """Takes the file lines corresponding to a CD scan, and extracts the
-    wavelengths from it as a list of floats."""
-
-    wavelengths = []
+def get_float_groups(lines):
+    """Takes data lines and identifies the sections that begin with numbers."""
+    float_groups = []
+    float_group = []
     for line in lines:
+        elements = line.split()
         try:
-            wavelengths.append(float(line.split()[0]))
+            float(elements[0])
+            float_group.append(line)
         except ValueError:
-            pass
-    return wavelengths
+            if float_group:
+                float_groups.append(float_group)
+                float_group = []
+    if float_group: float_groups.append(float_group)
+    return float_groups
 
 
-def get_absorbance(lines):
-    absorbances = []
-    for line in lines:
-        try:
-            absorbances.append([float(line.split()[0]), float(line.split()[1])])
-        except ValueError:
-            pass
-    return absorbances
+def float_groups_to_series(float_groups):
+    """Gets the largest float group and assumes it is a series."""
+
+    return sorted(float_groups, key=len)[-1]
+
+
+def extract_wavelengths(series):
+    """Takes the wavelengths from a series of lines."""
+
+    return [float(line.split()[0]) for line in series]

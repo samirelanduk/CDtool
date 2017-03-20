@@ -1,6 +1,5 @@
 from django.shortcuts import render
-from cdprocessing.functions import clean_file, extract_series, get_wavelengths
-from cdprocessing.functions import get_absorbance
+from cdprocessing import functions
 
 # Create your views here.
 def home_page(request):
@@ -9,17 +8,13 @@ def home_page(request):
 
 def single_run(request):
     if request.method == "POST":
-        return render(request, "single.html", {"display_chart": True})
-    return render(request, "single.html", {"display_chart": False})
-    '''if request.method == "POST":
-        lines = clean_file(list(request.FILES["blank"]))
-        series = extract_series(lines)
-        wavelengths = get_wavelengths(series)
-        absorbances = get_absorbance(series)
+        lines = functions.clean_file(list(request.FILES["blank"]))
+        float_groups = functions.get_float_groups(lines)
+        series = functions.float_groups_to_series(float_groups)
+        wavelengths = functions.extract_wavelengths(series)
         return render(request, "single.html", {
          "display_chart": True,
          "min": min(wavelengths),
-         "max": max(wavelengths),
-         "series": absorbances
+         "max": max(wavelengths)
         })
-    return render(request, "single.html", {"display_chart": False})'''
+    return render(request, "single.html", {"display_chart": False})
