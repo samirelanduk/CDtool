@@ -1,6 +1,7 @@
 from django.test import TestCase
 from cdprocessing.functions import clean_file, get_float_groups
 from cdprocessing.functions import float_groups_to_series, extract_wavelengths
+from cdprocessing.functions import extract_absorbances
 
 class FileCleaningTests(TestCase):
 
@@ -62,6 +63,14 @@ class WavelengthsExtractionTests(TestCase):
     def test_can_pull_out_wavelengths_from_series(self):
         wavelengths = extract_wavelengths(["3 76 34", "4.5 4 32", "76.8 34 3"])
         self.assertEqual(wavelengths, [3.0, 4.5, 76.8])
+
+
+
+class AbsorbanceExtractionTests(TestCase):
+
+    def test_can_get_absorbance_from_series(self):
+        absorbance = extract_absorbances(["3 76 34", "4.5 4 32", "76.8 34 3"])
+        self.assertEqual(absorbance, [[3, 76], [4.5, 4], [76.8, 34]])
 
 
 

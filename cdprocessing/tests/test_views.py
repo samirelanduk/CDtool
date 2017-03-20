@@ -32,7 +32,7 @@ class SingleRunPageViewTests(ViewTest):
         self.assertEqual(response.context["max"], 279)
 
 
-    '''def test_single_run_view_can_pull_out_absorbance_from_single_scan(self):
+    def test_single_run_view_can_pull_out_absorbance_from_single_scan(self):
         response = self.client.post("/single/", data={
          "blank": self.single_scan_file
         })
@@ -42,4 +42,4 @@ class SingleRunPageViewTests(ViewTest):
          [277.0, 0.031],
          [276.0, -0.158],
          [275.0, -0.151],
-        ])'''
+        ])

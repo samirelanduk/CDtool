@@ -44,7 +44,7 @@ class AveragingSeriesTests(FunctionalTest):
         self.assertEqual(x_labels[-1].text, "280")
 
         # There is a single line series
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
+        lines = chart.find_elements_by_class_name("highcharts-series")
         self.assertEqual(len(lines), 1)
 
         # There is a download button, which they click

@@ -31,3 +31,9 @@ def extract_wavelengths(series):
     """Takes the wavelengths from a series of lines."""
 
     return [float(line.split()[0]) for line in series]
+
+
+def extract_absorbances(series):
+    """Gets the wavelengths and absorbances from a series of lines."""
+
+    return [[float(line.split()[0]), float(line.split()[1])] for line in series]
