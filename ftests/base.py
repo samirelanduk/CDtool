@@ -12,3 +12,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def tearDown(self):
         self.browser.quit()
+        try:
+            os.remove("~/Downloads/TEST_DOWNLOAD")
+        except OSError:
+            pass
