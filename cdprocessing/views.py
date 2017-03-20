@@ -9,6 +9,9 @@ def home_page(request):
 
 def single_run(request):
     if request.method == "POST":
+        return render(request, "single.html", {"display_chart": True})
+    return render(request, "single.html", {"display_chart": False})
+    '''if request.method == "POST":
         lines = clean_file(list(request.FILES["blank"]))
         series = extract_series(lines)
         wavelengths = get_wavelengths(series)
@@ -19,4 +22,4 @@ def single_run(request):
          "max": max(wavelengths),
          "series": absorbances
         })
-    return render(request, "single.html", {"display_chart": False})
+    return render(request, "single.html", {"display_chart": False})'''
