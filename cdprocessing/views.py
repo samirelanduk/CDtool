@@ -21,17 +21,28 @@ def single_run(request):
              datetime.now().strftime("%H:%M:%S (UK Time)")
             )
             response = HttpResponse(header + "\n".join(lines), content_type='application/plain-text')
-            response['Content-Disposition'] = 'attachment; filename="average_blank.dat"'
+            response['Content-Disposition'] = 'attachment; filename="%s"' % request.POST["filename"]
             return response
-        lines = functions.clean_file(list(request.FILES["blank"]))
-        float_groups = functions.get_float_groups(lines)
-        series = functions.float_groups_to_series(float_groups)
-        wavelengths = functions.extract_wavelengths(series)
-        absorbances = functions.extract_absorbances(series)
-        return render(request, "single.html", {
-         "display_chart": True,
-         "min": min(wavelengths),
-         "max": max(wavelengths),
-         "series": absorbances
-        })
+        else:
+            lines, title, filename = None, None, None
+            if request.FILES.get("blank"):
+                lines = functions.clean_file(list(request.FILES["blank"]))
+                title = "Blank"
+                filename = "average_blank.dat"
+            elif request.FILES.get("sample"):
+                lines = functions.clean_file(list(request.FILES["sample"]))
+                title = "Sample"
+                filename = "average_sample.dat"
+            float_groups = functions.get_float_groups(lines)
+            series = functions.float_groups_to_series(float_groups)
+            wavelengths = functions.extract_wavelengths(series)
+            absorbances = functions.extract_absorbances(series)
+            return render(request, "single.html", {
+             "display_chart": True,
+             "title": title,
+             "min": min(wavelengths),
+             "max": max(wavelengths),
+             "series": absorbances,
+             "filename": filename
+            })
     return render(request, "single.html", {"display_chart": False})

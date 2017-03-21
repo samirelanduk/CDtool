@@ -15,13 +15,51 @@ class SingleRunPageViewTests(ViewTest):
         self.assertTemplateUsed(response, "single.html")
 
 
-    def test_chart_display_on_post(self):
+    def test_chart_display_on_blank_post(self):
         response = self.client.get("/single/")
         self.assertFalse(response.context["display_chart"])
         response = self.client.post("/single/", data={
          "blank": self.single_scan_file
         })
         self.assertTrue(response.context["display_chart"])
+
+
+    def test_chart_display_on_sample_post(self):
+        response = self.client.get("/single/")
+        self.assertFalse(response.context["display_chart"])
+        response = self.client.post("/single/", data={
+         "sample": self.single_scan_file
+        })
+        self.assertTrue(response.context["display_chart"])
+
+
+    def test_single_run_view_can_select_blank_title(self):
+        response = self.client.post("/single/", data={
+         "blank": self.single_scan_file
+        })
+        self.assertIn("blank", response.context["title"].lower())
+        self.assertTrue(response.context["display_chart"])
+
+
+    def test_single_run_view_can_select_blank_file_name(self):
+        response = self.client.post("/single/", data={
+         "blank": self.single_scan_file
+        })
+        self.assertIn("blank", response.context["filename"].lower())
+
+
+    def test_single_run_view_can_select_sample_title(self):
+        response = self.client.post("/single/", data={
+         "sample": self.single_scan_file
+        })
+        self.assertIn("sample", response.context["title"].lower())
+
+
+    def test_single_run_view_can_select_sample_file_name(self):
+        response = self.client.post("/single/", data={
+         "sample": self.single_scan_file
+        })
+        self.assertIn("sample", response.context["filename"].lower())
 
 
     def test_single_run_view_can_pull_min_and_max_wavelength_from_single_scan(self):
@@ -47,6 +85,7 @@ class SingleRunPageViewTests(ViewTest):
 
     def test_single_run_view_returns_file_if_series_given(self):
         response = self.client.post("/single/", data={
-         "series": "[]"
+         "series": "[]",
+         "filename": "test.dat"
         })
         self.assertEqual(response["Content-Type"], "application/plain-text")

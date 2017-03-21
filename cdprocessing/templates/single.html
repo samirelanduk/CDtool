@@ -25,7 +25,7 @@
   $(function () {
     $('#chart').highcharts({
       title: {
-        text: "Blank"
+        text: "{{ title }}"
       },
       chart: {
         type: "line",
@@ -84,6 +84,7 @@
   </script>
   <form method="POST">
     <input type="hidden" name="series" value="{{ series }}">
+    <input type="hidden" name="filename" value="{{ filename }}">
     {% csrf_token %}
     <input type="submit" id="download" value="Download data file">
   </form>
