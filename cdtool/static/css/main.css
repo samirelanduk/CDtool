@@ -54,7 +54,7 @@ nav a:hover {
   transition: 0.5s
 }
 
-#blank-entry, #sample-entry {
+#blank-input, #sample-input {
   width: 100%;
   padding: 30px;
   border: 2px solid pink;
@@ -103,17 +103,22 @@ nav a:hover {
     display: inline-block;
   }
 
-  #blank-entry, #sample-entry {
-    width: 40%;
-    padding: 30px;
+  h1, h2, h3 {
+    margin: 0px;
+  }
+
+  #blank-input, #sample-input {
+    width: 50%;
     border: 2px solid pink;
     border-radius: 4px;
     box-sizing: border-box;
     display: inline-block;
-    margin-left: 5%;
-    margin-right: 5%;
     margin-top: 20px;
     margin-bottom: 20px;
+  }
+
+  label, input {
+    display: block;
   }
 
 }

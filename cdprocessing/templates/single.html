@@ -6,12 +6,16 @@
 
 <form id="file-input" method="POST" enctype="multipart/form-data">
   <div id="blank-input">
-    <input name="blank" type="file">
+    <h2>CD Blanks</h2>
+    <label for="blank_id" class="btn">Upload a blank file...</label>
+    <input name="blank" type="file" id="blank_id">
     {% csrf_token %}
-    <input type="submit">
+  </div><div id="sample-input">
+    <h2>CD Samples</h2>
+    <label for="sample_id" class="btn">Upload a sample file...</label>
+    <input name="sample" type="file">
   </div>
-  <div id="sample-input">
-  </div>
+  <input type="submit">
 </form>
 
 <div id="output">

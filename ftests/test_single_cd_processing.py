@@ -14,10 +14,10 @@ class AveragingSeriesTests(FunctionalTest):
         blank_input = input_section.find_element_by_id("blank-input")
         sample_input = input_section.find_element_by_id("sample-input")
 
-        # The blank entry section has a file input and a submit button
+        # The blank entry section has a file input and a submit button outside
         file_input = blank_input.find_elements_by_tag_name("input")[0]
         self.assertEqual(file_input.get_attribute("type"), "file")
-        blank_submit = blank_input.find_elements_by_tag_name("input")[-1]
+        blank_submit = input_section.find_elements_by_tag_name("input")[-1]
         self.assertEqual(blank_submit.get_attribute("type"), "submit")
 
         # They submit a blank file with a single scan in it
