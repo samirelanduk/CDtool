@@ -43,3 +43,10 @@ class SingleRunPageViewTests(ViewTest):
          [276.0, -0.158],
          [275.0, -0.151],
         ])
+
+
+    def test_single_run_view_returns_file_if_series_given(self):
+        response = self.client.post("/single/", data={
+         "series": "[]"
+        })
+        self.assertEqual(response["Content-Type"], "application/plain-text")

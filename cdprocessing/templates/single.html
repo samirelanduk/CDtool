@@ -33,6 +33,11 @@
     });
   });
   </script>
+  <form method="POST">
+    <input type="hidden" name="series" value="{{ series }}">
+    {% csrf_token %}
+    <input type="submit" id="download">
+  </form>
   {% endif %}
 </div>
 <!--

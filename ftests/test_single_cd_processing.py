@@ -1,5 +1,6 @@
-from .base import FunctionalTest
+from os.path import expanduser
 from time import sleep
+from .base import FunctionalTest
 from cdtool.settings import BASE_DIR
 
 class AveragingSeriesTests(FunctionalTest):
@@ -50,19 +51,30 @@ class AveragingSeriesTests(FunctionalTest):
         # There is a download button, which they click
         download_button = output.find_element_by_id("download")
         download_button.click()
+        self.assertEqual(
+         self.browser.current_url,
+         self.live_server_url + "/single/"
+        )
+
+        # The chart and everything is still there
+        chart = output.find_element_by_id("chart")
+        title = chart.find_element_by_class_name("highcharts-title")
+        lines = chart.find_elements_by_class_name("highcharts-series")
+        self.assertEqual(len(lines), 1)
+
 
         # There is a downloaded file in Downloads
-        with open("~/Downloads/TEST_DOWNLOAD") as f:
-            lines = f.read()
+        with open(expanduser("~") + "/Downloads/average_blank.dat") as f:
+            output_lines = f.readlines()
 
-        # The data in this file has two columns, and goes from 280 to 190
-        data = [line.split() for line in lines]
-        for line in data:
-            self.assertEqual(len(line), 2)
-        self.assertEqual(
-         [float(line[0]) for line in data],
-         list(range(190, 281))[::-1]
-        )
+        # The data in this file is just the data from the original file
+        wavelength_range = range(190, 281)
+        with open("ftests/test_data/single-blank.dat") as f:
+            input_lines = f.readlines()
+        for wavelength in wavelength_range:
+            input_value = [float(l.split()[1]) for l in input_lines if l.startswith(str(wavelength))][0]
+            output_value = [float(l.split()[1]) for l in output_lines if l.startswith(str(wavelength))][0]
+            self.assertEqual(input_value, output_value)
 
 
     def test_can_submit_multi_scan_single_blank_file(self):
