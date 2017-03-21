@@ -117,8 +117,22 @@ nav a:hover {
     margin-bottom: 20px;
   }
 
-  label, input {
+  input[type=submit] {
+    background-color: #34495E;
+    padding: 10px;
+    font-size: 140%;
+    cursor: pointer;
+    color: #FFFFFF;
+    border-radius: 5px;
+    border: 0px;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
     display: block;
+  }
+
+  #file-input, #chart {
+    margin-bottom: 100px;
   }
 
 }

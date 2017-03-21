@@ -15,7 +15,7 @@
     <label for="sample_id" class="btn">Upload a sample file...</label>
     <input name="sample" type="file">
   </div>
-  <input type="submit">
+  <input type="submit" value="Process">
 </form>
 
 <div id="output">
@@ -85,60 +85,8 @@
   <form method="POST">
     <input type="hidden" name="series" value="{{ series }}">
     {% csrf_token %}
-    <input type="submit" id="download">
+    <input type="submit" id="download" value="Download data file">
   </form>
   {% endif %}
 </div>
-<!--
-</div>
-<div id="output">
-  <div id="chart"></div>
-  {% if display_chart %}
-  <script>
-  $(function () {
-    $('#chart').highcharts({
-      chart: {
-        type: 'line',
-        borderWidth: 1,
-        plotBorderWidth: 1,
-        margin: [50, 75, 50, 75]
-      },
-      title: {
-        text: 'Single Run'
-      },
-      credits: {
-        enabled: false
-      },
-      legend: {
-        enabled: false
-      },
-      xAxis: {
-        min: {{ min }},
-        max: {{ max }},
-        tickLength: -10,
-        title: {
-          text: "Wavelength (nm)",
-          style: {"font-weight": "bold"}
-        }
-      },
-      yAxis: {
-        gridLineWidth: 0,
-        tickWidth: 1,
-        tickLength: -10,
-        title: {
-          text: "Absorbance",
-          style: {"font-weight": "bold"}
-        }
-      },
-      series: [{
-         data: {{ series }},
-         marker: {
-           enabled: false
-         }
-      }]
-    });
-  })
-  </script>
-  {% endif %}
-</div>-->
 {% endblock %}
