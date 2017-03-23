@@ -13,6 +13,11 @@ header {
   letter-spacing: 0px;
 }
 
+header a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
 nav {
   display: none;
   width: 100%;
@@ -143,6 +148,7 @@ input[type=submit] {
   nav {
     display: inline;
     line-height: 80px;
+    width: 50%;
     position: absolute;
     top: 0px;
     right: 0px;
@@ -158,8 +164,8 @@ input[type=submit] {
     display: inline;
     border: 0px;
     background-color: inherit;
-    padding-left: 2%;
-    padding-right: 2%;
+    padding-left: 4%;
+    padding-right: 4%;
     font-size: 80%;
   }
 
