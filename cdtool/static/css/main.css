@@ -63,6 +63,28 @@ nav a:hover {
   display: block;
 }
 
+h1, h2, h3 {
+  margin: 0px;
+}
+
+input[type=submit] {
+  background-color: #45596d;
+  padding: 10px;
+  font-size: 140%;
+  cursor: pointer;
+  color: #FFFFFF;
+  border-radius: 5px;
+  border: 0px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+#file-input, #chart {
+  margin-bottom: 100px;
+}
+
 @media only screen and (min-width: 568px) {
   /* iPad and up */
 
@@ -103,10 +125,6 @@ nav a:hover {
     display: inline-block;
   }
 
-  h1, h2, h3 {
-    margin: 0px;
-  }
-
   #blank-input, #sample-input {
     width: 50%;
     border: 2px solid pink;
@@ -115,24 +133,6 @@ nav a:hover {
     display: inline-block;
     margin-top: 20px;
     margin-bottom: 20px;
-  }
-
-  input[type=submit] {
-    background-color: #34495E;
-    padding: 10px;
-    font-size: 140%;
-    cursor: pointer;
-    color: #FFFFFF;
-    border-radius: 5px;
-    border: 0px;
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-  }
-
-  #file-input, #chart {
-    margin-bottom: 100px;
   }
 
 }

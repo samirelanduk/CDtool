@@ -31,8 +31,9 @@
         type: "line",
         plotBorderWidth: 1,
         plotBorderColor: "#000000",
-        margin: [50, 75, 50, 75],
-        zoomType: "xy"
+        margin: [50, 30, 50, 75],
+        zoomType: "xy",
+        height: "50%"
       },
       credits: {
         enabled: false
@@ -76,7 +77,12 @@
       series: [{
         data: {{ series }},
         marker: {
-          enabled: false
+          enabled: false,
+          states: {
+            hover: {
+              enabled: false
+            }
+          }
         }
       }]
     });
