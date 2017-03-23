@@ -185,6 +185,13 @@ class AveragingSeriesTests(FunctionalTest):
              if l.startswith(str(wavelength))][0]
             self.assertEqual(average_input_value, output_value)
 
+        # There is a third column containing the errors
+        for wavelength in wavelength_range:
+            line = [l for l in output_lines if l.startswith(str(wavelength))][0]
+            self.assertEqual(len(line.split()), 3)
+            self.assertGreater(float(line.split()[2]), 0.0)
+
+
 
 
     def test_can_submit_multiple_blank_files(self):
