@@ -94,6 +94,13 @@
     {% csrf_token %}
     <input type="submit" id="download" value="Download data file">
   </form>
+  <script>
+    $( document ).ready(function() {
+      $("html, body").animate({
+        scrollTop: $("#chart").offset().top
+    }, 800);
+    });
+  </script>
   {% endif %}
 </div>
 {% endblock %}
