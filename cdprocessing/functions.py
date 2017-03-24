@@ -1,3 +1,5 @@
+from inferi import Series
+
 def clean_file(lines):
     """Takes the lines from a data file and returns a list of cleaned up lines."""
 
@@ -21,10 +23,24 @@ def get_float_groups(lines):
     return float_groups
 
 
-def float_groups_to_series(float_groups):
+def float_groups_to_big_series(float_groups):
     """Gets the largest float group and assumes it is a series."""
 
     return sorted(float_groups, key=len)[-1]
+
+
+def float_groups_to_extra_series(float_groups, big_series):
+    """Looks through float groups for ones which might be further scans of a
+    given float group."""
+
+    potential_series = [group for group in float_groups if group != big_series]
+    start_floats = [float(line.split()[0]) for line in big_series]
+    series = []
+    for group in potential_series:
+        group_floats = [float(line.split()[0]) for line in group]
+        if group_floats == start_floats:
+            series.append(group)
+    return series
 
 
 def extract_wavelengths(series):
@@ -36,4 +52,14 @@ def extract_wavelengths(series):
 def extract_absorbances(series):
     """Gets the wavelengths and absorbances from a series of lines."""
 
-    return [[float(line.split()[0]), float(line.split()[1])] for line in series]
+    if len(series) == 1:
+        return [[float(line.split()[0]), float(line.split()[1])] for line in series[0]]
+    else:
+        absorbances = []
+        for index, line in enumerate(series[0]):
+            wavelength = float(line.split()[0])
+            average_absorbance = Series(
+             *[float(s[index].split()[1]) for s in series]
+            ).mean()
+            absorbances.append([wavelength, average_absorbance])
+        return absorbances

@@ -46,9 +46,17 @@ class SingleRunViewBlankPostTests(ViewTest):
         self.assertIn("blank", response.context["title"].lower())
 
 
-    def test_correct_min_and_max_from_blank_post(self):
+    def test_correct_min_and_max_from_single_blank_post(self):
         response = self.client.post("/single/", data={
          "blank": self.single_scan_file
+        })
+        self.assertEqual(response.context["min"], 275)
+        self.assertEqual(response.context["max"], 279)
+
+
+    def test_correct_min_and_max_from_multi_blank_post(self):
+        response = self.client.post("/single/", data={
+         "blank": self.multi_scan_file
         })
         self.assertEqual(response.context["min"], 275)
         self.assertEqual(response.context["max"], 279)
@@ -62,6 +70,32 @@ class SingleRunViewBlankPostTests(ViewTest):
          [279.0, -0.006], [278.0, 0.044], [277.0, 0.031],
          [276.0, -0.158], [275.0, -0.151]
         ])
+
+
+    def test_single_run_view_averages_multiple_blank_scans(self):
+        response = self.client.post("/single/", data={
+         "blank": self.multi_scan_file
+        })
+        self.assertAlmostEqual(
+         response.context["series"][0][1],
+         -0.0265, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["series"][1][1],
+         0.041, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["series"][2][1],
+         -0.1195, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["series"][3][1],
+         -0.021, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["series"][4][1],
+         -0.0015, delta=0.005
+        )
 
 
     def test_series_puts_correct_filename_from_blank_post(self):
@@ -103,6 +137,14 @@ class SingleRunViewSamplePostTests(ViewTest):
         self.assertEqual(response.context["max"], 279)
 
 
+    def test_correct_min_and_max_from_multi_sample_post(self):
+        response = self.client.post("/single/", data={
+         "sample": self.multi_scan_file
+        })
+        self.assertEqual(response.context["min"], 275)
+        self.assertEqual(response.context["max"], 279)
+
+
     def test_series_pull_from_single_scan_sample_file(self):
         response = self.client.post("/single/", data={
          "sample": self.single_scan_file
@@ -111,6 +153,32 @@ class SingleRunViewSamplePostTests(ViewTest):
          [279.0, -0.006], [278.0, 0.044], [277.0, 0.031],
          [276.0, -0.158], [275.0, -0.151]
         ])
+
+
+    def test_single_run_view_averages_multiple_sample_scans(self):
+        response = self.client.post("/single/", data={
+         "sample": self.multi_scan_file
+        })
+        self.assertAlmostEqual(
+         response.context["series"][0][1],
+         -0.0265, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["series"][1][1],
+         0.041, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["series"][2][1],
+         -0.1195, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["series"][3][1],
+         -0.021, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["series"][4][1],
+         -0.0015, delta=0.005
+        )
 
 
     def test_series_puts_correct_filename_from_sample_post(self):

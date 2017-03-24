@@ -34,8 +34,12 @@ def single_run(request):
                 title = "Sample"
                 filename = "average_sample.dat"
             float_groups = functions.get_float_groups(lines)
-            series = functions.float_groups_to_series(float_groups)
-            wavelengths = functions.extract_wavelengths(series)
+            big_series = functions.float_groups_to_big_series(float_groups)
+            additional_series = functions.float_groups_to_extra_series(
+             float_groups, big_series
+            )
+            series = [big_series] + additional_series
+            wavelengths = functions.extract_wavelengths(big_series)
             absorbances = functions.extract_absorbances(series)
             return render(request, "single.html", {
              "display_chart": True,
