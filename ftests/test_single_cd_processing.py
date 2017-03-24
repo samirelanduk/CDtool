@@ -125,8 +125,8 @@ class AveragingSeriesTests(FunctionalTest):
         self.assertEqual(len(lines), 1)
 
         # There is an error area around the line
-        areas = chart.find_element_by_class_name("highcharts-arearange-series")
-        areas = [area for areas in areas if area.is_displayed()]
+        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
+        areas = [area for area in areas if area.is_displayed()]
         self.assertEqual(len(areas), 1)
 
         # Below the chart is a div for altering the chart appearance
@@ -140,8 +140,8 @@ class AveragingSeriesTests(FunctionalTest):
         lines = chart.find_elements_by_class_name("highcharts-line-series")
         lines = [line for line in lines if line.is_displayed()]
         self.assertEqual(len(lines), 4)
-        areas = chart.find_element_by_class_name("highcharts-arearange-series")
-        areas = [area for areas in areas if area.is_displayed()]
+        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
+        areas = [area for area in areas if area.is_displayed()]
         self.assertEqual(len(areas), 1)
 
         # They press the button again, and the three lines disappear
@@ -149,8 +149,8 @@ class AveragingSeriesTests(FunctionalTest):
         lines = chart.find_elements_by_class_name("highcharts-line-series")
         lines = [line for line in lines if line.is_displayed()]
         self.assertEqual(len(lines), 1)
-        areas = chart.find_element_by_class_name("highcharts-arearange-series")
-        areas = [area for areas in areas if area.is_displayed()]
+        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
+        areas = [area for area in areas if area.is_displayed()]
         self.assertEqual(len(areas), 1)
 
         # There is a download button, which they click

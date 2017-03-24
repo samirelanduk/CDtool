@@ -89,13 +89,13 @@ class AbsorbanceExtractionTests(TestCase):
 
     def test_can_get_absorbance_from_single_series(self):
         absorbance = extract_absorbances([["3 76 34", "4.5 4 32", "76.8 34 3"]])
-        self.assertEqual(absorbance, [[3, 76], [4.5, 4], [76.8, 34]])
+        self.assertEqual(absorbance, [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]])
 
 
     def test_can_get_absorbance_from_multiple_series(self):
         absorbance = extract_absorbances([
-         ["3 76 34", "4.5 4 32", "76.8 34 3"],
-         ["3 71 34", "4.5 1 32", "76.8 19.8 3"],
-         ["3 78 34", "4.5 4 32", "76.8 96.2 3"]
+         ["3 76 34", "4.5 4 32"],
+         ["3 76 34", "4.5 1 32"],
+         ["3 70 34", "4.5 4 32"]
         ])
-        self.assertEqual(absorbance, [[3, 75], [4.5, 3], [76.8, 50]])
+        self.assertEqual(absorbance, [[3, 74, 2], [4.5, 3, 1]])

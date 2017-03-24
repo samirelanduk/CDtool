@@ -1,3 +1,4 @@
+from math import sqrt
 from inferi import Series
 
 def clean_file(lines):
@@ -53,13 +54,13 @@ def extract_absorbances(series):
     """Gets the wavelengths and absorbances from a series of lines."""
 
     if len(series) == 1:
-        return [[float(line.split()[0]), float(line.split()[1])] for line in series[0]]
+        return [[float(line.split()[0]), float(line.split()[1]), 0] for line in series[0]]
     else:
         absorbances = []
         for index, line in enumerate(series[0]):
             wavelength = float(line.split()[0])
-            average_absorbance = Series(
-             *[float(s[index].split()[1]) for s in series]
-            ).mean()
-            absorbances.append([wavelength, average_absorbance])
+            measurements = Series(*[float(s[index].split()[1]) for s in series])
+            average_absorbance = measurements.mean()
+            error = measurements.standard_deviation() / sqrt(len(measurements))
+            absorbances.append([wavelength, average_absorbance, error])
         return absorbances

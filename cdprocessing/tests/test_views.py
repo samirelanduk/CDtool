@@ -58,7 +58,7 @@ class SingleRunViewBlankPostTests(ViewTest):
         response = self.client.post("/single/", data={
          "blank": self.multi_scan_file
         })
-        self.assertEqual(response.context["min"], 275)
+        self.assertEqual(response.context["min"], 277)
         self.assertEqual(response.context["max"], 279)
 
 
@@ -78,23 +78,52 @@ class SingleRunViewBlankPostTests(ViewTest):
         })
         self.assertAlmostEqual(
          response.context["series"][0][1],
-         -0.0265, delta=0.005
+         -0.131, delta=0.005
         )
         self.assertAlmostEqual(
          response.context["series"][1][1],
-         0.041, delta=0.005
+         0.031, delta=0.005
         )
         self.assertAlmostEqual(
          response.context["series"][2][1],
-         -0.1195, delta=0.005
+         -0.14, delta=0.005
+        )
+
+
+    def test_errors_in_single_blank_scan_are_zero(self):
+        response = self.client.post("/single/", data={
+         "blank": self.single_scan_file
+        })
+        self.assertEqual(response.context["errors"], [])
+
+
+    def test_errors_in_multi_blank_scan_are_correct(self):
+        response = self.client.post("/single/", data={
+         "blank": self.multi_scan_file
+        })
+        self.assertAlmostEqual(
+         response.context["errors"][0][1],
+         -0.236, delta=0.005
         )
         self.assertAlmostEqual(
-         response.context["series"][3][1],
-         -0.021, delta=0.005
+         response.context["errors"][0][2],
+         -0.0258, delta=0.005
         )
         self.assertAlmostEqual(
-         response.context["series"][4][1],
-         -0.0015, delta=0.005
+         response.context["errors"][1][1],
+         0.02, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["errors"][1][2],
+         0.041, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["errors"][2][1],
+         -0.232, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["errors"][2][2],
+         -0.048, delta=0.005
         )
 
 
@@ -141,7 +170,7 @@ class SingleRunViewSamplePostTests(ViewTest):
         response = self.client.post("/single/", data={
          "sample": self.multi_scan_file
         })
-        self.assertEqual(response.context["min"], 275)
+        self.assertEqual(response.context["min"], 277)
         self.assertEqual(response.context["max"], 279)
 
 
@@ -161,23 +190,52 @@ class SingleRunViewSamplePostTests(ViewTest):
         })
         self.assertAlmostEqual(
          response.context["series"][0][1],
-         -0.0265, delta=0.005
+         -0.131, delta=0.005
         )
         self.assertAlmostEqual(
          response.context["series"][1][1],
-         0.041, delta=0.005
+         0.031, delta=0.005
         )
         self.assertAlmostEqual(
          response.context["series"][2][1],
-         -0.1195, delta=0.005
+         -0.14, delta=0.005
+        )
+
+
+    def test_errors_in_single_sample_scan_are_zero(self):
+        response = self.client.post("/single/", data={
+         "sample": self.single_scan_file
+        })
+        self.assertEqual(response.context["errors"], [])
+
+
+    def test_errors_in_multi_sample_scan_are_correct(self):
+        response = self.client.post("/single/", data={
+         "sample": self.multi_scan_file
+        })
+        self.assertAlmostEqual(
+         response.context["errors"][0][1],
+         -0.236, delta=0.005
         )
         self.assertAlmostEqual(
-         response.context["series"][3][1],
-         -0.021, delta=0.005
+         response.context["errors"][0][2],
+         -0.0258, delta=0.005
         )
         self.assertAlmostEqual(
-         response.context["series"][4][1],
-         -0.0015, delta=0.005
+         response.context["errors"][1][1],
+         0.02, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["errors"][1][2],
+         0.041, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["errors"][2][1],
+         -0.232, delta=0.005
+        )
+        self.assertAlmostEqual(
+         response.context["errors"][2][2],
+         -0.048, delta=0.005
         )
 
 

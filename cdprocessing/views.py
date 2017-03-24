@@ -40,13 +40,18 @@ def single_run(request):
             )
             series = [big_series] + additional_series
             wavelengths = functions.extract_wavelengths(big_series)
-            absorbances = functions.extract_absorbances(series)
+            raw_absorbances = functions.extract_absorbances(series)
+            absorbances = [a[:2] for a in raw_absorbances]
+            errors = [
+             [a[0], a[1] - a[2], a[1] + a[2]]
+            for a in raw_absorbances] if len(series) > 1 else []
             return render(request, "single.html", {
              "display_chart": True,
              "title": title,
              "min": min(wavelengths),
              "max": max(wavelengths),
              "series": absorbances,
+             "errors": errors ,
              "filename": filename
             })
     return render(request, "single.html", {"display_chart": False})
