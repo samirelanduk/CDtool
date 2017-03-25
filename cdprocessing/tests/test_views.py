@@ -127,6 +127,24 @@ class SingleRunViewBlankPostTests(ViewTest):
         )
 
 
+    def test_no_input_series_in_single_blank_scan(self):
+        response = self.client.post("/single/", data={
+         "blank": self.single_scan_file
+        })
+        self.assertEqual(response.context["input_series"], [])
+
+
+    def test_inputs_passed_in_multi_blank_scan(self):
+        response = self.client.post("/single/", data={
+         "blank": self.multi_scan_file
+        })
+        self.assertEqual(response.context["input_series"], [
+         [[279, -0.006], [278, 0.042], [277, 0.036]],
+         [[279, -0.047], [278, 0.040], [277, -0.275]],
+         [[279, -0.34], [278, 0.01], [277, -0.18]],
+        ])
+
+
     def test_series_puts_correct_filename_from_blank_post(self):
         response = self.client.post("/single/", data={
          "blank": self.single_scan_file
@@ -237,6 +255,24 @@ class SingleRunViewSamplePostTests(ViewTest):
          response.context["errors"][2][2],
          -0.048, delta=0.005
         )
+
+
+    def test_no_input_series_in_single_sample_scan(self):
+        response = self.client.post("/single/", data={
+         "sample": self.single_scan_file
+        })
+        self.assertEqual(response.context["input_series"], [])
+
+
+    def test_inputs_passed_in_multi_sample_scan(self):
+        response = self.client.post("/single/", data={
+         "sample": self.multi_scan_file
+        })
+        self.assertEqual(response.context["input_series"], [
+         [[279, -0.006], [278, 0.042], [277, 0.036]],
+         [[279, -0.047], [278, 0.040], [277, -0.275]],
+         [[279, -0.34], [278, 0.01], [277, -0.18]],
+        ])
 
 
     def test_series_puts_correct_filename_from_sample_post(self):

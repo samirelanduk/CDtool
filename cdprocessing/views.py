@@ -45,13 +45,19 @@ def single_run(request):
             errors = [
              [a[0], a[1] - a[2], a[1] + a[2]]
             for a in raw_absorbances] if len(series) > 1 else []
+            input_series = [functions.extract_absorbances([original_series]) for original_series in series]
+            for i in input_series:
+                [point.pop() for point in i]
+            input_series = input_series[1:] + [input_series[0]]
+            if len(series) == 1: input_series = []
             return render(request, "single.html", {
              "display_chart": True,
              "title": title,
              "min": min(wavelengths),
              "max": max(wavelengths),
              "series": absorbances,
-             "errors": errors ,
+             "errors": errors,
+             "input_series": input_series,
              "filename": filename
             })
     return render(request, "single.html", {"display_chart": False})

@@ -133,7 +133,8 @@ class AveragingSeriesTests(FunctionalTest):
         chart_config = output.find_element_by_id("chart-config")
 
         # They press the button for toggling input lines
-        input_button = chart_config.find_element_by_id("toggle_inputs")
+        input_button = chart_config.find_element_by_id("toggle-inputs")
+        sleep(1)
         input_button.click()
 
         # There are now four lines, but still only one area
@@ -145,7 +146,7 @@ class AveragingSeriesTests(FunctionalTest):
         self.assertEqual(len(areas), 1)
 
         # They press the button again, and the three lines disappear
-        button.click()
+        input_button.click()
         lines = chart.find_elements_by_class_name("highcharts-line-series")
         lines = [line for line in lines if line.is_displayed()]
         self.assertEqual(len(lines), 1)
@@ -164,7 +165,8 @@ class AveragingSeriesTests(FunctionalTest):
         # The chart and everything is still there
         chart = output.find_element_by_id("chart")
         title = chart.find_element_by_class_name("highcharts-title")
-        lines = chart.find_elements_by_class_name("highcharts-series")
+        lines = chart.find_elements_by_class_name("highcharts-line-series")
+        lines = [line for line in lines if line.is_displayed()]
         self.assertEqual(len(lines), 1)
 
 

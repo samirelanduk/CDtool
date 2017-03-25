@@ -22,8 +22,7 @@
   <div id="chart"></div>
   {% if display_chart %}
   <script>
-  $(function () {
-    $('#chart').highcharts({
+  var chart = Highcharts.chart("chart", {
       title: {
         text: "{{ title }}"
       },
@@ -75,6 +74,12 @@
         enabled: false
       },
       series: [{
+        data: {{ errors }},
+        type: "arearange",
+        fillOpacity: 0.2,
+        lineWidth: 0,
+        enableMouseTracking: false
+      }, {
         data: {{ series }},
         marker: {
           enabled: false,
@@ -84,16 +89,27 @@
             }
           }
         }
-      }, {
-        data: {{ errors }},
-        type: "arearange",
-        fillOpacity: 0.2,
-        lineWidth: 0,
-        enableMouseTracking: false
-      }]
+      },{% for input in input_series %}
+      {
+        data: {{ input }},
+        lineWidth: 1,
+        visible: false,
+        marker: {
+          enabled: false,
+          states: {
+            hover: {
+              enabled: false
+            }
+          }
+        }
+      },
+      {% endfor %}
+      ]
     });
-  });
   </script>
+  <div id="chart-config">
+    <button id="toggle-inputs">Toggle Inputs</button>
+  </div>
   <form method="POST">
     <input type="hidden" name="series" value="{{ series }}">
     <input type="hidden" name="filename" value="{{ filename }}">
@@ -105,6 +121,19 @@
       $("html, body").animate({
         scrollTop: $("#chart").offset().top
     }, 800);
+    });
+
+    $("#toggle-inputs").click(function () {
+      for (s of chart.series) {
+        console.log(s.options.lineWidth);
+        if (s.options.lineWidth == 1) {
+          if (s.visible) {
+            s.hide();
+          } else {
+            s.show();
+          }
+        }
+      }
     });
   </script>
   {% endif %}
