@@ -13,8 +13,10 @@ Including another URLconf
     1. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import include, url
+from home import urls as home_urls
 from cdprocessing import urls as cdprocessing_urls
 
 urlpatterns = [
- url(r"^", include(cdprocessing_urls)),
+ url(r"^single/", include(cdprocessing_urls)),
+ url(r"^", include(home_urls)),
 ]

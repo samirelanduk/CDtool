@@ -6,10 +6,6 @@ from cdprocessing import functions, file_templates
 from cdtool import version
 
 # Create your views here.
-def home_page(request):
-    return render(request, "home.html")
-
-
 def single_run(request):
     if request.method == "POST":
         if "series" in request.POST:
