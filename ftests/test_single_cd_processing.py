@@ -176,7 +176,7 @@ class AveragingSeriesTests(FunctionalTest):
 
         # The data in this file is the averaged data from the original file
         wavelength_range = range(190, 281)
-        with open("ftests/test_data/single-blank.dat") as f:
+        with open("ftests/test_data/three-blanks.dat") as f:
             input_lines = f.readlines()
         for wavelength in wavelength_range:
             input_values = [float(l.split()[1]) for l in input_lines
@@ -185,7 +185,7 @@ class AveragingSeriesTests(FunctionalTest):
             average_input_value = sum(input_values) / len(input_values)
             output_value = [float(l.split()[1]) for l in output_lines
              if l.startswith(str(wavelength))][0]
-            self.assertEqual(average_input_value, output_value)
+            self.assertAlmostEqual(average_input_value, output_value, delta=0.005)
 
         # There is a third column containing the errors
         for wavelength in wavelength_range:
