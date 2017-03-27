@@ -80,7 +80,7 @@
         lineWidth: 0,
         enableMouseTracking: false
       }, {
-        data: {{ series }},
+        data: {{ average_absorbance }},
         marker: {
           enabled: false,
           states: {
@@ -111,7 +111,7 @@
     <button id="toggle-inputs">Toggle Inputs</button>
   </div>
   <form method="POST">
-    <input type="hidden" name="series" value="{{ series }}">
+    <input type="hidden" name="series" value="{{ file_series }}">
     <input type="hidden" name="filename" value="{{ filename }}">
     {% csrf_token %}
     <input type="submit" id="download" value="Download data file">

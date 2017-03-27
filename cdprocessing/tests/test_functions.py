@@ -1,32 +1,29 @@
-from django.test import TestCase
-from cdprocessing.functions import clean_file, get_float_groups
-from cdprocessing.functions import float_groups_to_big_series
-from cdprocessing.functions import float_groups_to_extra_series
-from cdprocessing.functions import extract_wavelengths
-from cdprocessing.functions import extract_absorbances
+from cdtool.tests import ViewTest
+from cdprocessing.functions import extract_all_series, get_float_groups
+from cdprocessing.functions import filter_float_groups, average_series
 
-class FileCleaningTests(TestCase):
+class AllSeriesExtractionFromFileTests(ViewTest):
 
-    def test_can_clean_file_lines(self):
-        cleaned = clean_file([
-         b"$SUMMARY\n",
-         b"Experiment Type : Wavelength\n",
-         b"Experiment Name : Test Single Blank\n",
-         b"\n",
-         b"258.000 0.081 0.105 1.013 0.001 252.7 19.99\n"
-        ])
-        self.assertEqual(cleaned, [
-         "$SUMMARY",
-         "Experiment Type : Wavelength",
-         "Experiment Name : Test Single Blank",
-         "258.000 0.081 0.105 1.013 0.001 252.7 19.99"
+    def test_can_pull_out_single_series_from_single_scan_file(self):
+        series = extract_all_series(self.single_scan_file)
+        self.assertEqual(series, [[
+         [279, -0.006], [278, 0.044], [277, 0.031]
+        ]])
+
+
+    def test_can_pull_out_multiple_series_from_multi_scan_file(self):
+        series = extract_all_series(self.multi_scan_file)
+        self.assertEqual(series, [
+         [[279, -0.006], [278, 0.042], [277, 0.036]],
+         [[279, -0.047], [278, 0.04], [277, -0.275]],
+         [[279, -0.34], [278, 0.01], [277, -0.18]]
         ])
 
 
 
-class FloatGrouperTests(TestCase):
+class FloatGrouperTests(ViewTest):
 
-    def test_can_create_float_groups(self):
+    def test_can_find_float_groups(self):
         float_groups = get_float_groups([
          "Irrelevant string1",
          "Irrelevant string2",
@@ -36,66 +33,67 @@ class FloatGrouperTests(TestCase):
          "More random data",
          "67.4 45",
          "45.6 4 4 4",
-         "String 3",
+         "67.6 string",
          "7.4 7.4",
          "String 4"
         ])
         self.assertEqual(float_groups, [
-         ["3 76 34", "4.5 4 32", "76.8 34 3"],
-         ["67.4 45", "45.6 4 4 4"],
-         ["7.4 7.4"]
+         [[3, 76], [4.5, 4], [76.8, 34]],
+         [[67.4, 45], [45.6, 4]],
+         [[7.4, 7.4]]
         ])
 
 
 
-class FloatGroupsToBiggestSeriesTests(TestCase):
+class FloatGroupFilterTests(ViewTest):
 
-    def test_can_get_single_series_from_float_groups(self):
-        series = float_groups_to_big_series([
-         ["67.4 45", "45.6 4 4 4"],
-         ["3 76 34", "4.5 4 32", "76.8 34 3"],
-         ["7.4 7.4"]
+    def test_can_filter_out_small_float_groups(self):
+        filtered_groups = filter_float_groups([
+         [[3, 76], [4.5, 4], [76.8, 34]],
+         [[67.4, 45], [45.6, 4]],
+         [[3, 74], [4.5, 5], [76.8, 4]],
+         [[7.4, 7.4]],
+         [[3, 76], [4.5, 4], [76.7, 34]],
         ])
-        self.assertEqual(series, ["3 76 34", "4.5 4 32", "76.8 34 3"])
-
-
-
-class FloatGroupsToMultipleSeriesTests(TestCase):
-
-    def test_can_get_additional_series_from_float_groups_and_big_series(self):
-        extra_series = float_groups_to_extra_series([
-         ["67.4 45", "45.6 4 4 4"],
-         ["3 76 34", "4.5 4 32", "76.8 34 3"],
-         ["7.4 7.4"],
-         ["3 34 2", "4.5 45 17", "76.8 3 7"],
-         ["3 1 42", "4.5 45 87", "76.8 321 1"],
-        ], ["3 76 34", "4.5 4 32", "76.8 34 3"])
-        self.assertEqual(
-         extra_series,
-         [["3 34 2", "4.5 45 17", "76.8 3 7"], ["3 1 42", "4.5 45 87", "76.8 321 1"]]
-        )
-
-
-
-class WavelengthsExtractionTests(TestCase):
-
-    def test_can_pull_out_wavelengths_from_series(self):
-        wavelengths = extract_wavelengths(["3 76 34", "4.5 4 32", "76.8 34 3"])
-        self.assertEqual(wavelengths, [3.0, 4.5, 76.8])
-
-
-
-class AbsorbanceExtractionTests(TestCase):
-
-    def test_can_get_absorbance_from_single_series(self):
-        absorbance = extract_absorbances([["3 76 34", "4.5 4 32", "76.8 34 3"]])
-        self.assertEqual(absorbance, [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]])
-
-
-    def test_can_get_absorbance_from_multiple_series(self):
-        absorbance = extract_absorbances([
-         ["3 76 34", "4.5 4 32"],
-         ["3 76 34", "4.5 1 32"],
-         ["3 70 34", "4.5 4 32"]
+        self.assertEqual(filtered_groups, [
+         [[3, 76], [4.5, 4], [76.8, 34]],
+         [[3, 74], [4.5, 5], [76.8, 4]]
         ])
-        self.assertEqual(absorbance, [[3, 74, 2], [4.5, 3, 1]])
+
+
+
+class SeriesAveragingTests(ViewTest):
+
+    def test_can_average_one_series(self):
+        average = average_series([[
+         [279, -0.006], [278, 0.044], [277, 0.031]
+        ]])
+        self.assertEqual(average, [
+         [279, -0.006, 0, -0.006, -0.006],
+         [278, 0.044, 0, 0.044, 0.044],
+         [277, 0.031, 0, 0.031, 0.031]
+        ])
+
+
+    def test_can_average_multple_series(self):
+        average = average_series([
+         [[279, -0.006], [278, 0.042], [277, 0.036]],
+         [[279, -0.047], [278, 0.04], [277, -0.275]],
+         [[279, -0.34], [278, 0.01], [277, -0.18]]
+        ])
+        self.assertEqual(len(average), 3)
+        self.assertEqual(average[0][0], 279)
+        self.assertEqual(average[1][0], 278)
+        self.assertEqual(average[2][0], 277)
+        self.assertAlmostEqual(average[0][1], -0.131, delta=0.005)
+        self.assertAlmostEqual(average[1][1], 0.0307, delta=0.005)
+        self.assertAlmostEqual(average[2][1], -0.1397, delta=0.005)
+        self.assertAlmostEqual(average[0][2], 0.105, delta=0.005)
+        self.assertAlmostEqual(average[1][2], 0.0103, delta=0.005)
+        self.assertAlmostEqual(average[2][2], 0.092, delta=0.005)
+        self.assertAlmostEqual(average[0][3], -0.2361, delta=0.005)
+        self.assertAlmostEqual(average[1][3], 0.0203, delta=0.005)
+        self.assertAlmostEqual(average[2][3], -0.232, delta=0.005)
+        self.assertAlmostEqual(average[0][4], -0.0258, delta=0.005)
+        self.assertAlmostEqual(average[1][4], 0.04102, delta=0.005)
+        self.assertAlmostEqual(average[2][4], -0.0477, delta=0.005)

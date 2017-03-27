@@ -1,21 +1,24 @@
 from math import sqrt
+from collections import Counter
 from inferi import Series
 
-def clean_file(lines):
-    """Takes the lines from a data file and returns a list of cleaned up lines."""
+def extract_all_series(django_file):
+    """Takes a Django file object and extracts all the CD scans from it."""
 
-    return [line.decode().strip() for line in lines if line.strip()]
+    raw_lines = list(django_file)
+    file_lines = [line.decode().strip() for line in raw_lines if line.strip()]
+    float_groups = get_float_groups(file_lines)
+    correct_float_groups = filter_float_groups(float_groups)
+    return correct_float_groups
 
 
-def get_float_groups(lines):
-    """Takes data lines and identifies the sections that begin with numbers."""
-    float_groups = []
-    float_group = []
-    for line in lines:
-        elements = line.split()
+def get_float_groups(file_lines):
+    float_groups, float_group = [], []
+    split_file_lines = [line.split() for line in file_lines]
+    for line in split_file_lines:
         try:
-            float(elements[0])
-            float_group.append(line)
+            first, second = float(line[0]), float(line[1])
+            float_group.append([first, second])
         except ValueError:
             if float_group:
                 float_groups.append(float_group)
@@ -24,43 +27,31 @@ def get_float_groups(lines):
     return float_groups
 
 
-def float_groups_to_big_series(float_groups):
-    """Gets the largest float group and assumes it is a series."""
-
-    return sorted(float_groups, key=len)[-1]
-
-
-def float_groups_to_extra_series(float_groups, big_series):
-    """Looks through float groups for ones which might be further scans of a
-    given float group."""
-
-    potential_series = [group for group in float_groups if group != big_series]
-    start_floats = [float(line.split()[0]) for line in big_series]
-    series = []
-    for group in potential_series:
-        group_floats = [float(line.split()[0]) for line in group]
-        if group_floats == start_floats:
-            series.append(group)
-    return series
+def filter_float_groups(float_groups):
+    longest_length = len(sorted(float_groups, key=lambda k: len(k))[-1])
+    correct_length_groups = [
+     group for group in float_groups if len(group) == longest_length
+    ]
+    wavelengths = [
+     tuple([line[0] for line in group]) for group in correct_length_groups
+    ]
+    wavelengths = Counter(wavelengths)
+    most_common_wavelengths = wavelengths.most_common(1)[0][0]
+    correct_wavelength_groups = [group for group in correct_length_groups if tuple(
+     [line[0] for line in group]
+    ) == most_common_wavelengths]
+    return correct_wavelength_groups
 
 
-def extract_wavelengths(series):
-    """Takes the wavelengths from a series of lines."""
+def average_series(series):
+    wavelengths = [line[0] for line in series[0]]
+    average = []
+    for index, wavelength in enumerate(wavelengths):
+        measurements = Series(*[s[index][1] for s in series])
+        mean = measurements.mean()
+        error = 0 if len(series) == 1 else \
+         measurements.standard_deviation() / sqrt(len(series))
+        max_, min_ = mean - error, mean + error
 
-    return [float(line.split()[0]) for line in series]
-
-
-def extract_absorbances(series):
-    """Gets the wavelengths and absorbances from a series of lines."""
-
-    if len(series) == 1:
-        return [[float(line.split()[0]), float(line.split()[1]), 0] for line in series[0]]
-    else:
-        absorbances = []
-        for index, line in enumerate(series[0]):
-            wavelength = float(line.split()[0])
-            measurements = Series(*[float(s[index].split()[1]) for s in series])
-            average_absorbance = measurements.mean()
-            error = measurements.standard_deviation() / sqrt(len(measurements))
-            absorbances.append([wavelength, average_absorbance, error])
-        return absorbances
+        average.append([wavelength, mean, error, max_, min_])
+    return average
