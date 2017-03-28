@@ -18,9 +18,11 @@ def single_run(request):
 
 def averaging_view(request):
     title = "Sample" if request.FILES.get("sample") else "Blank"
-    input_file = request.FILES.get("sample")
-    if not input_file: input_file = request.FILES.get("blank")
-    all_series = functions.extract_all_series(input_file)
+    input_files = request.FILES.getlist("sample")
+    if not input_files: input_files = request.FILES.getlist("blank")
+    all_series = []
+    for input_file in input_files:
+        all_series += functions.extract_all_series(input_file)
     average_series = functions.average_series(all_series)
     min_wavelength, max_wavelength = average_series[-1][0], average_series[0][0]
     average_absorbance = [line[:2] for line in average_series]

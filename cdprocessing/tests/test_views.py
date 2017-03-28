@@ -119,6 +119,23 @@ class AveragingViewTests(ViewTest):
         self.assertAlmostEqual(absorbance[2][1], -0.1397, delta=0.005)
 
 
+    def test_averaging_view_gives_correct_absorbance_from_multi_file_post(self):
+        response = self.client.post("/single/", data={
+         "blank": [self.multi_scan_file, self.single_scan_file]
+        })
+        absorbance = response.context["average_absorbance"]
+        self.assertEqual(len(absorbance), 3)
+        self.assertEqual(len(absorbance[0]), 2)
+        self.assertEqual(absorbance[0][0], 279)
+        self.assertAlmostEqual(absorbance[0][1], -0.09975, delta=0.005)
+        self.assertEqual(len(absorbance[1]), 2)
+        self.assertEqual(absorbance[1][0], 278)
+        self.assertAlmostEqual(absorbance[1][1], 0.034, delta=0.005)
+        self.assertEqual(len(absorbance[2]), 2)
+        self.assertEqual(absorbance[2][0], 277)
+        self.assertAlmostEqual(absorbance[2][1], -0.097, delta=0.005)
+
+
     def test_averaging_view_sends_no_errors_in_single_scan_post(self):
         response = self.client.post("/single/", data={
          "blank": self.single_scan_file
@@ -146,6 +163,26 @@ class AveragingViewTests(ViewTest):
         self.assertAlmostEqual(errors[2][2], -0.048, delta=0.005)
 
 
+    def test_averaging_view_gives_correct_errors_in_multi_file_post(self):
+        response = self.client.post("/single/", data={
+         "blank": [self.multi_scan_file, self.single_scan_file]
+        })
+        errors = response.context["errors"]
+        self.assertEqual(len(errors), 3)
+        self.assertEqual(len(errors[0]), 3)
+        self.assertEqual(errors[0][0], 279)
+        self.assertAlmostEqual(errors[0][1], -0.18, delta=0.005)
+        self.assertAlmostEqual(errors[0][2], -0.019, delta=0.005)
+        self.assertEqual(len(errors[1]), 3)
+        self.assertEqual(errors[1][0], 278)
+        self.assertAlmostEqual(errors[1][1], 0.02596, delta=0.005)
+        self.assertAlmostEqual(errors[1][2], 0.042, delta=0.005)
+        self.assertEqual(len(errors[2]), 3)
+        self.assertEqual(errors[2][0], 277)
+        self.assertAlmostEqual(errors[2][1], -0.1748, delta=0.005)
+        self.assertAlmostEqual(errors[2][2], -0.0192, delta=0.005)
+
+
     def test_averaging_view_sends_no_input_series_for_single_scan_post(self):
         response = self.client.post("/single/", data={
          "blank": self.single_scan_file
@@ -161,6 +198,18 @@ class AveragingViewTests(ViewTest):
          [[279, -0.006], [278, 0.042], [277, 0.036]],
          [[279, -0.047], [278, 0.040], [277, -0.275]],
          [[279, -0.34], [278, 0.01], [277, -0.18]],
+        ])
+
+
+    def test_averaging_view_sends_correct_input_series_for_multi_file_post(self):
+        response = self.client.post("/single/", data={
+         "blank": [self.multi_scan_file, self.single_scan_file]
+        })
+        self.assertEqual(response.context["input_series"], [
+         [[279, -0.006], [278, 0.042], [277, 0.036]],
+         [[279, -0.047], [278, 0.040], [277, -0.275]],
+         [[279, -0.34], [278, 0.01], [277, -0.18]],
+         [[279, -0.006], [278, 0.044], [277, 0.031]],
         ])
 
 
@@ -205,6 +254,26 @@ class AveragingViewTests(ViewTest):
         self.assertEqual(file_series[2][0], 277)
         self.assertAlmostEqual(file_series[2][1], -0.1397, delta=0.005)
         self.assertAlmostEqual(file_series[2][2], 0.092, delta=0.005)
+
+
+    def test_averaging_view_gives_correct_file_series_from_multi_file_post(self):
+        response = self.client.post("/single/", data={
+         "blank": [self.multi_scan_file, self.single_scan_file]
+        })
+        file_series = response.context["file_series"]
+        self.assertEqual(len(file_series), 3)
+        self.assertEqual(len(file_series[0]), 3)
+        self.assertEqual(file_series[0][0], 279)
+        self.assertAlmostEqual(file_series[0][1], -0.09975, delta=0.005)
+        self.assertAlmostEqual(file_series[0][2], 0.08066, delta=0.005)
+        self.assertEqual(len(file_series[1]), 3)
+        self.assertEqual(file_series[1][0], 278)
+        self.assertAlmostEqual(file_series[1][1], 0.034, delta=0.005)
+        self.assertAlmostEqual(file_series[1][2], 0.00804, delta=0.005)
+        self.assertEqual(len(file_series[2]), 3)
+        self.assertEqual(file_series[2][0], 277)
+        self.assertAlmostEqual(file_series[2][1], -0.097, delta=0.005)
+        self.assertAlmostEqual(file_series[2][2], 0.0778, delta=0.005)
 
 
 

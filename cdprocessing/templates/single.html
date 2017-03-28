@@ -8,12 +8,12 @@
   <div id="blank-input">
     <h2>CD Blanks</h2>
     <label for="blank_id" class="btn">Upload a blank file...</label>
-    <input name="blank" type="file" id="blank_id">
+    <input name="blank" type="file" id="blank_id" multiple>
     {% csrf_token %}
   </div><div id="sample-input">
     <h2>CD Samples</h2>
     <label for="sample_id" class="btn">Upload a sample file...</label>
-    <input name="sample" type="file">
+    <input name="sample" type="file" id="sample_id" multiple>
   </div>
   <input type="submit" value="Process">
 </form>
