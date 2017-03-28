@@ -15,12 +15,13 @@
     <label for="sample_id" class="btn">Upload a sample file...</label>
     <input name="sample" type="file" id="sample_id" multiple>
   </div>
+  <div id="input-errors">{{ error_text }}</div>
   <input type="submit" value="Process">
 </form>
 
 <div id="output">
-  <div id="chart"></div>
   {% if display_chart %}
+  <div id="chart"></div>
   <script>
   var chart = Highcharts.chart("chart", {
       title: {

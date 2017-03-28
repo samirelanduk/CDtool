@@ -4,7 +4,7 @@ from django.http.response import HttpResponse
 from cdtool.tests import ViewTest
 from cdtool import version
 
-class SingleRunView(ViewTest):
+class SingleRunViewTests(ViewTest):
 
     def test_single_run_view_uses_single_run_template(self):
         response = self.client.get("/single/")
@@ -44,6 +44,11 @@ class SingleRunView(ViewTest):
          "series": [[1, 2]]
         })
         self.assertIs(response, view_output)
+
+
+    def test_single_run_view_returns_errors_if_no_files_given_in_post(self):
+        response = self.client.post("/single/")
+        self.assertIn("no file", response.context["error_text"].lower())
 
 
 

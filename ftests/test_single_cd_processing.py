@@ -318,10 +318,6 @@ class AveragingSeriesTests(FunctionalTest):
             self.assertGreater(float(line.split()[2]), 0.0)
 
 
-    def test_graceful_errors_on_blank_submission_tests(self):
-        pass
-
-
     def test_can_submit_single_sample_file(self):
         # User goes to the single run page
         self.browser.get(self.live_server_url + "/single/")
@@ -635,5 +631,37 @@ class AveragingSeriesTests(FunctionalTest):
             self.assertGreater(float(line.split()[2]), 0.0)
 
 
-    def test_graceful_errors_on_sample_submission_tests(self):
-        pass
+
+class SingleCdErrorTests(FunctionalTest):
+
+    def test_error_when_no_file_given(self):
+        # User goes to the single run page
+        self.browser.get(self.live_server_url + "/single/")
+
+        # There is a file input section, with an error section
+        input_section = self.browser.find_element_by_id("file-input")
+        input_errors = input_section.find_element_by_id("input-errors")
+
+        # There are no errors
+        self.assertEqual(input_errors.text, "")
+
+        # The user submits
+        submit = input_section.find_elements_by_tag_name("input")[-1]
+        self.assertEqual(submit.get_attribute("type"), "submit")
+        submit.click()
+
+        # They are still on the same page
+        self.assertEqual(
+         self.browser.current_url,
+         self.live_server_url + "/single/"
+        )
+
+        # There is no chart
+        output = self.browser.find_element_by_id("output")
+        charts = output.find_elements_by_id("chart")
+        self.assertEqual(len(charts), 0)
+
+        # The error message tells the user there is no file
+        input_section = self.browser.find_element_by_id("file-input")
+        input_errors = input_section.find_element_by_id("input-errors")
+        self.assertIn("no file", input_errors.text.lower())

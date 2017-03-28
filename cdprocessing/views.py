@@ -12,6 +12,10 @@ def single_run(request):
             return file_producing_view(request)
         elif "blank" in request.FILES or "sample" in request.FILES:
             return averaging_view(request)
+        else:
+            return render(request, "single.html", {
+             "display_chart": False, "error_text": "No files were supplied."
+            })
     else:
         return render(request, "single.html", {"display_chart": False})
 
