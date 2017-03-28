@@ -26,7 +26,12 @@ def averaging_view(request):
     if not input_files: input_files = request.FILES.getlist("blank")
     all_series = []
     for input_file in input_files:
-        all_series += functions.extract_all_series(input_file)
+        try:
+            all_series += functions.extract_all_series(input_file)
+        except:
+            return render(request, "single.html", {
+             "display_chart": False, "error_text": "Problem parsing %s." % input_file
+            })
     average_series = functions.average_series(all_series)
     min_wavelength, max_wavelength = average_series[-1][0], average_series[0][0]
     average_absorbance = [line[:2] for line in average_series]

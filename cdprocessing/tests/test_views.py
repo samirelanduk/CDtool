@@ -82,6 +82,13 @@ class AveragingViewTests(ViewTest):
         self.assertIn("sample", response.context["title"].lower())
 
 
+    def test_averaging_view_sends_error_if_no_series(self):
+        response = self.client.post("/single/", data={
+         "blank": self.no_scan_file
+        })
+        self.assertIn("problem", response.context["error_text"].lower())
+
+
     def test_averaging_view_gets_correct_min_and_max_from_single_scan_post(self):
         response = self.client.post("/single/", data={
          "blank": self.single_scan_file

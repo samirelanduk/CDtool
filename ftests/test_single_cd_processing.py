@@ -665,3 +665,73 @@ class SingleCdErrorTests(FunctionalTest):
         input_section = self.browser.find_element_by_id("file-input")
         input_errors = input_section.find_element_by_id("input-errors")
         self.assertIn("no file", input_errors.text.lower())
+
+
+    def test_error_when_blank_contains_no_series(self):
+        # User goes to the single run page
+        self.browser.get(self.live_server_url + "/single/")
+
+        # There is a file input section, with an error section
+        input_section = self.browser.find_element_by_id("file-input")
+        input_errors = input_section.find_element_by_id("input-errors")
+
+        # There are no errors
+        self.assertEqual(input_errors.text, "")
+
+        # The user submits a nonsense file
+        blank_input = input_section.find_element_by_id("blank-input")
+        file_input = blank_input.find_elements_by_tag_name("input")[0]
+        blank_submit = input_section.find_elements_by_tag_name("input")[-1]
+        file_input.send_keys(BASE_DIR + "/ftests/test_data/no-series.dat")
+        blank_submit.click()
+
+        # They are still on the same page
+        self.assertEqual(
+         self.browser.current_url,
+         self.live_server_url + "/single/"
+        )
+
+        # There is no chart
+        output = self.browser.find_element_by_id("output")
+        charts = output.find_elements_by_id("chart")
+        self.assertEqual(len(charts), 0)
+
+        # The error message tells the user there were no series
+        input_section = self.browser.find_element_by_id("file-input")
+        input_errors = input_section.find_element_by_id("input-errors")
+        self.assertIn("problem", input_errors.text.lower())
+
+
+    def test_error_when_sample_contains_no_series(self):
+        # User goes to the single run page
+        self.browser.get(self.live_server_url + "/single/")
+
+        # There is a file input section, with an error section
+        input_section = self.browser.find_element_by_id("file-input")
+        input_errors = input_section.find_element_by_id("input-errors")
+
+        # There are no errors
+        self.assertEqual(input_errors.text, "")
+
+        # The user submits a nonsense file
+        sample_input = input_section.find_element_by_id("sample-input")
+        file_input = sample_input.find_elements_by_tag_name("input")[0]
+        sample_submit = input_section.find_elements_by_tag_name("input")[-1]
+        file_input.send_keys(BASE_DIR + "/ftests/test_data/no-series.dat")
+        sample_submit.click()
+
+        # They are still on the same page
+        self.assertEqual(
+         self.browser.current_url,
+         self.live_server_url + "/single/"
+        )
+
+        # There is no chart
+        output = self.browser.find_element_by_id("output")
+        charts = output.find_elements_by_id("chart")
+        self.assertEqual(len(charts), 0)
+
+        # The error message tells the user there were no series
+        input_section = self.browser.find_element_by_id("file-input")
+        input_errors = input_section.find_element_by_id("input-errors")
+        self.assertIn("problem", input_errors.text.lower())

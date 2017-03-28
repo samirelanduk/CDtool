@@ -13,6 +13,13 @@ class UrlTest(TestCase):
 class ViewTest(TestCase):
 
     def setUp(self):
+        self.no_scan_file = SimpleUploadedFile(
+         "single_scan.dat",
+         b"""$MDCDATA:1:14:2:3:4:9
+          X  CD_Signal  CD_Error  CD_Current_(Abs)  CD_Delta_Absorbance  CD_Dynode  Jacket_Temp.
+          """
+        )
+
         self.single_scan_file = SimpleUploadedFile(
          "single_scan.dat",
          b"""$MDCDATA:1:14:2:3:4:9
