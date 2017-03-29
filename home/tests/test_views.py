@@ -10,6 +10,14 @@ class HomePageViewTests(ViewTest):
 
 
 
+class HelpPageViewTests(ViewTest):
+
+    def test_help_view_uses_help_template(self):
+        response = self.client.get("/help/")
+        self.assertTemplateUsed(response, "help.html")
+
+
+
 class ChangelogPageViewTests(ViewTest):
 
     def test_changelog_view_uses_changelog_template(self):
