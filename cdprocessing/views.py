@@ -61,7 +61,11 @@ def file_producing_view(request):
      datetime.now().strftime("%H:%M:%S (UK Time)")
     )
     series = json.loads(request.POST["series"])
-    lines = ["{}   {}   {}".format(line[0], line[1], line[2]) for line in series]
+    lines = ["{:.1f}         {:10.4f}   {:10.4f}".format(
+     line[0],
+     line[1],
+     line[2]
+    ) for line in series]
     response = HttpResponse(
      header + "\n".join(lines), content_type="application/plain-text"
     )
