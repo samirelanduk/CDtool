@@ -2,17 +2,26 @@
 
 {% block title %}Single Run{% endblock %}
 
+{% block css %}
+<style>
+  main {
+    text-align: center;
+    width: inherit;
+  }
+</style>
+{% endblock %}
+
 {% block main %}
 
 <form id="file-input" method="POST" enctype="multipart/form-data">
   <div id="blank-input">
     <h2>CD Blanks</h2>
-    <label for="blank_id" class="btn">Upload a blank file...</label>
+    <label for="blank_id" class="btn">Upload blanks...</label>
     <input name="blank" type="file" id="blank_id" multiple>
     {% csrf_token %}
   </div><div id="sample-input">
     <h2>CD Samples</h2>
-    <label for="sample_id" class="btn">Upload a sample file...</label>
+    <label for="sample_id" class="btn">Upload samples...</label>
     <input name="sample" type="file" id="sample_id" multiple>
   </div>
   <div id="input-errors">{{ error_text }}</div>
@@ -40,6 +49,11 @@
       },
       legend: {
         enabled: false
+      },
+      plotOptions: {
+        arearange: {
+          animation: true
+        }
       },
       xAxis: {
         min: {{ min }},

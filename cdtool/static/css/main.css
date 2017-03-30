@@ -52,17 +52,17 @@ nav a {
   color: #FFFFFF;
   text-decoration: none;
   padding: 0px;
+  transition: 0.5s;
 }
 
 nav a:hover {
-  color: #000000;
+  color: #CCCCCC;
   transition: 0.5s
 }
 
 main {
   min-height: calc(90vh);
   padding: 20px;
-  text-align: center;
 }
 
 footer {
@@ -105,9 +105,7 @@ footer a {
   margin-bottom: 10px;
 }
 
-h1, h2, h3 {
-  margin: 0px;
-}
+
 
 input[type=submit] {
   background-color: #45596d;
@@ -121,10 +119,48 @@ input[type=submit] {
   margin-left: auto;
   margin-right: auto;
   display: block;
+  transition: 0.5s;
 }
 
-#file-input, #chart {
+input[type=submit]:hover {
+  background-color: #000000;
+  transition: 0.5s;
+}
+
+input[type=file] {
+  display: block;
+  text-align: center;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#file-input, #chart-config {
   margin-bottom: 100px;
+}
+
+button {
+  background-color: #61778e;
+  padding: 5px;
+  font-size: 90%;
+  cursor: pointer;
+  color: #FFFFFF;
+  border-radius: 8px;
+  border: 0px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  transition: 0.5s;
+}
+
+button:hover {
+  background-color: #55697d;
+  transition: 0.5s;
+}
+
+p {
+  line-height: 2;
 }
 
 @media only screen and (min-width: 568px) {
@@ -138,6 +174,10 @@ input[type=submit] {
     height: 100%;
     box-sizing: border-box;
     vertical-align: top;
+  }
+
+  main {
+    padding: 25px 40px;;
   }
 }
 
@@ -186,6 +226,21 @@ input[type=submit] {
     display: inline-block;
     margin-top: 20px;
     margin-bottom: 20px;
+  }
+
+  main {
+    padding: 30px 50px;;
+  }
+
+}
+
+@media only screen and (min-width: 1025px) {
+  /* Big Desktop screens */
+
+  main {
+    width: 960px;
+    margin: 0px auto;
+    padding: 40px 60px;;
   }
 
 }
