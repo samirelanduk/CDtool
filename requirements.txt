@@ -1,3 +1,5 @@
 django==1.8.17
 selenium
 inferi
+psycopg2
+gunicorn
