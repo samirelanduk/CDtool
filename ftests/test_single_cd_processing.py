@@ -5,7 +5,32 @@ from cdtool.settings import BASE_DIR
 
 class AveragingSeriesTests(FunctionalTest):
 
-    def test_can_submit_single_blank_file(self):
+    def test_can_submit_single_scan(self):
+        pass
+
+
+    def test_can_submit_multiple_scans_in_one_file(self):
+        pass
+
+
+    def test_can_submit_multiple_scans_in_multiple_files(self):
+        pass
+
+
+
+class SubtractingSeriesTests(FunctionalTest):
+
+    def test_can_subtract_single_scan_from_multiple_scans(self):
+        pass
+
+
+    def test_can_subtract_multiple_scans_from_multiple_scans(self):
+        pass
+
+
+    def test_can_subtract_multiple_files_from_multiple_files(self):
+        pass
+    '''def test_can_submit_single_blank_file(self):
         # User goes to the single run page
         self.browser.get(self.live_server_url + "/single/")
 
@@ -628,13 +653,27 @@ class AveragingSeriesTests(FunctionalTest):
         for wavelength in wavelength_range:
             line = [l for l in output_lines if l.startswith(str(wavelength))][0]
             self.assertEqual(len(line.split()), 3)
-            self.assertGreater(float(line.split()[2]), 0.0)
+            self.assertGreater(float(line.split()[2]), 0.0)'''
 
 
 
 class SingleCdErrorTests(FunctionalTest):
 
     def test_error_when_no_file_given(self):
+        pass
+
+
+    def test_error_when_no_file_given_for_second_file_input(self):
+        pass
+
+
+    def test_error_when_no_series_found(self):
+        pass
+
+
+    def test_error_when_no_series_found_for_second_file_input(self):
+        pass
+    '''def test_error_when_no_file_given(self):
         # User goes to the single run page
         self.browser.get(self.live_server_url + "/single/")
 
@@ -734,4 +773,4 @@ class SingleCdErrorTests(FunctionalTest):
         # The error message tells the user there were no series
         input_section = self.browser.find_element_by_id("file-input")
         input_errors = input_section.find_element_by_id("input-errors")
-        self.assertIn("problem", input_errors.text.lower())
+        self.assertIn("problem", input_errors.text.lower())'''
