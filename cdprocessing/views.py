@@ -21,9 +21,14 @@ def single_run(request):
 
 
 def averaging_view(request):
+    input_files = request.FILES.getlist("sample_files")
+    scan = functions.extract_all_series(input_files[0])[0]
+    min_wavelength, max_wavelength = scan[-1][0], scan[0][0]
     return render(request, "single.html", {
      "display_chart": True,
-     "title": request.POST.get("title")
+     "title": request.POST.get("title"),
+     "min": min_wavelength,
+     "max": max_wavelength,
     })
     '''input_files = request.FILES.getlist("sample")
     all_series = []
@@ -35,7 +40,7 @@ def averaging_view(request):
              "display_chart": False, "error_text": "Problem parsing %s." % input_file
             })
     average_series = functions.average_series(all_series)
-    min_wavelength, max_wavelength = average_series[-1][0], average_series[0][0]
+
     average_absorbance = [line[:2] for line in average_series]
     errors = [[line[0]] + line[-2:] for line in average_series]
     if len(all_series) == 1: errors = []
@@ -46,8 +51,7 @@ def averaging_view(request):
     return render(request, "single.html", {
      "display_chart": True,
      "title": title,
-     "min": min_wavelength,
-     "max": max_wavelength,
+
      "average_absorbance": average_absorbance,
      "errors": errors,
      "input_series": all_series if len(all_series) > 1 else [],
