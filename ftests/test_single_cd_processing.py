@@ -12,18 +12,18 @@ class AveragingSeriesTests(FunctionalTest):
         # There is a file input section, with one fieldset for input
         input_section = self.browser.find_element_by_id("input")
         file_upload = input_section.find_element_by_id("file-input")
-        file_fieldsets = file_input.find_elements_by_class_name("file-fieldset")
+        file_fieldsets = file_upload.find_elements_by_class_name("file-fieldset")
         self.assertEqual(len(file_fieldsets), 1)
 
         # The one file upload fieldset has a file input
-        file_input = file_fieldsets[0].find_elements_by_tag_name("input")
+        file_input = file_fieldsets[0].find_element_by_tag_name("input")
         self.assertEqual(file_input.get_attribute("type"), "file")
 
         # They submit a sample file with one scan in it
         file_input.send_keys(BASE_DIR + "/ftests/test_data/single-blank.dat")
 
-        # They give the sample a name, and submit it
-        text_input = file_fieldsets[0].find_elements_by_tag_name["input"][1]
+        # They give the sample a name
+        text_input = file_fieldsets[0].find_elements_by_tag_name("input")[1]
         self.assertEqual(text_input.get_attribute("type"), "text")
         text_input.send_keys("Test Sample I")
 
