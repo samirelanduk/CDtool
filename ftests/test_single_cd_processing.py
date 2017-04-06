@@ -6,7 +6,152 @@ from cdtool.settings import BASE_DIR
 class AveragingSeriesTests(FunctionalTest):
 
     def test_can_submit_single_scan(self):
-        pass
+        # User goes to the single run page
+        self.browser.get(self.live_server_url + "/single/")
+
+        # There is a file input section, with one fieldset for input
+        input_section = self.browser.find_element_by_id("input")
+        file_upload = input_section.find_element_by_id("file-input")
+        file_fieldsets = file_input.find_elements_by_class_name("file-fieldset")
+        self.assertEqual(len(file_fieldsets), 1)
+
+        # The one file upload fieldset has a file input
+        file_input = file_fieldsets[0].find_elements_by_tag_name("input")
+        self.assertEqual(file_input.get_attribute("type"), "file")
+
+        # They submit a sample file with one scan in it
+        file_input.send_keys(BASE_DIR + "/ftests/test_data/single-blank.dat")
+
+        # They give the sample a name, and submit it
+        text_input = file_fieldsets[0].find_elements_by_tag_name["input"][1]
+        self.assertEqual(text_input.get_attribute("type"), "text")
+        text_input.send_keys("Test Sample I")
+
+        # There is a config section, asking for the experiment name
+        input_parameters = input_section.find_element_by_id("input-parameters")
+        experiment_title_input = input_parameters.find_element_by_id("id_title")
+        experiment_title_input.send_keys("A Single Sample Test")
+
+        # They submit the data
+        submit_button = input_section.find_elements_by_tag_name("input")[-1]
+        submit_button.click()
+
+        # They are still on the same page
+        self.assertEqual(
+         self.browser.current_url,
+         self.live_server_url + "/single/"
+        )
+
+        # The output section has a chart div
+        output = self.browser.find_element_by_id("output")
+        chart = output.find_element_by_id("chart")
+
+        # The chart's title matches what was provided
+        title = chart.find_element_by_class_name("highcharts-title")
+        self.assertEqual(title.text, "A Single Sample Test")
+
+        # The x-axis goes from 280 to 190
+        x_axis = chart.find_element_by_class_name("highcharts-xaxis-labels")
+        x_labels = x_axis.find_elements_by_tag_name("text")
+        self.assertEqual(x_labels[0].text, "190")
+        self.assertEqual(x_labels[-1].text, "280")
+
+        # There is only one line series
+        line_series = self.get_visible_line_series(chart)
+        self.assertEqual(len(line_series), 1)
+
+        # The line series is just the scan from the file
+        with open("ftests/test_data/single-blank.dat") as f:
+            input_lines = f.readlines()
+        lines = [l for l in lines if l.split()[0].split(".")[0].isdigit()]
+        input_data = [(
+         float(l.split()[0]), float(l.split()[1]), float(l.split()[2])
+        ) for l in lines]
+        chart_data = self.browser.execute_script(
+         "return chart.series[1].data;"
+        )
+        self.assertEqual(chart_data, [l[:2] for l in input_data])
+
+        # There is one area series
+        area_series = self.get_visible_area_series(chart)
+        self.assertEqual(len(area_series), 1)
+
+        # The area series is just the machine error from the chart
+        chart_data = self.browser.execute_script(
+         "return chart.series[1].data;"
+        )
+        for wavelength, error_min, error_max in chart_data:
+            input_wavelength = [l for l in input_data if l[0] == wavelength][0]
+            self.assertAlmostEqual(
+             error_max - error_min, input_wavelength[2], delta=0.005
+            )
+
+        # Below the chart is the config section
+        config = output.find_element_by_id("chart-config")
+
+        # There config div has a div for the series
+        series_div = config.find_element_by_id("series-config")
+        series_div_title = series_div.find_element_by_class_name("series-title")
+        self.assertEqual(series_div_title.text, "Test Sample I")
+
+        # There is an option for displaying error
+        error_option = series_div.find_element_by_id("error_option")
+        error_option.click()
+        area_series = self.get_visible_area_series(chart)
+        self.assertEqual(len(area_series), 0)
+        error_option.click()
+        area_series = self.get_visible_area_series(chart)
+        self.assertEqual(len(area_series), 1)
+
+        # There is an option for displaying the series at all
+        display_option = series_div.find_element_by_id("display_option")
+        display_option.click()
+        area_series = self.get_visible_area_series(chart)
+        self.assertEqual(len(area_series), 0)
+        line_series = self.get_visible_line_series(chart)
+        self.assertEqual(len(line_series), 0)
+        display_option.click()
+        area_series = self.get_visible_area_series(chart)
+        self.assertEqual(len(area_series), 1)
+        line_series = self.get_visible_line_series(chart)
+        self.assertEqual(len(line_series), 1)
+
+        # The error can be hidden while the series is not visible
+        display_option.click()
+        area_series = self.get_visible_area_series(chart)
+        self.assertEqual(len(area_series), 0)
+        line_series = self.get_visible_line_series(chart)
+        self.assertEqual(len(line_series), 0)
+        error_option.click()
+        area_series = self.get_visible_area_series(chart)
+        self.assertEqual(len(area_series), 0)
+        line_series = self.get_visible_line_series(chart)
+        self.assertEqual(len(line_series), 0)
+        display_option.click()
+        area_series = self.get_visible_area_series(chart)
+        self.assertEqual(len(area_series), 0)
+        line_series = self.get_visible_line_series(chart)
+        self.assertEqual(len(line_series), 1)
+        error_option.click()
+        area_series = self.get_visible_area_series(chart)
+        self.assertEqual(len(area_series), 1)
+
+        # Below the config div is the file output div
+        file_output = output.find_element_by_id("file-output")
+
+        # There is a button to download a data file
+        download_button = file_output.find_element_by_id("file-download")
+
+        # Clicking it produces a file with the correct name and data
+        download_button.click()
+        with open(expanduser("~") + "/Downloads/A Single Sample Test.dat") as f:
+            output_lines = f.readlines()
+        wavelengths = [l[0] for l in input_lines]
+        output_lines = [l for l in output_lines if l.startswith(str(wavelength))]
+        output_lines = [(
+         float(l.split()[0]), float(l.split()[1]), float(l.split()[2])
+        ) for l in output_lines]
+        self.assertEqual(input_lines, output_lines)
 
 
     def test_can_submit_multiple_scans_in_one_file(self):
@@ -30,630 +175,7 @@ class SubtractingSeriesTests(FunctionalTest):
 
     def test_can_subtract_multiple_files_from_multiple_files(self):
         pass
-    '''def test_can_submit_single_blank_file(self):
-        # User goes to the single run page
-        self.browser.get(self.live_server_url + "/single/")
 
-        # There is a file input section, with two sub-sections
-        input_section = self.browser.find_element_by_id("file-input")
-        blank_input = input_section.find_element_by_id("blank-input")
-        sample_input = input_section.find_element_by_id("sample-input")
-
-        # The blank entry section has a file input and a submit button outside
-        file_input = blank_input.find_elements_by_tag_name("input")[0]
-        self.assertEqual(file_input.get_attribute("type"), "file")
-        blank_submit = input_section.find_elements_by_tag_name("input")[-1]
-        self.assertEqual(blank_submit.get_attribute("type"), "submit")
-
-        # They submit a blank file with a single scan in it
-        file_input.send_keys(BASE_DIR + "/ftests/test_data/single-blank.dat")
-        blank_submit.click()
-
-        # They are still on the same page
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # The output section has a chart div
-        output = self.browser.find_element_by_id("output")
-        chart = output.find_element_by_id("chart")
-
-        # The chart has a title with the word 'blank' in it
-        title = chart.find_element_by_class_name("highcharts-title")
-        self.assertIn("blank", title.text.lower())
-
-        # The x-axis goes from 280 to 190
-        x_axis = chart.find_element_by_class_name("highcharts-xaxis-labels")
-        x_labels = x_axis.find_elements_by_tag_name("text")
-        self.assertEqual(x_labels[0].text, "190")
-        self.assertEqual(x_labels[-1].text, "280")
-
-        # There is a single line series
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-
-        # There is a download button, which they click
-        download_button = output.find_element_by_id("download")
-        sleep(1)
-        download_button.click()
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # The chart and everything is still there
-        chart = output.find_element_by_id("chart")
-        title = chart.find_element_by_class_name("highcharts-title")
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-
-
-        # There is a downloaded file in Downloads
-        with open(expanduser("~") + "/Downloads/average_blank.dat") as f:
-            output_lines = f.readlines()
-
-        # The data in this file is just the data from the original file
-        wavelength_range = range(190, 281)
-        with open("ftests/test_data/single-blank.dat") as f:
-            input_lines = f.readlines()
-        for wavelength in wavelength_range:
-            input_value = [float(l.split()[1]) for l in input_lines
-             if l.startswith(str(wavelength))][0]
-            output_value = [float(l.split()[1]) for l in output_lines
-             if l.startswith(str(wavelength))][0]
-            self.assertEqual(input_value, output_value)
-
-
-    def test_can_submit_multi_scan_single_blank_file(self):
-        # User goes to the single run page
-        self.browser.get(self.live_server_url + "/single/")
-
-        # There is a file input section, with two sub-sections
-        input_section = self.browser.find_element_by_id("file-input")
-        blank_input = input_section.find_element_by_id("blank-input")
-        sample_input = input_section.find_element_by_id("sample-input")
-
-        # The blank entry section has a file input and a submit button outside
-        file_input = blank_input.find_elements_by_tag_name("input")[0]
-        self.assertEqual(file_input.get_attribute("type"), "file")
-        blank_submit = input_section.find_elements_by_tag_name("input")[-1]
-        self.assertEqual(blank_submit.get_attribute("type"), "submit")
-
-        # They submit a blank file with three scans in it
-        file_input.send_keys(BASE_DIR + "/ftests/test_data/three-blanks.dat")
-        blank_submit.click()
-
-        # They are still on the same page
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # The output section has a chart div
-        output = self.browser.find_element_by_id("output")
-        chart = output.find_element_by_id("chart")
-
-        # The chart has a title with the word 'blank' in it
-        title = chart.find_element_by_class_name("highcharts-title")
-        self.assertIn("blank", title.text.lower())
-
-        # The x-axis goes from 280 to 190
-        x_axis = chart.find_element_by_class_name("highcharts-xaxis-labels")
-        x_labels = x_axis.find_elements_by_tag_name("text")
-        self.assertEqual(x_labels[0].text, "190")
-        self.assertEqual(x_labels[-1].text, "280")
-
-        # There is a single line series
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-
-        # There is an error area around the line
-        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        self.assertEqual(len(areas), 1)
-
-        # Below the chart is a div for altering the chart appearance
-        chart_config = output.find_element_by_id("chart-config")
-
-        # They press the button for toggling input lines
-        input_button = chart_config.find_element_by_id("toggle-inputs")
-        sleep(1)
-        input_button.click()
-
-        # There are now four lines, but still only one area
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 4)
-        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        self.assertEqual(len(areas), 1)
-
-        # They press the button again, and the three lines disappear
-        input_button.click()
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        self.assertEqual(len(areas), 1)
-
-        # There is a download button, which they click
-        download_button = output.find_element_by_id("download")
-        download_button.click()
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # The chart and everything is still there
-        chart = output.find_element_by_id("chart")
-        title = chart.find_element_by_class_name("highcharts-title")
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-
-
-        # There is a downloaded file in Downloads
-        with open(expanduser("~") + "/Downloads/average_blank.dat") as f:
-            output_lines = f.readlines()
-
-        # The data in this file is the averaged data from the original file
-        wavelength_range = range(190, 281)
-        with open("ftests/test_data/three-blanks.dat") as f:
-            input_lines = f.readlines()
-        for wavelength in wavelength_range:
-            input_values = [float(l.split()[1]) for l in input_lines
-             if l.startswith(str(wavelength))]
-            self.assertEqual(len(input_values), 3)
-            average_input_value = sum(input_values) / len(input_values)
-            output_value = [float(l.split()[1]) for l in output_lines
-             if l.startswith(str(wavelength))][0]
-            self.assertAlmostEqual(average_input_value, output_value, delta=0.005)
-
-        # There is a third column containing the errors
-        for wavelength in wavelength_range:
-            line = [l for l in output_lines if l.startswith(str(wavelength))][0]
-            self.assertEqual(len(line.split()), 3)
-            self.assertGreater(float(line.split()[2]), 0.0)
-
-
-    def test_can_submit_multiple_blank_files(self):
-        # User goes to the single run page
-        self.browser.get(self.live_server_url + "/single/")
-
-        # There is a file input section, with two sub-sections
-        input_section = self.browser.find_element_by_id("file-input")
-        blank_input = input_section.find_element_by_id("blank-input")
-        sample_input = input_section.find_element_by_id("sample-input")
-
-        # The blank entry section has a file input and a submit button outside
-        file_input = blank_input.find_elements_by_tag_name("input")[0]
-        self.assertEqual(file_input.get_attribute("type"), "file")
-        blank_submit = input_section.find_elements_by_tag_name("input")[-1]
-        self.assertEqual(blank_submit.get_attribute("type"), "submit")
-
-        # They submit a blank file with three scans in it and one with one scan
-        file_input.send_keys(
-         "%s/ftests/test_data/three-blanks.dat\n%s/ftests/test_data/single-blank.dat" % (
-          BASE_DIR, BASE_DIR
-         )
-        )
-        blank_submit.click()
-
-        # They are still on the same page
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # The output section has a chart div
-        output = self.browser.find_element_by_id("output")
-        chart = output.find_element_by_id("chart")
-
-        # The chart has a title with the word 'blank' in it
-        title = chart.find_element_by_class_name("highcharts-title")
-        self.assertIn("blank", title.text.lower())
-
-        # The x-axis goes from 280 to 190
-        x_axis = chart.find_element_by_class_name("highcharts-xaxis-labels")
-        x_labels = x_axis.find_elements_by_tag_name("text")
-        self.assertEqual(x_labels[0].text, "190")
-        self.assertEqual(x_labels[-1].text, "280")
-
-        # There is a single line series
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-
-        # There is an error area around the line
-        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        self.assertEqual(len(areas), 1)
-
-        # Below the chart is a div for altering the chart appearance
-        chart_config = output.find_element_by_id("chart-config")
-
-        # They press the button for toggling input lines
-        input_button = chart_config.find_element_by_id("toggle-inputs")
-        sleep(1)
-        input_button.click()
-
-        # There are now five lines, but still only one area
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 5)
-        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        self.assertEqual(len(areas), 1)
-
-        # They press the button again, and the four lines disappear
-        input_button.click()
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        self.assertEqual(len(areas), 1)
-
-        # There is a download button, which they click
-        download_button = output.find_element_by_id("download")
-        download_button.click()
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # The chart and everything is still there
-        chart = output.find_element_by_id("chart")
-        title = chart.find_element_by_class_name("highcharts-title")
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-
-
-        # There is a downloaded file in Downloads
-        with open(expanduser("~") + "/Downloads/average_blank.dat") as f:
-            output_lines = f.readlines()
-
-        # The data in this file is the averaged data from the original files
-        wavelength_range = range(190, 281)
-        with open("ftests/test_data/three-blanks.dat") as f:
-            input_lines_three = f.readlines()
-        with open("ftests/test_data/single-blank.dat") as f:
-            input_lines_one = f.readlines()
-        for wavelength in wavelength_range:
-            input_values = [float(l.split()[1]) for l in input_lines_three
-             if l.startswith(str(wavelength))]
-            input_values += [float(l.split()[1]) for l in input_lines_one
-             if l.startswith(str(wavelength))]
-            self.assertEqual(len(input_values), 4)
-            average_input_value = sum(input_values) / len(input_values)
-            output_value = [float(l.split()[1]) for l in output_lines
-             if l.startswith(str(wavelength))][0]
-            self.assertAlmostEqual(average_input_value, output_value, delta=0.005)
-
-        # There is a third column containing the errors
-        for wavelength in wavelength_range:
-            line = [l for l in output_lines if l.startswith(str(wavelength))][0]
-            self.assertEqual(len(line.split()), 3)
-            self.assertGreater(float(line.split()[2]), 0.0)
-
-
-    def test_can_submit_single_sample_file(self):
-        # User goes to the single run page
-        self.browser.get(self.live_server_url + "/single/")
-
-        # There is a file input section, with two sub-sections
-        input_section = self.browser.find_element_by_id("file-input")
-        blank_input = input_section.find_element_by_id("blank-input")
-        sample_input = input_section.find_element_by_id("sample-input")
-
-        # The sample entry section has a file input and a submit button outside
-        file_input = sample_input.find_elements_by_tag_name("input")[0]
-        self.assertEqual(file_input.get_attribute("type"), "file")
-        sample_submit = input_section.find_elements_by_tag_name("input")[-1]
-        self.assertEqual(sample_submit.get_attribute("type"), "submit")
-
-        # They submit a blank file with a single scan in it
-        file_input.send_keys(BASE_DIR + "/ftests/test_data/single-sample.dat")
-        sample_submit.click()
-
-        # They are still on the same page
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # The output section has a chart div
-        output = self.browser.find_element_by_id("output")
-        chart = output.find_element_by_id("chart")
-
-        # The chart has a title with the word 'blank' in it
-        title = chart.find_element_by_class_name("highcharts-title")
-        self.assertIn("sample", title.text.lower())
-
-        # The x-axis goes from 280 to 190
-        x_axis = chart.find_element_by_class_name("highcharts-xaxis-labels")
-        x_labels = x_axis.find_elements_by_tag_name("text")
-        self.assertEqual(x_labels[0].text, "190")
-        self.assertEqual(x_labels[-1].text, "280")
-
-        # There is a single line series
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-
-        # There is a download button, which they click
-        download_button = output.find_element_by_id("download")
-        sleep(1)
-        download_button.click()
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # The chart and everything is still there
-        chart = output.find_element_by_id("chart")
-        title = chart.find_element_by_class_name("highcharts-title")
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-
-
-        # There is a downloaded file in Downloads
-        with open(expanduser("~") + "/Downloads/average_sample.dat") as f:
-            output_lines = f.readlines()
-
-        # The data in this file is just the data from the original file
-        wavelength_range = range(190, 281)
-        with open("ftests/test_data/single-sample.dat") as f:
-            input_lines = f.readlines()
-        for wavelength in wavelength_range:
-            input_value = [float(l.split()[1]) for l in input_lines
-             if l.startswith(str(wavelength))][0]
-            output_value = [float(l.split()[1]) for l in output_lines
-             if l.startswith(str(wavelength))][0]
-            self.assertEqual(input_value, output_value)
-
-
-    def test_can_submit_multi_scan_single_sample_file(self):
-        # User goes to the single run page
-        self.browser.get(self.live_server_url + "/single/")
-
-        # There is a file input section, with two sub-sections
-        input_section = self.browser.find_element_by_id("file-input")
-        blank_input = input_section.find_element_by_id("blank-input")
-        sample_input = input_section.find_element_by_id("sample-input")
-
-        # The sample entry section has a file input and a submit button outside
-        file_input = sample_input.find_elements_by_tag_name("input")[0]
-        self.assertEqual(file_input.get_attribute("type"), "file")
-        sample_submit = input_section.find_elements_by_tag_name("input")[-1]
-        self.assertEqual(sample_submit.get_attribute("type"), "submit")
-
-        # They submit a blank file with three scans in it
-        file_input.send_keys(BASE_DIR + "/ftests/test_data/three-samples.dat")
-        sample_submit.click()
-
-        # They are still on the same page
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # The output section has a chart div
-        output = self.browser.find_element_by_id("output")
-        chart = output.find_element_by_id("chart")
-
-        # The chart has a title with the word 'blank' in it
-        title = chart.find_element_by_class_name("highcharts-title")
-        self.assertIn("sample", title.text.lower())
-
-        # The x-axis goes from 280 to 190
-        x_axis = chart.find_element_by_class_name("highcharts-xaxis-labels")
-        x_labels = x_axis.find_elements_by_tag_name("text")
-        self.assertEqual(x_labels[0].text, "190")
-        self.assertEqual(x_labels[-1].text, "280")
-
-        # There is a single line series
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-
-        # There is an error area around the line
-        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        self.assertEqual(len(areas), 1)
-
-        # Below the chart is a div for altering the chart appearance
-        chart_config = output.find_element_by_id("chart-config")
-
-        # They press the button for toggling input lines
-        input_button = chart_config.find_element_by_id("toggle-inputs")
-        sleep(1)
-        input_button.click()
-
-        # There are now four lines, but still only one area
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 4)
-        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        self.assertEqual(len(areas), 1)
-
-        # They press the button again, and the three lines disappear
-        input_button.click()
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        self.assertEqual(len(areas), 1)
-
-        # There is a download button, which they click
-        download_button = output.find_element_by_id("download")
-        download_button.click()
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # The chart and everything is still there
-        chart = output.find_element_by_id("chart")
-        title = chart.find_element_by_class_name("highcharts-title")
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-
-
-        # There is a downloaded file in Downloads
-        with open(expanduser("~") + "/Downloads/average_sample.dat") as f:
-            output_lines = f.readlines()
-
-        # The data in this file is the averaged data from the original file
-        wavelength_range = range(190, 281)
-        with open("ftests/test_data/three-samples.dat") as f:
-            input_lines = f.readlines()
-        for wavelength in wavelength_range:
-            input_values = [float(l.split()[1]) for l in input_lines
-             if l.startswith(str(wavelength))]
-            self.assertEqual(len(input_values), 3)
-            average_input_value = sum(input_values) / len(input_values)
-            output_value = [float(l.split()[1]) for l in output_lines
-             if l.startswith(str(wavelength))][0]
-            self.assertAlmostEqual(average_input_value, output_value, delta=0.005)
-
-        # There is a third column containing the errors
-        for wavelength in wavelength_range:
-            line = [l for l in output_lines if l.startswith(str(wavelength))][0]
-            self.assertEqual(len(line.split()), 3)
-            self.assertGreater(float(line.split()[2]), 0.0)
-
-
-    def test_can_submit_multiple_sample_files(self):
-        # User goes to the single run page
-        self.browser.get(self.live_server_url + "/single/")
-
-        # There is a file input section, with two sub-sections
-        input_section = self.browser.find_element_by_id("file-input")
-        blank_input = input_section.find_element_by_id("blank-input")
-        sample_input = input_section.find_element_by_id("sample-input")
-
-        # The sample entry section has a file input and a submit button outside
-        file_input = sample_input.find_elements_by_tag_name("input")[0]
-        self.assertEqual(file_input.get_attribute("type"), "file")
-        sample_submit = input_section.find_elements_by_tag_name("input")[-1]
-        self.assertEqual(sample_submit.get_attribute("type"), "submit")
-
-        # They submit a blank file with three scans in it and one with one scan
-        file_input.send_keys(
-         "%s/ftests/test_data/three-samples.dat\n%s/ftests/test_data/single-sample.dat" % (
-          BASE_DIR, BASE_DIR
-         )
-        )
-        sample_submit.click()
-
-        # They are still on the same page
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # The output section has a chart div
-        output = self.browser.find_element_by_id("output")
-        chart = output.find_element_by_id("chart")
-
-        # The chart has a title with the word 'blank' in it
-        title = chart.find_element_by_class_name("highcharts-title")
-        self.assertIn("sample", title.text.lower())
-
-        # The x-axis goes from 280 to 190
-        x_axis = chart.find_element_by_class_name("highcharts-xaxis-labels")
-        x_labels = x_axis.find_elements_by_tag_name("text")
-        self.assertEqual(x_labels[0].text, "190")
-        self.assertEqual(x_labels[-1].text, "280")
-
-        # There is a single line series
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-
-        # There is an error area around the line
-        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        self.assertEqual(len(areas), 1)
-
-        # Below the chart is a div for altering the chart appearance
-        chart_config = output.find_element_by_id("chart-config")
-
-        # They press the button for toggling input lines
-        input_button = chart_config.find_element_by_id("toggle-inputs")
-        sleep(1)
-        input_button.click()
-
-        # There are now five lines, but still only one area
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 5)
-        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        self.assertEqual(len(areas), 1)
-
-        # They press the button again, and the four lines disappear
-        input_button.click()
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-        areas = chart.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        self.assertEqual(len(areas), 1)
-
-        # There is a download button, which they click
-        download_button = output.find_element_by_id("download")
-        download_button.click()
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # The chart and everything is still there
-        chart = output.find_element_by_id("chart")
-        title = chart.find_element_by_class_name("highcharts-title")
-        lines = chart.find_elements_by_class_name("highcharts-line-series")
-        lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), 1)
-
-
-        # There is a downloaded file in Downloads
-        with open(expanduser("~") + "/Downloads/average_sample.dat") as f:
-            output_lines = f.readlines()
-
-        # The data in this file is the averaged data from the original files
-        wavelength_range = range(190, 281)
-        with open("ftests/test_data/three-samples.dat") as f:
-            input_lines_three = f.readlines()
-        with open("ftests/test_data/single-sample.dat") as f:
-            input_lines_one = f.readlines()
-        for wavelength in wavelength_range:
-            input_values = [float(l.split()[1]) for l in input_lines_three
-             if l.startswith(str(wavelength))]
-            input_values += [float(l.split()[1]) for l in input_lines_one
-             if l.startswith(str(wavelength))]
-            self.assertEqual(len(input_values), 4)
-            average_input_value = sum(input_values) / len(input_values)
-            output_value = [float(l.split()[1]) for l in output_lines
-             if l.startswith(str(wavelength))][0]
-            self.assertAlmostEqual(average_input_value, output_value, delta=0.005)
-
-        # There is a third column containing the errors
-        for wavelength in wavelength_range:
-            line = [l for l in output_lines if l.startswith(str(wavelength))][0]
-            self.assertEqual(len(line.split()), 3)
-            self.assertGreater(float(line.split()[2]), 0.0)'''
 
 
 
@@ -673,104 +195,3 @@ class SingleCdErrorTests(FunctionalTest):
 
     def test_error_when_no_series_found_for_second_file_input(self):
         pass
-    '''def test_error_when_no_file_given(self):
-        # User goes to the single run page
-        self.browser.get(self.live_server_url + "/single/")
-
-        # There is a file input section, with an error section
-        input_section = self.browser.find_element_by_id("file-input")
-        input_errors = input_section.find_element_by_id("input-errors")
-
-        # There are no errors
-        self.assertEqual(input_errors.text, "")
-
-        # The user submits
-        submit = input_section.find_elements_by_tag_name("input")[-1]
-        self.assertEqual(submit.get_attribute("type"), "submit")
-        submit.click()
-
-        # They are still on the same page
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # There is no chart
-        output = self.browser.find_element_by_id("output")
-        charts = output.find_elements_by_id("chart")
-        self.assertEqual(len(charts), 0)
-
-        # The error message tells the user there is no file
-        input_section = self.browser.find_element_by_id("file-input")
-        input_errors = input_section.find_element_by_id("input-errors")
-        self.assertIn("no file", input_errors.text.lower())
-
-
-    def test_error_when_blank_contains_no_series(self):
-        # User goes to the single run page
-        self.browser.get(self.live_server_url + "/single/")
-
-        # There is a file input section, with an error section
-        input_section = self.browser.find_element_by_id("file-input")
-        input_errors = input_section.find_element_by_id("input-errors")
-
-        # There are no errors
-        self.assertEqual(input_errors.text, "")
-
-        # The user submits a nonsense file
-        blank_input = input_section.find_element_by_id("blank-input")
-        file_input = blank_input.find_elements_by_tag_name("input")[0]
-        blank_submit = input_section.find_elements_by_tag_name("input")[-1]
-        file_input.send_keys(BASE_DIR + "/ftests/test_data/no-series.dat")
-        blank_submit.click()
-
-        # They are still on the same page
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # There is no chart
-        output = self.browser.find_element_by_id("output")
-        charts = output.find_elements_by_id("chart")
-        self.assertEqual(len(charts), 0)
-
-        # The error message tells the user there were no series
-        input_section = self.browser.find_element_by_id("file-input")
-        input_errors = input_section.find_element_by_id("input-errors")
-        self.assertIn("problem", input_errors.text.lower())
-
-
-    def test_error_when_sample_contains_no_series(self):
-        # User goes to the single run page
-        self.browser.get(self.live_server_url + "/single/")
-
-        # There is a file input section, with an error section
-        input_section = self.browser.find_element_by_id("file-input")
-        input_errors = input_section.find_element_by_id("input-errors")
-
-        # There are no errors
-        self.assertEqual(input_errors.text, "")
-
-        # The user submits a nonsense file
-        sample_input = input_section.find_element_by_id("sample-input")
-        file_input = sample_input.find_elements_by_tag_name("input")[0]
-        sample_submit = input_section.find_elements_by_tag_name("input")[-1]
-        file_input.send_keys(BASE_DIR + "/ftests/test_data/no-series.dat")
-        sample_submit.click()
-
-        # They are still on the same page
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
-
-        # There is no chart
-        output = self.browser.find_element_by_id("output")
-        charts = output.find_elements_by_id("chart")
-        self.assertEqual(len(charts), 0)
-
-        # The error message tells the user there were no series
-        input_section = self.browser.find_element_by_id("file-input")
-        input_errors = input_section.find_element_by_id("input-errors")
-        self.assertIn("problem", input_errors.text.lower())'''
