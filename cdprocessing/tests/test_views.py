@@ -98,6 +98,14 @@ class AveragingViewTests(ViewTest):
         self.assertAlmostEqual(cd_error[2][2], 0.15, delta=0.005)
 
 
+    def test_averaging_view_gets_correct_sample_name(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.single_scan_file,
+         "sample_name": "Some sample"
+        })
+        self.assertEqual("Some sample", response.context["sample_name"])
+
+
     '''def test_averaging_view_gets_correct_min_and_max_from_multi_scan_post(self):
         response = self.client.post("/single/", data={
          "blank": self.multi_scan_file

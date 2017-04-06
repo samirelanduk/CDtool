@@ -32,7 +32,8 @@ def averaging_view(request):
      "min": min_wavelength,
      "max": max_wavelength,
      "cd": cd,
-     "cd_error": cd_error
+     "cd_error": cd_error,
+     "sample_name": request.POST.get("sample_name")
     })
     '''input_files = request.FILES.getlist("sample")
     all_series = []

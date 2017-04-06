@@ -19,7 +19,7 @@
     <fieldset class="file-fieldset">
       <h2>CD Blanks</h2>
       <input name="sample_files" type="file" multiple>
-      <input name="files_name" type="text">
+      <input name="sample_name" type="text">
     </fieldset>
   </div>
 
@@ -113,7 +113,9 @@
     });
   </script>
   <div id="chart-config">
-    <button id="toggle-inputs">Toggle Inputs</button>
+    <div id="series-config">
+      <div class="series-title">{{ sample_name }}</div>
+    </div>
   </div>
   <form method="POST">
     <input type="hidden" name="series" value="{{ file_series }}">
@@ -126,19 +128,6 @@
       $("html, body").animate({
         scrollTop: $("#chart").offset().top
     }, 800);
-    });
-
-    $("#toggle-inputs").click(function () {
-      for (s of chart.series) {
-        console.log(s.options.lineWidth);
-        if (s.options.lineWidth == 1) {
-          if (s.visible) {
-            s.hide();
-          } else {
-            s.show();
-          }
-        }
-      }
     });
   </script>
   {% endif %}
