@@ -78,6 +78,26 @@ class AveragingViewTests(ViewTest):
         ])
 
 
+    def test_averaging_view_gives_correct_cerror_from_single_scan_post(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.single_scan_file
+        })
+        cd_error = response.context["cd_error"]
+        self.assertEqual(len(cd_error), 3)
+        self.assertEqual(len(cd_error[0]), 3)
+        self.assertEqual(cd_error[0][0], 279)
+        self.assertAlmostEqual(cd_error[0][1], -0.089, delta=0.005)
+        self.assertAlmostEqual(cd_error[0][2], 0.077, delta=0.005)
+        self.assertEqual(len(cd_error[1]), 3)
+        self.assertEqual(cd_error[1][0], 278)
+        self.assertAlmostEqual(cd_error[1][1], -0.104, delta=0.005)
+        self.assertAlmostEqual(cd_error[1][2], 0.192, delta=0.005)
+        self.assertEqual(len(cd_error[2]), 3)
+        self.assertEqual(cd_error[2][0], 277)
+        self.assertAlmostEqual(cd_error[2][1], -0.088, delta=0.005)
+        self.assertAlmostEqual(cd_error[2][2], 0.15, delta=0.005)
+
+
     '''def test_averaging_view_gets_correct_min_and_max_from_multi_scan_post(self):
         response = self.client.post("/single/", data={
          "blank": self.multi_scan_file

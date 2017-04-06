@@ -24,12 +24,15 @@ def averaging_view(request):
     input_files = request.FILES.getlist("sample_files")
     scan = functions.extract_all_series(input_files[0])[0]
     min_wavelength, max_wavelength = scan[-1][0], scan[0][0]
+    cd = [line[:2] for line in scan]
+    cd_error = [[line[0], line[1] - line[2], line[1] + line[2]] for line in scan]
     return render(request, "single.html", {
      "display_chart": True,
      "title": request.POST.get("title"),
      "min": min_wavelength,
      "max": max_wavelength,
-     "cd": scan
+     "cd": cd,
+     "cd_error": cd_error
     })
     '''input_files = request.FILES.getlist("sample")
     all_series = []

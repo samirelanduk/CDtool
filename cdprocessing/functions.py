@@ -13,12 +13,15 @@ def extract_all_series(django_file):
 
 
 def get_float_groups(file_lines):
+    """Takes the lines of a django files and breaks it into sections composed
+    entirely of space separated numbers."""
+
     float_groups, float_group = [], []
     split_file_lines = [line.split() for line in file_lines]
     for line in split_file_lines:
         try:
-            first, second = float(line[0]), float(line[1])
-            float_group.append([first, second])
+            chunks = [float(chunk) for chunk in line]
+            float_group.append(chunks)
         except ValueError:
             if float_group:
                 float_groups.append(float_group)
@@ -28,6 +31,9 @@ def get_float_groups(file_lines):
 
 
 def filter_float_groups(float_groups):
+    """Takes a a bunch of number groups and returns only the longest ones with
+    matching wavelengths, and with more than three values"""
+
     longest_length = len(sorted(float_groups, key=lambda k: len(k))[-1])
     correct_length_groups = [
      group for group in float_groups if len(group) == longest_length
@@ -40,7 +46,15 @@ def filter_float_groups(float_groups):
     correct_wavelength_groups = [group for group in correct_length_groups if tuple(
      [line[0] for line in group]
     ) == most_common_wavelengths]
-    return correct_wavelength_groups
+    groups_at_least_three = []
+    for group in correct_wavelength_groups:
+        add_group = True
+        for line in group:
+            if len(line) < 3:
+                add_group = False
+        if add_group: groups_at_least_three.append(group)
+    final_groups = [[line[:3] for line in group] for group in groups_at_least_three]
+    return final_groups
 
 
 def average_series(series):

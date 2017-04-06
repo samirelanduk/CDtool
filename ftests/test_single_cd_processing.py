@@ -20,7 +20,7 @@ class AveragingSeriesTests(FunctionalTest):
         self.assertEqual(file_input.get_attribute("type"), "file")
 
         # They submit a sample file with one scan in it
-        file_input.send_keys(BASE_DIR + "/ftests/test_data/single-blank.dat")
+        file_input.send_keys(BASE_DIR + "/ftests/test_data/single-sample.dat")
 
         # They give the sample a name
         text_input = file_fieldsets[0].find_elements_by_tag_name("input")[1]
@@ -61,7 +61,7 @@ class AveragingSeriesTests(FunctionalTest):
         self.assertEqual(len(line_series), 1)
 
         # The line series is just the scan from the file
-        with open("ftests/test_data/single-blank.dat") as f:
+        with open("ftests/test_data/single-sample.dat") as f:
             input_lines = f.readlines()
         lines = [l for l in input_lines if l[:3].isdigit()]
         input_data = [(
@@ -70,11 +70,11 @@ class AveragingSeriesTests(FunctionalTest):
         for index, line in enumerate(input_data):
             self.assertEqual(
              line[0],
-             self.browser.execute_script("return chart.series[0].data[%i].x;" % index)
+             self.browser.execute_script("return chart.series[1].data[%i].x;" % index)
             )
             self.assertEqual(
              line[1],
-             self.browser.execute_script("return chart.series[0].data[%i].y;" % index)
+             self.browser.execute_script("return chart.series[1].data[%i].y;" % index)
             )
 
         # There is one area series
@@ -82,14 +82,15 @@ class AveragingSeriesTests(FunctionalTest):
         self.assertEqual(len(area_series), 1)
 
         # The area series is just the machine error from the chart
-        chart_data = self.browser.execute_script(
-         "return chart.series[1].data;"
-        )
-        for wavelength, error_min, error_max in chart_data:
-            input_wavelength = [l for l in input_data if l[0] == wavelength][0]
-            self.assertAlmostEqual(
-             error_max - error_min, input_wavelength[2], delta=0.005
+        for index, line in enumerate(input_data):
+            self.assertEqual(
+             line[0],
+             self.browser.execute_script("return chart.series[0].data[%i].x;" % index)
             )
+            error_low = self.browser.execute_script("return chart.series[0].data[%i].low;" % index)
+            error_high = self.browser.execute_script("return chart.series[0].data[%i].high;" % index)
+            self.assertAlmostEqual(2 * line[2], error_high - error_low, delta=0.005)
+
 
         # Below the chart is the config section
         config = output.find_element_by_id("chart-config")

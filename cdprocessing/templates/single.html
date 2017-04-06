@@ -92,6 +92,13 @@
         enabled: false
       },
       series: [{
+        data: {{ cd_error }},
+        color: "#4A9586",
+        type: "arearange",
+        fillOpacity: 0.2,
+        lineWidth: 0,
+        enableMouseTracking: false
+      }, {
         data: {{ cd }},
         color: "#4A9586",
         marker: {

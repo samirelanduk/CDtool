@@ -23,3 +23,9 @@ class FunctionalTest(StaticLiveServerTestCase):
         lines = div.find_elements_by_class_name("highcharts-line-series")
         lines = [line for line in lines if line.is_displayed()]
         return lines
+
+
+    def get_visible_area_series(self, div):
+        areas = div.find_elements_by_class_name("highcharts-arearange-series")
+        areas = [area for area in areas if area.is_displayed()]
+        return areas
