@@ -18,7 +18,7 @@
   <div id="file-input">
     <fieldset class="file-fieldset">
       <h2>CD Blanks</h2>
-      <input name="files" type="file" multiple>
+      <input name="sample_files" type="file" multiple>
       <input name="files_name" type="text">
     </fieldset>
   </div>
@@ -59,8 +59,8 @@
         }
       },
       xAxis: {
-        min: {{ min }},
-        max: {{ max }},
+        min: 0,
+        max: 100,
         gridLineWidth: 1,
         gridLineColor: "#EEEEEE",
         gridLineDashStyle: "ShortDash",
@@ -91,38 +91,7 @@
       tooltip: {
         enabled: false
       },
-      series: [{
-        data: {{ errors }},
-        type: "arearange",
-        fillOpacity: 0.2,
-        lineWidth: 0,
-        enableMouseTracking: false
-      }, {
-        data: {{ average_absorbance }},
-        marker: {
-          enabled: false,
-          states: {
-            hover: {
-              enabled: false
-            }
-          }
-        }
-      },{% for input in input_series %}
-      {
-        data: {{ input }},
-        lineWidth: 1,
-        visible: false,
-        marker: {
-          enabled: false,
-          states: {
-            hover: {
-              enabled: false
-            }
-          }
-        }
-      },
-      {% endfor %}
-      ]
+      series: [{data: []}]
     });
   </script>
   <div id="chart-config">

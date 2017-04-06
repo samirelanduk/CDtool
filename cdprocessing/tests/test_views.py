@@ -17,21 +17,11 @@ class SingleRunViewTests(ViewTest):
 
 
     @patch("cdprocessing.views.averaging_view")
-    def test_single_run_view_uses_averaging_view_on_blank_posts(self, mock_view):
-        view_output = HttpResponse()
-        mock_view.return_value = view_output
-        response = self.client.post("/single/", data={
-         "blank": self.single_scan_file
-        })
-        self.assertIs(response, view_output)
-
-
-    @patch("cdprocessing.views.averaging_view")
     def test_single_run_view_uses_averaging_view_on_sample_posts(self, mock_view):
         view_output = HttpResponse()
         mock_view.return_value = view_output
         response = self.client.post("/single/", data={
-         "sample": self.single_scan_file
+         "sample_files": self.single_scan_file
         })
         self.assertIs(response, view_output)
 
@@ -46,36 +36,32 @@ class SingleRunViewTests(ViewTest):
         self.assertIs(response, view_output)
 
 
-    def test_single_run_view_returns_errors_if_no_files_given_in_post(self):
-        response = self.client.post("/single/")
-        self.assertIn("no file", response.context["error_text"].lower())
-
-
 
 class AveragingViewTests(ViewTest):
 
     def test_averaging_view_uses_single_run_template(self):
         response = self.client.post("/single/", data={
-         "blank": self.single_scan_file
+         "sample_files": self.single_scan_file
         })
         self.assertTemplateUsed(response, "single.html")
 
 
     def test_averaging_view_makes_chart_display_true(self):
         response = self.client.post("/single/", data={
-         "sample": self.single_scan_file
+         "sample_files": self.single_scan_file,
         })
         self.assertTrue(response.context["display_chart"])
 
 
-    def test_averaging_view_gets_correct_title_on_blank_post(self):
+    def test_averaging_view_gets_correct_title(self):
         response = self.client.post("/single/", data={
-         "blank": self.single_scan_file
+         "sample_files": self.single_scan_file,
+         "title": "Some title"
         })
-        self.assertIn("blank", response.context["title"].lower())
+        self.assertEqual("Some title", response.context["title"])
 
 
-    def test_averaging_view_gets_correct_title_on_sample_post(self):
+    '''def test_averaging_view_gets_correct_title_on_sample_post(self):
         response = self.client.post("/single/", data={
          "sample": self.single_scan_file
         })
@@ -342,13 +328,4 @@ class FileProducingViewTests(ViewTest):
         self.assertEqual(
          [float(value) for value in lines[-1].split()],
          [278, 0.2, 0.3]
-        )
-
-
-
-
-'''
-class SingleRunViewFileProductionTests(ViewTest):
-
-
-    '''
+        )'''

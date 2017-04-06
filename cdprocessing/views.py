@@ -10,7 +10,7 @@ def single_run(request):
     if request.method == "POST":
         if "series" in request.POST:
             return file_producing_view(request)
-        elif "blank" in request.FILES or "sample" in request.FILES:
+        elif "sample_files" in request.FILES:
             return averaging_view(request)
         else:
             return render(request, "single.html", {
@@ -21,9 +21,11 @@ def single_run(request):
 
 
 def averaging_view(request):
-    title = "Sample" if request.FILES.get("sample") else "Blank"
-    input_files = request.FILES.getlist("sample")
-    if not input_files: input_files = request.FILES.getlist("blank")
+    return render(request, "single.html", {
+     "display_chart": True,
+     "title": request.POST.get("title")
+    })
+    '''input_files = request.FILES.getlist("sample")
     all_series = []
     for input_file in input_files:
         try:
@@ -51,7 +53,7 @@ def averaging_view(request):
      "input_series": all_series if len(all_series) > 1 else [],
      "filename": filename,
      "file_series": file_series
-    })
+    })'''
 
 
 def file_producing_view(request):
