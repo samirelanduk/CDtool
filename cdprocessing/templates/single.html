@@ -91,7 +91,18 @@
       tooltip: {
         enabled: false
       },
-      series: [{data: []}]
+      series: [{
+        data: {{ cd }},
+        color: "#4A9586",
+        marker: {
+          enabled: false,
+          states: {
+            hover: {
+              enabled: false
+            }
+          }
+        }
+      }]
     });
   </script>
   <div id="chart-config">

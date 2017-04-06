@@ -63,14 +63,19 @@ class AveragingSeriesTests(FunctionalTest):
         # The line series is just the scan from the file
         with open("ftests/test_data/single-blank.dat") as f:
             input_lines = f.readlines()
-        lines = [l for l in lines if l.split()[0].split(".")[0].isdigit()]
+        lines = [l for l in input_lines if l[:3].isdigit()]
         input_data = [(
          float(l.split()[0]), float(l.split()[1]), float(l.split()[2])
         ) for l in lines]
-        chart_data = self.browser.execute_script(
-         "return chart.series[1].data;"
-        )
-        self.assertEqual(chart_data, [l[:2] for l in input_data])
+        for index, line in enumerate(input_data):
+            self.assertEqual(
+             line[0],
+             self.browser.execute_script("return chart.series[0].data[%i].x;" % index)
+            )
+            self.assertEqual(
+             line[1],
+             self.browser.execute_script("return chart.series[0].data[%i].y;" % index)
+            )
 
         # There is one area series
         area_series = self.get_visible_area_series(chart)

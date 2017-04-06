@@ -29,6 +29,7 @@ def averaging_view(request):
      "title": request.POST.get("title"),
      "min": min_wavelength,
      "max": max_wavelength,
+     "cd": scan
     })
     '''input_files = request.FILES.getlist("sample")
     all_series = []

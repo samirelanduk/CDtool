@@ -69,6 +69,15 @@ class AveragingViewTests(ViewTest):
         self.assertEqual(response.context["max"], 279)
 
 
+    def test_averaging_view_gives_correct_cd_from_single_scan_post(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.single_scan_file
+        })
+        self.assertEqual(response.context["cd"], [
+         [279.0, -0.006], [278.0, 0.044], [277.0, 0.031]
+        ])
+
+
     '''def test_averaging_view_gets_correct_min_and_max_from_multi_scan_post(self):
         response = self.client.post("/single/", data={
          "blank": self.multi_scan_file
@@ -77,13 +86,7 @@ class AveragingViewTests(ViewTest):
         self.assertEqual(response.context["max"], 279)
 
 
-    def test_averaging_view_gives_correct_absorbance_from_single_scan_post(self):
-        response = self.client.post("/single/", data={
-         "blank": self.single_scan_file
-        })
-        self.assertEqual(response.context["average_absorbance"], [
-         [279.0, -0.006], [278.0, 0.044], [277.0, 0.031]
-        ])
+
 
 
     def test_averaging_view_gives_correct_absorbance_from_multi_scan_post(self):
