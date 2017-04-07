@@ -101,7 +101,7 @@ class AveragingSeriesTests(FunctionalTest):
         self.assertEqual(series_div_title.text, "Test Sample I")
 
         # There is an option for displaying error
-        error_option = series_div.find_element_by_id("error_option")
+        error_option = series_div.find_element_by_class_name("error-option")
         error_option.click()
         area_series = self.get_visible_area_series(chart)
         self.assertEqual(len(area_series), 0)
@@ -110,7 +110,7 @@ class AveragingSeriesTests(FunctionalTest):
         self.assertEqual(len(area_series), 1)
 
         # There is an option for displaying the series at all
-        display_option = series_div.find_element_by_id("display_option")
+        display_option = series_div.find_element_by_class_name("display-option")
         display_option.click()
         area_series = self.get_visible_area_series(chart)
         self.assertEqual(len(area_series), 0)

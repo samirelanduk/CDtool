@@ -93,6 +93,7 @@
       },
       series: [{
         data: {{ cd_error }},
+        name: "cd error",
         color: "#4A9586",
         type: "arearange",
         fillOpacity: 0.2,
@@ -115,6 +116,20 @@
   <div id="chart-config">
     <div id="series-config">
       <div class="series-title">{{ sample_name }}</div>
+      <button class="error-option" id="series-error-option">Toggle Error</button>
+      <script>
+      $("#series-error-option").click(function () {
+        for (s of chart.series) {
+          if (s.name == "cd error") {
+            if (s.visible) {
+              s.hide();
+            } else {
+              s.show();
+            }
+          }
+        }
+      });
+      </script>
     </div>
   </div>
   <form method="POST">
