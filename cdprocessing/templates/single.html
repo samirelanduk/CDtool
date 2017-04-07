@@ -116,30 +116,45 @@
   </script>
   <div id="chart-config">
     <div id="series-config">
-      <div class="series-title">{{ sample_name }}</div>
-      <button class="error-option" id="series-error-option">Toggle Error</button>
       <script>
-      $("#series-error-option").click(function () {
-        series = chart.get(1);
-        if (series.visible) {
-          series.hide();
-        } else {
-          series.show();
-        }
-      });
-      </script>
-      <button class="display-option" id="series-display-option">Toggle Series</button>
-      <script>
-      $("#series-display-option").click(function () {
+      function updateSeries() {
         series = chart.get(2);
         error = chart.get(1);
-        if (series.visible) {
+        if ($("#series-display-option").hasClass("off")) {
           series.hide();
           error.hide();
         } else {
           series.show();
-          error.show();
+          if (($("#series-error-option").hasClass("off"))) {
+            error.hide();
+          } else {
+            error.show();
+          }
         }
+      }
+      </script>
+      <div class="series-title">{{ sample_name }}</div>
+      <button class="error-option on" id="series-error-option">Toggle Error</button>
+      <script>
+      $("#series-error-option").click(function () {
+        if ($("#series-error-option").hasClass("on")) {
+          $("#series-error-option").addClass("off").removeClass("on");
+        } else {
+          $("#series-error-option").addClass("on").removeClass("off");
+        }
+        updateSeries();
+      });
+      </script>
+
+      <button class="display-option on" id="series-display-option">Toggle Series</button>
+      <script>
+      $("#series-display-option").click(function () {
+        if ($("#series-display-option").hasClass("on")) {
+          $("#series-display-option").addClass("off").removeClass("on");
+        } else {
+          $("#series-display-option").addClass("on").removeClass("off");
+        }
+        updateSeries();
       });
       </script>
     </div>
