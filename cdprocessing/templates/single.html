@@ -93,7 +93,7 @@
       },
       series: [{
         data: {{ cd_error }},
-        name: "cd error",
+        id: 1,
         color: "#4A9586",
         type: "arearange",
         fillOpacity: 0.2,
@@ -101,6 +101,7 @@
         enableMouseTracking: false
       }, {
         data: {{ cd }},
+        id: 2,
         color: "#4A9586",
         marker: {
           enabled: false,
@@ -119,14 +120,25 @@
       <button class="error-option" id="series-error-option">Toggle Error</button>
       <script>
       $("#series-error-option").click(function () {
-        for (s of chart.series) {
-          if (s.name == "cd error") {
-            if (s.visible) {
-              s.hide();
-            } else {
-              s.show();
-            }
-          }
+        series = chart.get(1);
+        if (series.visible) {
+          series.hide();
+        } else {
+          series.show();
+        }
+      });
+      </script>
+      <button class="display-option" id="series-display-option">Toggle Series</button>
+      <script>
+      $("#series-display-option").click(function () {
+        series = chart.get(2);
+        error = chart.get(1);
+        if (series.visible) {
+          series.hide();
+          error.hide();
+        } else {
+          series.show();
+          error.show();
         }
       });
       </script>
