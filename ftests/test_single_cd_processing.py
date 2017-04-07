@@ -153,11 +153,11 @@ class AveragingSeriesTests(FunctionalTest):
         with open(expanduser("~") + "/Downloads/A Single Sample Test.dat") as f:
             output_lines = f.readlines()
         wavelengths = [l[0] for l in input_lines]
-        output_lines = [l for l in output_lines if l.startswith(str(wavelength))]
+        output_lines = [l for l in output_lines if l[:3].isdigit()]
         output_lines = [(
          float(l.split()[0]), float(l.split()[1]), float(l.split()[2])
         ) for l in output_lines]
-        self.assertEqual(input_lines, output_lines)
+        self.assertEqual(input_data, output_lines)
 
 
     def test_can_submit_multiple_scans_in_one_file(self):

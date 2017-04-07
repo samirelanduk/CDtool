@@ -8,15 +8,17 @@ class FunctionalTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Chrome()
         self.current_location = os.path.dirname(os.path.realpath(__file__))
+        self.files_at_start = os.listdir(expanduser("~") + "/Downloads")
 
 
     def tearDown(self):
         self.browser.quit()
-        for name in ("average_blank", "average_sample"):
-            try:
-                os.remove(expanduser("~") + "/Downloads/%s.dat" % name)
-            except OSError:
-                pass
+        files_at_end = os.listdir(expanduser("~") + "/Downloads")
+        to_remove = [
+         f for f in files_at_end if f not in self.files_at_start and f[-4:] == ".dat"
+        ]
+        for f in to_remove:
+            os.remove(expanduser("~") + "/Downloads/%s" % f)
 
 
     def get_visible_line_series(self, div):

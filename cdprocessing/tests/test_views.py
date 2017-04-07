@@ -106,6 +106,15 @@ class AveragingViewTests(ViewTest):
         self.assertEqual("Some sample", response.context["sample_name"])
 
 
+    def test_averaging_view_gives_correct_file_series_from_single_scan_post(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.single_scan_file
+        })
+        self.assertEqual(response.context["file_series"], [
+         [279.0, -0.006, 0.083], [278.0, 0.044, 0.148], [277.0, 0.031, 0.119]
+        ])
+
+
     '''def test_averaging_view_gets_correct_min_and_max_from_multi_scan_post(self):
         response = self.client.post("/single/", data={
          "blank": self.multi_scan_file
@@ -288,7 +297,7 @@ class AveragingViewTests(ViewTest):
         self.assertEqual(len(file_series[2]), 3)
         self.assertEqual(file_series[2][0], 277)
         self.assertAlmostEqual(file_series[2][1], -0.097, delta=0.005)
-        self.assertAlmostEqual(file_series[2][2], 0.0778, delta=0.005)
+        self.assertAlmostEqual(file_series[2][2], 0.0778, delta=0.005)'''
 
 
 
@@ -345,4 +354,4 @@ class FileProducingViewTests(ViewTest):
         self.assertEqual(
          [float(value) for value in lines[-1].split()],
          [278, 0.2, 0.3]
-        )'''
+        )
