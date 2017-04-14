@@ -66,18 +66,16 @@ class SeriesAveragingTests(ViewTest):
 
     def test_can_average_one_series(self):
         average = average_series([[
-         [279, -0.006], [278, 0.044], [277, 0.031]
+         [279, 1, 0.5], [278, 2, 0.4], [277, 3, 0.2]
         ]])
         self.assertEqual(average, [
-         [279, -0.006, 0, -0.006, -0.006],
-         [278, 0.044, 0, 0.044, 0.044],
-         [277, 0.031, 0, 0.031, 0.031]
+         [279, 1, 0.5], [278, 2, 0.4], [277, 3, 0.2]
         ])
 
 
     def test_can_average_multple_series(self):
         average = average_series([
-         [[279, -0.006], [278, 0.042], [277, 0.036]],
+         [[279, -0.006, 0], [278, 0.042, 0], [277, 0.036, ]],
          [[279, -0.047], [278, 0.04], [277, -0.275]],
          [[279, -0.34], [278, 0.01], [277, -0.18]]
         ])
@@ -91,9 +89,3 @@ class SeriesAveragingTests(ViewTest):
         self.assertAlmostEqual(average[0][2], 0.105, delta=0.005)
         self.assertAlmostEqual(average[1][2], 0.0103, delta=0.005)
         self.assertAlmostEqual(average[2][2], 0.092, delta=0.005)
-        self.assertAlmostEqual(average[0][3], -0.2361, delta=0.005)
-        self.assertAlmostEqual(average[1][3], 0.0203, delta=0.005)
-        self.assertAlmostEqual(average[2][3], -0.232, delta=0.005)
-        self.assertAlmostEqual(average[0][4], -0.0258, delta=0.005)
-        self.assertAlmostEqual(average[1][4], 0.04102, delta=0.005)
-        self.assertAlmostEqual(average[2][4], -0.0477, delta=0.005)

@@ -3,7 +3,10 @@ from collections import Counter
 from inferi import Series
 
 def extract_all_series(django_file):
-    """Takes a Django file object and extracts all the CD scans from it."""
+    """Takes a Django file object and extracts all the CD scans from it. This
+    will be a list of scans, with each scan being a list of wavelength
+    measurments, with each measurment being of the form
+    [wavelength, cd, cd_error]."""
 
     raw_lines = list(django_file)
     file_lines = [line.decode().strip() for line in raw_lines if line.strip()]
@@ -58,14 +61,18 @@ def filter_float_groups(float_groups):
 
 
 def average_series(series):
+    """Takes the series output by extract_all_series and averages them. A single
+    scan is produced and returned. This scan will be a list of wavelength
+    measurements, with each measurment taking the form
+    [wavelength average_cd, standard_error."""
+
     wavelengths = [line[0] for line in series[0]]
     average = []
     for index, wavelength in enumerate(wavelengths):
         measurements = Series(*[s[index][1] for s in series])
         mean = measurements.mean()
-        error = 0 if len(series) == 1 else \
+        error = series[0][index][2] if len(series) == 1 else \
          measurements.standard_deviation() / sqrt(len(series))
-        max_, min_ = mean - error, mean + error
 
-        average.append([wavelength, mean, error, max_, min_])
+        average.append([wavelength, mean, error])
     return average

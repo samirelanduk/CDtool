@@ -69,20 +69,37 @@ class AveragingViewTests(ViewTest):
         self.assertEqual(response.context["max"], 279)
 
 
-    def test_averaging_view_gives_correct_cd_from_single_scan_post(self):
+    def test_averaging_view_gives_correct_main_series_from_single_scan_post(self):
         response = self.client.post("/single/", data={
          "sample_files": self.single_scan_file
         })
-        self.assertEqual(response.context["cd"], [
+        self.assertEqual(response.context["main_series"], [
          [279.0, -0.006], [278.0, 0.044], [277.0, 0.031]
         ])
 
 
-    def test_averaging_view_gives_correct_cerror_from_single_scan_post(self):
+    def test_averaging_view_gives_correct_main_series_from_multi_scan_post(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.multi_scan_file
+        })
+        main_series = response.context["main_series"]
+        self.assertEqual(len(main_series), 3)
+        self.assertEqual(len(main_series[0]), 2)
+        self.assertEqual(main_series[0][0], 279)
+        self.assertAlmostEqual(main_series[0][1], -0.131, delta=0.005)
+        self.assertEqual(len(main_series[1]), 2)
+        self.assertEqual(main_series[1][0], 278)
+        self.assertAlmostEqual(main_series[1][1], 0.0307, delta=0.005)
+        self.assertEqual(len(main_series[2]), 2)
+        self.assertEqual(main_series[2][0], 277)
+        self.assertAlmostEqual(main_series[2][1], -0.1397, delta=0.005)
+
+
+    def test_averaging_view_gives_correct_main_error_from_single_scan_post(self):
         response = self.client.post("/single/", data={
          "sample_files": self.single_scan_file
         })
-        cd_error = response.context["cd_error"]
+        cd_error = response.context["main_error"]
         self.assertEqual(len(cd_error), 3)
         self.assertEqual(len(cd_error[0]), 3)
         self.assertEqual(cd_error[0][0], 279)
