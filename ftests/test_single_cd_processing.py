@@ -5,7 +5,7 @@ import inferi
 from .base import FunctionalTest
 from cdtool.settings import BASE_DIR
 
-class AveragingSeriesTests(FunctionalTest):
+class SingleSampleSeriesTests(FunctionalTest):
 
     def test_can_submit_single_scan(self):
         # User goes to the single run page
@@ -161,6 +161,9 @@ class AveragingSeriesTests(FunctionalTest):
         ) for l in output_lines]
         self.assertEqual(input_data, output_lines)
 
+
+
+class AveragingSeriesTests(FunctionalTest):
 
     def test_can_submit_multiple_scans_in_one_file(self):
         # User goes to the single run page
@@ -320,83 +323,8 @@ class AveragingSeriesTests(FunctionalTest):
         sample_scans = config.find_element_by_id("sample-scans")
 
         # It has three series div
-        sample_series_divs = config.find_elements_by_class("line-config")
+        sample_series_divs = sample_scans.find_elements_by_class_name("series-config")
         self.assertEqual(len(sample_series_divs), 3)
-
-        '''# Each one controls one of the input series
-        for index, series_div in enumerate(sample_series_divs):
-            title = series_div.find_element_by_class_name("series-title")
-            self.assertEqual(series_div_title.text, "Test Sample I #%i" % index + 1)
-
-            # The user turns on that series
-            display_option = series_div.find_element_by_class_name("display-option")
-            display_option.click()
-            area_series = self.get_visible_area_series(chart)
-            self.assertEqual(len(area_series), 1)
-            line_series = self.get_visible_line_series(chart)
-            self.assertEqual(len(line_series), 1)
-
-            # The line is one of the input scans
-            pass
-
-            # There is an option for displaying error
-            error_option = series_div.find_element_by_class_name("error-option")
-            error_option.click()
-            area_series = self.get_visible_area_series(chart)
-            self.assertEqual(len(area_series), 0)
-            error_option.click()
-            area_series = self.get_visible_area_series(chart)
-            self.assertEqual(len(area_series), 1)
-
-            # There is an option for displaying the series at all
-            display_option = series_div.find_element_by_class_name("display-option")
-            display_option.click()
-            area_series = self.get_visible_area_series(chart)
-            self.assertEqual(len(area_series), 0)
-            line_series = self.get_visible_line_series(chart)
-            self.assertEqual(len(line_series), 0)
-            display_option.click()
-            area_series = self.get_visible_area_series(chart)
-            self.assertEqual(len(area_series), 1)
-            line_series = self.get_visible_line_series(chart)
-            self.assertEqual(len(line_series), 1)
-
-            # The error can be hidden while the series is not visible
-            display_option.click()
-            area_series = self.get_visible_area_series(chart)
-            self.assertEqual(len(area_series), 0)
-            line_series = self.get_visible_line_series(chart)
-            self.assertEqual(len(line_series), 0)
-            error_option.click()
-            area_series = self.get_visible_area_series(chart)
-            self.assertEqual(len(area_series), 0)
-            line_series = self.get_visible_line_series(chart)
-            self.assertEqual(len(line_series), 0)
-            display_option.click()
-            area_series = self.get_visible_area_series(chart)
-            self.assertEqual(len(area_series), 0)
-            line_series = self.get_visible_line_series(chart)
-            self.assertEqual(len(line_series), 1)
-            error_option.click()
-            area_series = self.get_visible_area_series(chart)
-            self.assertEqual(len(area_series), 1)
-
-        # Below the config div is the file output div
-        file_output = output.find_element_by_id("file-output")
-
-        # There is a button to download a data file
-        download_button = file_output.find_element_by_id("file-download")
-
-        # Clicking it produces a file with the correct name and data
-        download_button.click()
-        with open(expanduser("~") + "/Downloads/A Single Sample Test.dat") as f:
-            output_lines = f.readlines()
-        wavelengths = [l[0] for l in input_lines]
-        output_lines = [l for l in output_lines if l[:3].isdigit()]
-        output_lines = [(
-         float(l.split()[0]), float(l.split()[1]), float(l.split()[2])
-        ) for l in output_lines]
-        self.assertEqual(input_data, output_lines)'''
 
 
     def test_can_submit_multiple_scans_in_multiple_files(self):

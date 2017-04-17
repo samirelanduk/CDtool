@@ -7,16 +7,16 @@ class AllSeriesExtractionFromFileTests(ViewTest):
     def test_can_pull_out_single_series_from_single_scan_file(self):
         series = extract_all_series(self.single_scan_file)
         self.assertEqual(series, [[
-         [279, -0.006, 0.083], [278, 0.044, 0.148], [277, 0.031, 0.119]
+         [279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]
         ]])
 
 
     def test_can_pull_out_multiple_series_from_multi_scan_file(self):
         series = extract_all_series(self.multi_scan_file)
         self.assertEqual(series, [
-         [[279, -0.006, 0.083], [278, 0.042, 0.148], [277, 0.036, 0.119]],
-         [[279, -0.047, 0.067], [278, 0.04, 0.188], [277, -0.275, 0.197]],
-         [[279, -0.34, 0.067], [278, 0.01, 0.188], [277, -0.18, 0.197]]
+         [[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]],
+         [[279, 0.0, 0.2], [278, -5.0, 0.75], [277, 11.0, 0.4]],
+         [[279, 2.0, 0.1], [278, -3.0, 0.3], [277, 13.0, 0.2]]
         ])
 
 
