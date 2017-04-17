@@ -64,7 +64,19 @@ def one_sample_scan_view(request, scan):
 
 
 def average_sample_view(request, scans):
-    pass
+    average_scan = functions.average_series(scans)
+    min_wavelength, max_wavelength = average_scan[-1][0], average_scan[0][0]
+    return render(request, "single.html", {
+     "display_chart": True,
+     "title": request.POST.get("title"),
+     "min": min_wavelength,
+     "max": max_wavelength,
+     "main_series": [[wav, cd] for wav, cd, error in average_scan],
+     "main_error": [[wav, cd - error, cd + error] for wav, cd, error in average_scan],
+     "sample_scans": [[[wav, cd] for wav, cd, err in scan] for scan in scans],
+     "sample_name": request.POST.get("sample_name"),
+     "file_series": average_scan
+    })
 
 
 def file_producing_view(request):

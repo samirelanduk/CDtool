@@ -16,7 +16,7 @@ class AllSeriesExtractionFromFileTests(ViewTest):
         self.assertEqual(series, [
          [[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]],
          [[279, 0.0, 0.2], [278, -5.0, 0.75], [277, 11.0, 0.4]],
-         [[279, 2.0, 0.1], [278, -3.0, 0.3], [277, 13.0, 0.2]]
+         [[279, -1.0, 0.1], [278, -6.0, 0.3], [277, 10.0, 0.2]]
         ])
 
 
@@ -75,9 +75,9 @@ class SeriesAveragingTests(ViewTest):
 
     def test_can_average_multple_series(self):
         average = average_series([
-         [[279, -0.006, 0], [278, 0.042, 0], [277, 0.036, ]],
-         [[279, -0.047], [278, 0.04], [277, -0.275]],
-         [[279, -0.34], [278, 0.01], [277, -0.18]]
+         [[279, -0.006, 0], [278, 0.042, 0], [277, 0.036, 0]],
+         [[279, -0.047, 0], [278, 0.04, 0], [277, -0.275, 0]],
+         [[279, -0.34, 0], [278, 0.01, 0], [277, -0.18, 0]]
         ])
         self.assertEqual(len(average), 3)
         self.assertEqual(average[0][0], 279)
@@ -86,6 +86,6 @@ class SeriesAveragingTests(ViewTest):
         self.assertAlmostEqual(average[0][1], -0.131, delta=0.005)
         self.assertAlmostEqual(average[1][1], 0.0307, delta=0.005)
         self.assertAlmostEqual(average[2][1], -0.1397, delta=0.005)
-        self.assertAlmostEqual(average[0][2], 0.105, delta=0.005)
-        self.assertAlmostEqual(average[1][2], 0.0103, delta=0.005)
-        self.assertAlmostEqual(average[2][2], 0.092, delta=0.005)
+        self.assertAlmostEqual(average[0][2], 0.1487, delta=0.005)
+        self.assertAlmostEqual(average[1][2], 0.01464, delta=0.005)
+        self.assertAlmostEqual(average[2][2], 0.1301, delta=0.005)

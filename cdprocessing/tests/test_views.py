@@ -87,7 +87,7 @@ class ProcessingViewTests(ViewTest):
          scan,
          [[[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]],
           [[279, 0.0, 0.2], [278, -5.0, 0.75], [277, 11.0, 0.4]],
-          [[279, 2.0, 0.1], [278, -3.0, 0.3], [277, 13.0, 0.2]]]
+          [[279, -1.0, 0.1], [278, -6.0, 0.3], [277, 10.0, 0.2]]]
         )
 
 
@@ -156,6 +156,101 @@ class OneSampleScanViewTests(ViewTest):
         })
         self.assertEqual(response.context["file_series"], [
          [279.0, 1, 0.5], [278.0, -4, 0.4], [277.0, 12, 0.3]
+        ])
+
+
+
+class AverageSampleViewTests(ViewTest):
+
+    def test_average_sample_view_uses_single_run_template(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.multi_scan_file
+        })
+        self.assertTemplateUsed(response, "single.html")
+
+
+    def test_average_sample_view_makes_chart_display_true(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.multi_scan_file,
+        })
+        self.assertTrue(response.context["display_chart"])
+
+
+    def test_average_sample_view_gets_correct_title(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.multi_scan_file,
+         "title": "Some title"
+        })
+        self.assertEqual("Some title", response.context["title"])
+
+
+    def test_average_sample_view_gets_correct_min_and_max(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.multi_scan_file
+        })
+        self.assertEqual(response.context["min"], 277)
+        self.assertEqual(response.context["max"], 279)
+
+
+    def test_average_sample_view_gives_correct_main_series(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.multi_scan_file
+        })
+        self.assertEqual(response.context["main_series"], [
+         [279.0, 0], [278.0, -5], [277.0, 11]
+        ])
+
+
+    def test_average_sample_view_gives_correct_main_error(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.multi_scan_file
+        })
+        main_error = response.context["main_error"]
+        self.assertEqual(len(main_error), 3)
+        self.assertEqual(len(main_error[0]), 3)
+        self.assertEqual(main_error[0][0], 279)
+        self.assertAlmostEqual(main_error[0][1], -0.8165, delta=0.005)
+        self.assertAlmostEqual(main_error[0][2], 0.8165, delta=0.005)
+        self.assertEqual(len(main_error[1]), 3)
+        self.assertEqual(main_error[1][0], 278)
+        self.assertAlmostEqual(main_error[1][1], -5.8165, delta=0.005)
+        self.assertAlmostEqual(main_error[1][2], -4.1835, delta=0.005)
+        self.assertEqual(len(main_error[2]), 3)
+        self.assertEqual(main_error[2][0], 277)
+        self.assertAlmostEqual(main_error[2][1], 10.1835, delta=0.005)
+        self.assertAlmostEqual(main_error[2][2], 11.8165, delta=0.005)
+
+
+    def test_average_sample_view_gets_correct_sample_name(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.multi_scan_file,
+         "sample_name": "Some sample"
+        })
+        self.assertEqual("Some sample", response.context["sample_name"])
+
+
+    def test_average_sample_view_sends_sample_scans(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.multi_scan_file
+        })
+        self.assertEqual(
+         response.context["sample_scans"],
+         [
+          [[279.0, 1], [278.0, -4], [277.0, 12]],
+          [[279.0, 0], [278.0, -5], [277.0, 11]],
+          [[279.0, -1], [278.0, -6], [277.0, 10]],
+         ]
+        )
+
+
+    def test_average_sample_view_gives_correct_file_series(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.multi_scan_file
+        })
+        self.assertEqual(response.context["file_series"], [
+         [279.0, 0, 0.816496580927726],
+         [278.0, -5, 0.816496580927726],
+         [277.0, 11, 0.816496580927726]
         ])
 
 

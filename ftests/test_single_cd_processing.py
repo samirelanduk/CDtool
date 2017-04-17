@@ -230,7 +230,7 @@ class AveragingSeriesTests(FunctionalTest):
         wavelengths = sorted(list(set([l[0] for l in input_data])))
         input_data = [{
          "wavelength": wavelength,
-         "input_values": inferi.Series(*[l[1] for l in input_data if l[0] == wavelength])
+         "input_values": inferi.Series(*[l[1] for l in input_data if l[0] == wavelength], sample=False)
         } for wavelength in wavelengths]
         for index, line in enumerate(input_data[::-1]):
             self.assertEqual(
@@ -253,14 +253,13 @@ class AveragingSeriesTests(FunctionalTest):
              self.browser.execute_script("return chart.series[0].data[%i].x;" % index)
             )
             self.assertEqual(
-             line["input_values"].mean() - line["input_values"].standard_deviation() / sqrt(3),
+             line["input_values"].mean() - line["input_values"].standard_deviation(),
              self.browser.execute_script("return chart.series[0].data[%i].low;" % index)
             )
             self.assertEqual(
-             line["input_values"].mean() + line["input_values"].standard_deviation() / sqrt(3),
+             line["input_values"].mean() + line["input_values"].standard_deviation(),
              self.browser.execute_script("return chart.series[0].data[%i].high;" % index)
             )
-
 
         # Below the chart is the config section
         config = output.find_element_by_id("chart-config")
@@ -325,6 +324,11 @@ class AveragingSeriesTests(FunctionalTest):
         # It has three series div
         sample_series_divs = sample_scans.find_elements_by_class_name("series-config")
         self.assertEqual(len(sample_series_divs), 3)
+
+        # Each div controls a line
+        for index, sample_series_div in enumerate(sample_series_divs):
+            sample_div_title = sample_series_div.find_element_by_class_name("series-title")
+            self.assertEqual(sample_div_title.text, "Test Sample II #%i" % (index + 1))
 
 
     def test_can_submit_multiple_scans_in_multiple_files(self):

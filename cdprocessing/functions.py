@@ -69,10 +69,10 @@ def average_series(series):
     wavelengths = [line[0] for line in series[0]]
     average = []
     for index, wavelength in enumerate(wavelengths):
-        measurements = Series(*[s[index][1] for s in series])
+        measurements = Series(*[s[index][1] for s in series], sample=False)
         mean = measurements.mean()
         error = series[0][index][2] if len(series) == 1 else \
-         measurements.standard_deviation() / sqrt(len(series))
+         measurements.standard_deviation()
 
         average.append([wavelength, mean, error])
     return average

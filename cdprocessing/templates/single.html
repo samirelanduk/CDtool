@@ -160,8 +160,15 @@
       </script>
     </div>
 
+    {% if sample_scans %}
     <div id="sample-scans">
+      {% for scan in sample_scans %}
+      <div class="series-config">
+        <div class="series-title">{{ sample_name }} #{{forloop.counter}}</div>
+      </div>
+      {% endfor %}
     </div>
+    {% endif %}
 
   </div>
 
