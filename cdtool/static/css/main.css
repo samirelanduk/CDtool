@@ -1,3 +1,5 @@
+/* Base structure styles */
+
 body {
   margin: 0px;
   font-family: "Amiko", sans-serif;
@@ -89,15 +91,14 @@ footer a {
   color: inherit;
 }
 
-#copyright {
-  color: #AAAAAA;
-  text-align: center;
-}
+/* Input styles */
 
-#blank-input, #sample-input {
+
+
+fieldset {
   width: 100%;
   padding: 30px;
-  background-color: #EEEEEE;
+  background-color: #F9F9F9;
   border-radius: 4px;
   box-sizing: border-box;
   display: block;
@@ -105,7 +106,49 @@ footer a {
   margin-bottom: 10px;
 }
 
+.input {
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 50px;
+}
 
+label {
+  display: block;
+  text-align: left;
+}
+
+input {
+  display: block;
+  line-height: 1.5;
+  width: 100%;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 140%;
+}
+
+input[type=file] {
+  width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+input[type=file] + label {
+  font-weight: 700;
+  color: #FFFFFF;
+  padding: 10px;
+  background-color: #45596d;
+  display: inline-block;
+  cursor: pointer;
+}
+
+input[type=file]:focus + label,
+input[type=file] + label:hover {
+  background-color: #2c3e50;
+}
 
 input[type=submit] {
   background-color: #45596d;
@@ -120,6 +163,8 @@ input[type=submit] {
   margin-right: auto;
   display: block;
   transition: 0.5s;
+  display: inline-block;
+  width:auto;
 }
 
 input[type=submit]:hover {
@@ -127,13 +172,6 @@ input[type=submit]:hover {
   transition: 0.5s;
 }
 
-input[type=file] {
-  display: block;
-  text-align: center;
-  width: 50%;
-  margin-left: auto;
-  margin-right: auto;
-}
 
 #file-input, #chart-config {
   margin-bottom: 100px;
@@ -161,6 +199,11 @@ button:hover {
 
 p {
   line-height: 2;
+}
+
+#copyright {
+  color: #AAAAAA;
+  text-align: center;
 }
 
 @media only screen and (min-width: 568px) {
@@ -215,17 +258,6 @@ p {
 
   nav a {
     display: inline-block;
-  }
-
-  #blank-input, #sample-input {
-    width: 40%;
-    margin-left: 5%;
-    margin-right: 5%;
-    border-radius: 4px;
-    box-sizing: border-box;
-    display: inline-block;
-    margin-top: 20px;
-    margin-bottom: 20px;
   }
 
   main {

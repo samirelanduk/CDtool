@@ -16,21 +16,36 @@
 <form id="input" method="POST" enctype="multipart/form-data">
 
   <div id="file-input">
-    <fieldset class="file-fieldset">
-      <h2>CD Blanks</h2>
-      <input name="sample_files" type="file" multiple>
-      <input name="sample_name" type="text">
+    <fieldset id="sample-input">
+      <h2>Sample Data</h2>
+      <div class="input">
+
+        <input id="id-sample-files" name="sample_files" type="file" data-multiple-caption="{count} files selected" multiple>
+        <label for="id-sample-files">Upload Sample Files</label>
+      </div>
+      <div class="input">
+        <label for="id-sample-name">Sample Name:</label>
+        <input name="sample_name" type="text" placeholder="e.g. 'sample', 'protein' etc.">
+      </div>
+    </fieldset>
+    <fieldset id="blank-input">
     </fieldset>
   </div>
 
   <fieldset id="input-parameters">
-    <input type="text" name="title" id="id_title">
+    <div id="experiment-name">
+      <label for="id-title">Experiment Name:</label>
+      <input type="text" name="title" id="id-title">
+    </div>
   </fieldset>
 
-  {% csrf_token %}
-  <input type="submit" value="Process">
+  <div id="submit-button-div">
+    {% csrf_token %}
+    <input type="submit" value="Process" id="submit-input">
+  </div>
 </form>
 
+<!--
 <div id="output">
   {% if display_chart %}
   <div id="chart"></div>
@@ -162,6 +177,7 @@
 
     {% if sample_scans %}
     <div id="sample-scans">
+      <button>Toggle sample scans</button>
       {% for scan in sample_scans %}
       <div class="series-config">
         <div class="series-title">{{ sample_name }} #{{forloop.counter}}</div>
@@ -186,5 +202,5 @@
     });
   </script>
   {% endif %}
-</div>
+</div>-->
 {% endblock %}
