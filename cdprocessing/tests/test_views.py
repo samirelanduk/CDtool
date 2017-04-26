@@ -105,7 +105,11 @@ class OneSampleScanViewTests(ViewTest):
         self.assertEqual(response.context["max"], 279)
 
 
-    '''def test_single_sample_scan_view_gives_correct_main_series(self):
+    @patch("cdprocessing.functions.extract_all_series")
+    def test_single_sample_scan_view_gives_correct_main_series(self, mock_extract):
+        mock_extract.return_value = [
+         [[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]]
+        ]
         response = self.client.post("/single/", data={
          "sample_files": self.single_scan_file
         })
@@ -114,7 +118,7 @@ class OneSampleScanViewTests(ViewTest):
         ])
 
 
-    def test_single_sample_gives_correct_main_error(self):
+    '''def test_single_sample_gives_correct_main_error(self):
         response = self.client.post("/single/", data={
          "sample_files": self.single_scan_file
         })

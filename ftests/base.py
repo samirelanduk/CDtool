@@ -28,6 +28,16 @@ class FunctionalTest(StaticLiveServerTestCase):
         )
 
 
+    def get_single_scan_from_file(self, file_name):
+        with open("ftests/test_data/" + file_name) as f:
+            lines = f.readlines()
+        lines = [l for l in lines if l[:3].isdigit()]
+        input_data = [(
+         float(l.split()[0]), float(l.split()[1]), float(l.split()[2])
+        ) for l in lines]
+        return input_data
+
+
     def check_chart_appears(self, chart_div):
         self.assertGreater(chart_div.size["width"], 10)
         self.assertGreater(chart_div.size["height"], 10)
@@ -55,6 +65,26 @@ class FunctionalTest(StaticLiveServerTestCase):
         lines = chart_div.find_elements_by_class_name("highcharts-line-series")
         lines = [line for line in lines if line.is_displayed()]
         self.assertEqual(len(lines), count)
+
+
+    def check_line_matches_data(self, line, data):
+        line_length = self.browser.execute_script(
+         "return chart.get('%s').data.length" % line
+        )
+        self.assertEqual(line_length, len(data))
+        for index, datum in enumerate(data):
+            self.assertEqual(
+             datum[0],
+             self.browser.execute_script(
+              "return chart.get('%s').data[%i].x;" % (line, index)
+             )
+            )
+            self.assertEqual(
+             datum[1],
+             self.browser.execute_script(
+              "return chart.get('%s').data[%i].y;" % (line, index)
+             )
+            )
 
 
     def get_visible_area_series(self, div):

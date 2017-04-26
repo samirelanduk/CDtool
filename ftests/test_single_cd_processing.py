@@ -8,6 +8,9 @@ from cdtool.settings import BASE_DIR
 class SingleSampleScanTests(FunctionalTest):
 
     def test_can_submit_single_scan(self):
+        # Get data for this test
+        input_data = self.get_single_scan_from_file("single-sample.dat")
+
         # User goes to the single run page
         self.browser.get(self.live_server_url + "/single/")
 
@@ -77,34 +80,10 @@ class SingleSampleScanTests(FunctionalTest):
         # There is a single line series
         self.check_visible_line_series_count(chart_div, 1)
 
+        # The line series matches the scan in the input data
+        self.check_line_matches_data("main", [w[:2] for w in input_data])
+
         '''
-
-        # The x-axis goes from 280 to 190
-        x_axis = chart.find_element_by_class_name("highcharts-xaxis-labels")
-        x_labels = x_axis.find_elements_by_tag_name("text")
-        self.assertEqual(x_labels[0].text, "190")
-        self.assertEqual(x_labels[-1].text, "280")
-
-        # There is only one line series
-        line_series = self.get_visible_line_series(chart)
-        self.assertEqual(len(line_series), 1)
-
-        # The line series is just the scan from the file
-        with open("ftests/test_data/single-sample.dat") as f:
-            input_lines = f.readlines()
-        lines = [l for l in input_lines if l[:3].isdigit()]
-        input_data = [(
-         float(l.split()[0]), float(l.split()[1]), float(l.split()[2])
-        ) for l in lines]
-        for index, line in enumerate(input_data):
-            self.assertEqual(
-             line[0],
-             self.browser.execute_script("return chart.get('main').data[%i].x;" % index)
-            )
-            self.assertEqual(
-             line[1],
-             self.browser.execute_script("return chart.get('main').data[%i].y;" % index)
-            )
 
         # There is one area series
         area_series = self.get_visible_area_series(chart)
