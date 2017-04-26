@@ -118,7 +118,11 @@ class OneSampleScanViewTests(ViewTest):
         ])
 
 
-    '''def test_single_sample_gives_correct_main_error(self):
+    @patch("cdprocessing.functions.extract_all_series")
+    def test_single_sample_gives_correct_main_error(self, mock_extract):
+        mock_extract.return_value = [
+         [[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]]
+        ]
         response = self.client.post("/single/", data={
          "sample_files": self.single_scan_file
         })
@@ -127,7 +131,7 @@ class OneSampleScanViewTests(ViewTest):
         ])
 
 
-    def test_single_sample_view_gets_correct_sample_name(self):
+    '''def test_single_sample_view_gets_correct_sample_name(self):
         response = self.client.post("/single/", data={
          "sample_files": self.single_scan_file,
          "sample_name": "Some sample"

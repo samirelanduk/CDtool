@@ -83,8 +83,14 @@ class SingleSampleScanTests(FunctionalTest):
         # The line series matches the scan in the input data
         self.check_line_matches_data("main", [w[:2] for w in input_data])
 
-        # There is a single line series
+        # There is a single error series
         self.check_visible_area_series_count(chart_div, 1)
+
+        # The error series matches the scan error in the input data
+        self.check_error_matches_data(
+         "main_error",
+         [[w[0], w[1] - w[2], w[1] + w[2]] for w in input_data]
+        )
 
         '''
 

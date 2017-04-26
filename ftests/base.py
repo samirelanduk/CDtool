@@ -91,3 +91,29 @@ class FunctionalTest(StaticLiveServerTestCase):
               "return chart.get('%s').data[%i].y;" % (line, index)
              )
             )
+
+
+    def check_error_matches_data(self, error, data):
+        error_length = self.browser.execute_script(
+         "return chart.get('%s').data.length" % error
+        )
+        self.assertEqual(error_length, len(data))
+        for index, datum in enumerate(data):
+            self.assertEqual(
+             datum[0],
+             self.browser.execute_script(
+              "return chart.get('%s').data[%i].x;" % (error, index)
+             )
+            )
+            self.assertAlmostEqual(
+             datum[1],
+             self.browser.execute_script(
+              "return chart.get('%s').data[%i].low;" % (error, index)
+             ), delta=0.0005
+            )
+            self.assertAlmostEqual(
+             datum[2],
+             self.browser.execute_script(
+              "return chart.get('%s').data[%i].high;" % (error, index)
+             ), delta=0.0005
+            )
