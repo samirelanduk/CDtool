@@ -52,8 +52,69 @@
   <div id="chart"></div>
   <div id="config"></div>
   <div id="download"></div>
-  
+
 </div>
+
+<script>
+var chart = Highcharts.chart("chart", {
+    title: {
+      text: "{{ title }}"
+    },
+    chart: {
+      type: "line",
+      plotBorderWidth: 1,
+      plotBorderColor: "#000000",
+      margin: [50, 30, 50, 75],
+      zoomType: "xy",
+      height: "50%"
+    },
+    credits: {
+      enabled: false
+    },
+    legend: {
+      enabled: false
+    },
+    plotOptions: {
+      arearange: {
+        animation: true
+      }
+    },
+    xAxis: {
+      min: {{ min }},
+      max: {{ max }},
+      gridLineWidth: 1,
+      gridLineColor: "#EEEEEE",
+      gridLineDashStyle: "ShortDash",
+      lineColor: "#000000",
+      tickWidth: 1,
+      tickLength: 6,
+      tickPosition: "inside",
+      tickColor: "#000000",
+      title: {
+        text: "Wavelength (nm)",
+        style: {"font-weight": "bold"}
+      }
+    },
+    yAxis: {
+      gridLineWidth: 1,
+      gridLineColor: "#EEEEEE",
+      gridLineDashStyle: "ShortDash",
+      tickWidth: 1,
+      tickLength: 6,
+      tickPosition: "inside",
+      lineColor: "#000000",
+      tickColor: "#000000",
+      title: {
+        text: "Circular Dichroism",
+        style: {"font-weight": "bold"}
+      }
+    },
+    tooltip: {
+      enabled: false
+    },
+    series: []
+  });
+</script>
 {% endif %}
 
 <!--

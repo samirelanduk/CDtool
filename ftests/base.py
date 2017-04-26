@@ -21,6 +21,11 @@ class FunctionalTest(StaticLiveServerTestCase):
             os.remove(expanduser("~") + "/Downloads/%s" % f)
 
 
+    def check_chart_appears(self, chart_div):
+        self.assertGreater(chart_div.size["width"], 10)
+        self.assertGreater(chart_div.size["height"], 10)
+
+
     def get_visible_line_series(self, div):
         lines = div.find_elements_by_class_name("highcharts-line-series")
         lines = [line for line in lines if line.is_displayed()]
