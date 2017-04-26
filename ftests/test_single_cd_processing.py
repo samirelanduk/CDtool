@@ -74,6 +74,9 @@ class SingleSampleScanTests(FunctionalTest):
         # The chart x axis goes from 190 to 280
         self.check_chart_x_axis(190, 280)
 
+        # There is a single line series
+        self.check_visible_line_series_count(chart_div, 1)
+
         '''
 
         # The x-axis goes from 280 to 190

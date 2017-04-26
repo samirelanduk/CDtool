@@ -51,10 +51,10 @@ class FunctionalTest(StaticLiveServerTestCase):
         )
 
 
-    def get_visible_line_series(self, div):
-        lines = div.find_elements_by_class_name("highcharts-line-series")
+    def check_visible_line_series_count(self, chart_div, count):
+        lines = chart_div.find_elements_by_class_name("highcharts-line-series")
         lines = [line for line in lines if line.is_displayed()]
-        return lines
+        self.assertEqual(len(lines), count)
 
 
     def get_visible_area_series(self, div):

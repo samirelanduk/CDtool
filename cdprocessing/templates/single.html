@@ -113,7 +113,17 @@ var chart = Highcharts.chart("chart", {
       enabled: false
     },
     series: [{
-      data: []
+      data: [[190, 0], [280, 1]],
+      id: "main",
+      color: "#4A9586",
+      marker: {
+        enabled: false,
+        states: {
+          hover: {
+            enabled: false
+          }
+        }
+      }
     }]
   });
 </script>
