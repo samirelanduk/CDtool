@@ -53,13 +53,21 @@ class SingleSampleScanTests(FunctionalTest):
         # They submit the data
         submit_button.click()
 
-        '''# They are still on the same page
+        # They are still on the same page
         self.assertEqual(
          self.browser.current_url,
          self.live_server_url + "/single/"
         )
 
-        # The output section has a chart div
+        # There is now an output section
+        output_div = self.browser.find_element_by_id("output")
+
+        # It has sections for the chart, for configuration, and downloading
+        chart_div = output_div.find_element_by_id("chart")
+        config_div = output_div.find_element_by_id("config")
+        download_div = output_div.find_element_by_id("download")
+
+        '''# The output section has a chart div
         output = self.browser.find_element_by_id("output")
         chart = output.find_element_by_id("chart")
 

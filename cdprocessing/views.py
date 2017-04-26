@@ -27,7 +27,7 @@ def single_run(request):
              "display_chart": False, "error_text": "No files were supplied."
             })
     else:
-        return render(request, "single.html", {"display_chart": False})
+        return render(request, "single.html", {"display_output": False})
 
 
 def processing_view(request):
@@ -52,7 +52,7 @@ def one_sample_scan_view(request, scan):
 
     min_wavelength, max_wavelength = scan[-1][0], scan[0][0]
     return render(request, "single.html", {
-     "display_chart": True,
+     "display_output": True,
      "title": request.POST.get("title"),
      "min": min_wavelength,
      "max": max_wavelength,

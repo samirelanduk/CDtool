@@ -43,7 +43,18 @@
     {% csrf_token %}
     <input type="submit" value="Process" id="submit-input">
   </div>
+
 </form>
+
+{% if display_output %}
+<div id="output">
+
+  <div id="chart"></div>
+  <div id="config"></div>
+  <div id="download"></div>
+  
+</div>
+{% endif %}
 
 <!--
 <div id="output">
