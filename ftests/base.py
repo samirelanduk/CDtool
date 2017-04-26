@@ -67,6 +67,12 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(len(lines), count)
 
 
+    def check_visible_area_series_count(self, chart_div, count):
+        areas = chart_div.find_elements_by_class_name("highcharts-arearange-series")
+        areas = [area for area in areas if area.is_displayed()]
+        self.assertEqual(len(areas), count)
+
+
     def check_line_matches_data(self, line, data):
         line_length = self.browser.execute_script(
          "return chart.get('%s').data.length" % line
@@ -85,9 +91,3 @@ class FunctionalTest(StaticLiveServerTestCase):
               "return chart.get('%s').data[%i].y;" % (line, index)
              )
             )
-
-
-    def get_visible_area_series(self, div):
-        areas = div.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        return areas

@@ -113,6 +113,14 @@ var chart = Highcharts.chart("chart", {
       enabled: false
     },
     series: [{
+      data: [[190, -20, -10], [280, 0, 10]],
+      id: "main_error",
+      color: "#4A9586",
+      type: "arearange",
+      fillOpacity: 0.2,
+      lineWidth: 0,
+      enableMouseTracking: false
+    }, {
       data: {{ main_series }},
       id: "main",
       color: "#4A9586",
@@ -199,14 +207,6 @@ var chart = Highcharts.chart("chart", {
         enabled: false
       },
       series: [{
-        data: {{ main_error }},
-        id: "main_error",
-        color: "#4A9586",
-        type: "arearange",
-        fillOpacity: 0.2,
-        lineWidth: 0,
-        enableMouseTracking: false
-      }, {
         data: {{ main_series }},
         id: "main",
         color: "#4A9586",
