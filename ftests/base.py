@@ -42,6 +42,15 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(title_text, title)
 
 
+    def check_chart_x_axis(self, x_min, x_max):
+        self.assertEqual(
+         self.browser.execute_script("return chart.xAxis[0].min;"), x_min
+        )
+        self.assertEqual(
+         self.browser.execute_script("return chart.xAxis[0].max;"), x_max
+        )
+
+
     def get_visible_line_series(self, div):
         lines = div.find_elements_by_class_name("highcharts-line-series")
         lines = [line for line in lines if line.is_displayed()]

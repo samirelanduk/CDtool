@@ -71,6 +71,9 @@ class SingleSampleScanTests(FunctionalTest):
         # The chart has the correct title
         self.check_chart_title(chart_div, "A Single Sample Test")
 
+        # The chart x axis goes from 190 to 280
+        self.check_chart_x_axis(190, 280)
+
         '''
 
         # The x-axis goes from 280 to 190
