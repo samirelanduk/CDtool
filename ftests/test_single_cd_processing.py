@@ -54,10 +54,7 @@ class SingleSampleScanTests(FunctionalTest):
         submit_button.click()
 
         # They are still on the same page
-        self.assertEqual(
-         self.browser.current_url,
-         self.live_server_url + "/single/"
-        )
+        self.check_page("/single/")
 
         # There is now an output section
         output_div = self.browser.find_element_by_id("output")
@@ -71,13 +68,10 @@ class SingleSampleScanTests(FunctionalTest):
         sleep(1)
         self.check_chart_appears(chart_div)
 
-        '''# The output section has a chart div
-        output = self.browser.find_element_by_id("output")
-        chart = output.find_element_by_id("chart")
+        # The chart has the correct title
+        self.check_chart_title(chart_div, "A Single Sample Test")
 
-        # The chart's title matches what was provided
-        title = chart.find_element_by_class_name("highcharts-title")
-        self.assertEqual(title.text, "A Single Sample Test")
+        '''
 
         # The x-axis goes from 280 to 190
         x_axis = chart.find_element_by_class_name("highcharts-xaxis-labels")

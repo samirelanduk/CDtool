@@ -21,11 +21,25 @@ class FunctionalTest(StaticLiveServerTestCase):
             os.remove(expanduser("~") + "/Downloads/%s" % f)
 
 
+    def check_page(self, url):
+        self.assertEqual(
+         self.browser.current_url,
+         self.live_server_url + url
+        )
+
+
     def check_chart_appears(self, chart_div):
         self.assertGreater(chart_div.size["width"], 10)
         self.assertGreater(chart_div.size["height"], 10)
         y_offset = self.browser.execute_script('return window.pageYOffset;')
         self.assertGreater(y_offset, 100)
+
+
+    def check_chart_title(self, chart_div, title):
+        title_element = chart_div.find_element_by_class_name("highcharts-title")
+        self.assertEqual(title_element.text, title)
+        title_text = self.browser.execute_script("return chart.title.textStr;")
+        self.assertEqual(title_text, title)
 
 
     def get_visible_line_series(self, div):
