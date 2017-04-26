@@ -115,6 +115,14 @@ var chart = Highcharts.chart("chart", {
     series: []
   });
 </script>
+
+<script>
+  $( document ).ready(function() {
+    $("html, body").animate({
+      scrollTop: $("#chart").offset().top
+  }, 800);
+  });
+</script>
 {% endif %}
 
 <!--
@@ -266,13 +274,7 @@ var chart = Highcharts.chart("chart", {
     {% csrf_token %}
     <input type="submit" id="file-download" value="Download data file">
   </form>
-  <script>
-    $( document ).ready(function() {
-      $("html, body").animate({
-        scrollTop: $("#chart").offset().top
-    }, 800);
-    });
-  </script>
+
   {% endif %}
 </div>-->
 {% endblock %}

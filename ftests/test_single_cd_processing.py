@@ -68,6 +68,7 @@ class SingleSampleScanTests(FunctionalTest):
         download_div = output_div.find_element_by_id("download")
 
         # The chart section has a chart in it
+        sleep(1)
         self.check_chart_appears(chart_div)
 
         '''# The output section has a chart div
