@@ -9,6 +9,7 @@
     width: inherit;
   }
 </style>
+<link rel="stylesheet" type="text/css" href="/static/css/chart.css">
 {% endblock %}
 
 {% block main %}
@@ -23,7 +24,11 @@
         <input id="id-sample-files" name="sample_files" type="file" data-multiple-caption="{count} files selected" multiple>
         <label for="id-sample-files">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" fill="#FFFFFF">
-             <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
+             <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3
+             11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8
+             2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2
+             2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0
+             1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
            </svg> Upload Sample Files
          </label>
       </div>
@@ -51,12 +56,17 @@
 </form>
 
 {% if display_output %}
+<script src="/static/js/chart.js"></script>
+
 <div id="output">
 
   <div id="chart"></div>
 
   <div id="config">
     <div id="main-config" class="series-config">
+      <div class="config-title">{{ sample_name }}</div>
+      <button id="main-series-option" class="on">Toggle Main Series</button>
+      <button id="main-error-option" class="on">Toggle Main Series Error</button>
     </div>
   </div>
 
@@ -65,238 +75,18 @@
 </div>
 
 <script>
-var chart = Highcharts.chart("chart", {
-    title: {
-      text: "{{ title }}"
-    },
-    chart: {
-      type: "line",
-      plotBorderWidth: 1,
-      plotBorderColor: "#000000",
-      margin: [50, 30, 50, 75],
-      zoomType: "xy",
-      height: "50%",
-      animation: true
-    },
-    credits: {
-      enabled: false
-    },
-    legend: {
-      enabled: false
-    },
-    plotOptions: {
-      arearange: {
-        animation: true
-      }
-    },
-    xAxis: {
-      min: {{ min }},
-      max: {{ max }},
-      gridLineWidth: 1,
-      gridLineColor: "#EEEEEE",
-      gridLineDashStyle: "ShortDash",
-      lineColor: "#000000",
-      tickWidth: 1,
-      tickLength: 6,
-      tickPosition: "inside",
-      tickColor: "#000000",
-      title: {
-        text: "Wavelength (nm)",
-        style: {"font-weight": "bold"}
-      }
-    },
-    yAxis: {
-      gridLineWidth: 1,
-      gridLineColor: "#EEEEEE",
-      gridLineDashStyle: "ShortDash",
-      tickWidth: 1,
-      tickLength: 6,
-      tickPosition: "inside",
-      lineColor: "#000000",
-      tickColor: "#000000",
-      title: {
-        text: "Circular Dichroism",
-        style: {"font-weight": "bold"}
-      }
-    },
-    tooltip: {
-      enabled: false
-    },
-    series: [{
-      data: {{ main_error }},
-      id: "main_error",
-      color: "#4A9586",
-      type: "arearange",
-      fillOpacity: 0.2,
-      lineWidth: 0,
-      enableMouseTracking: false
-    }, {
-      data: {{ main_series }},
-      id: "main",
-      color: "#4A9586",
-      marker: {
-        enabled: false,
-        states: {
-          hover: {
-            enabled: false
-          }
-        }
-      }
-    }]
-  });
-</script>
-
-<script>
-  $( document ).ready(function() {
-    $("html, body").animate({
-      scrollTop: $("#chart").offset().top
-  }, 800);
-  });
+  chart = makeChart(
+     "{{ title }}", {{ min }}, {{ max }}, {{ main_series }}, {{ main_error }}
+  )
 </script>
 {% endif %}
 
 <!--
-<div id="output">
-  {% if display_chart %}
-  <div id="chart"></div>
-  <script>
-  var chart = Highcharts.chart("chart", {
-      title: {
-        text: "{{ title }}"
-      },
-      chart: {
-        type: "line",
-        plotBorderWidth: 1,
-        plotBorderColor: "#000000",
-        margin: [50, 30, 50, 75],
-        zoomType: "xy",
-        height: "50%"
-      },
-      credits: {
-        enabled: false
-      },
-      legend: {
-        enabled: false
-      },
-      plotOptions: {
-        arearange: {
-          animation: true
-        }
-      },
-      xAxis: {
-        min: {{ min }},
-        max: {{ max }},
-        gridLineWidth: 1,
-        gridLineColor: "#EEEEEE",
-        gridLineDashStyle: "ShortDash",
-        lineColor: "#000000",
-        tickWidth: 1,
-        tickLength: 6,
-        tickPosition: "inside",
-        tickColor: "#000000",
-        title: {
-          text: "Wavelength (nm)",
-          style: {"font-weight": "bold"}
-        }
-      },
-      yAxis: {
-        gridLineWidth: 1,
-        gridLineColor: "#EEEEEE",
-        gridLineDashStyle: "ShortDash",
-        tickWidth: 1,
-        tickLength: 6,
-        tickPosition: "inside",
-        lineColor: "#000000",
-        tickColor: "#000000",
-        title: {
-          text: "Circular Dichroism",
-          style: {"font-weight": "bold"}
-        }
-      },
-      tooltip: {
-        enabled: false
-      },
-      series: [{
-        data: {{ main_series }},
-        id: "main",
-        color: "#4A9586",
-        marker: {
-          enabled: false,
-          states: {
-            hover: {
-              enabled: false
-            }
-          }
-        }
-      }]
-    });
-  </script>
-  <div id="chart-config">
-
-    <div id="main-series-config" class="series-config">
-      <script>
-      function updateSeries() {
-        series = chart.get("main");
-        error = chart.get("main_error");
-        if ($("#series-display-option").hasClass("off")) {
-          series.hide();
-          error.hide();
-        } else {
-          series.show();
-          if (($("#series-error-option").hasClass("off"))) {
-            error.hide();
-          } else {
-            error.show();
-          }
-        }
-      }
-      </script>
-      <div class="series-title">{{ sample_name }}</div>
-      <button class="error-option on" id="series-error-option">Toggle Error</button>
-      <script>
-      $("#series-error-option").click(function () {
-        if ($("#series-error-option").hasClass("on")) {
-          $("#series-error-option").addClass("off").removeClass("on");
-        } else {
-          $("#series-error-option").addClass("on").removeClass("off");
-        }
-        updateSeries();
-      });
-      </script>
-
-      <button class="display-option on" id="series-display-option">Toggle Series</button>
-      <script>
-      $("#series-display-option").click(function () {
-        if ($("#series-display-option").hasClass("on")) {
-          $("#series-display-option").addClass("off").removeClass("on");
-        } else {
-          $("#series-display-option").addClass("on").removeClass("off");
-        }
-        updateSeries();
-      });
-      </script>
-    </div>
-
-    {% if sample_scans %}
-    <div id="sample-scans">
-      <button>Toggle sample scans</button>
-      {% for scan in sample_scans %}
-      <div class="series-config">
-        <div class="series-title">{{ sample_name }} #{{forloop.counter}}</div>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
-
-  </div>
-
   <form method="POST" id="file-output">
     <input type="hidden" name="series" value="{{ file_series }}">
     <input type="hidden" name="filename" value="{{ title }}.dat">
     {% csrf_token %}
     <input type="submit" id="file-download" value="Download data file">
   </form>
-
-  {% endif %}
 </div>-->
 {% endblock %}

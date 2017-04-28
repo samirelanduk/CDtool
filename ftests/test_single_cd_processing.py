@@ -94,33 +94,63 @@ class SingleSampleScanTests(FunctionalTest):
 
         # The config section has a single series config div for the main series
         main_config = config_div.find_element_by_id("main-config")
-        self.assertEqual(len(config_div.find_elements_by_tag_name("div")), 1)
+        self.assertEqual(len(config_div.find_elements_by_xpath("./*")), 1)
         self.assertIn("series-config", main_config.get_attribute("class"))
+
+        # The main config div has a title and two buttons
+        title = main_config.find_element_by_class_name("config-title")
+        self.assertEqual(title.text, "Test Sample I")
+        buttons = main_config.find_elements_by_tag_name("button")
+        self.assertEqual(len(buttons), 2)
+        toggle_series_button, toggle_error_button = buttons
+
+        # Tne two buttons are both 'on'
+        self.assertIn("on", toggle_series_button.get_attribute("class"))
+        self.assertIn("on", toggle_error_button.get_attribute("class"))
+
+        # The error button can make the error disappear and reappear
+        toggle_error_button.click()
+        self.check_visible_area_series_count(chart_div, 0)
+        self.assertIn("off", toggle_error_button.get_attribute("class"))
+        toggle_error_button.click()
+        self.check_visible_area_series_count(chart_div, 1)
+        self.assertIn("on", toggle_error_button.get_attribute("class"))
+
+        # The series button can make everything disappear and reappear
+        toggle_series_button.click()
+        self.check_visible_area_series_count(chart_div, 0)
+        self.check_visible_line_series_count(chart_div, 0)
+        self.assertIn("off", toggle_series_button.get_attribute("class"))
+        toggle_series_button.click()
+        self.check_visible_area_series_count(chart_div, 1)
+        self.check_visible_line_series_count(chart_div, 1)
+        self.assertIn("on", toggle_series_button.get_attribute("class"))
+
+        # The error can be hidden while the series is not visible
+        toggle_series_button.click()
+        self.check_visible_area_series_count(chart_div, 0)
+        self.check_visible_line_series_count(chart_div, 0)
+        self.assertIn("off", toggle_series_button.get_attribute("class"))
+        self.assertIn("on", toggle_error_button.get_attribute("class"))
+        toggle_error_button.click()
+        self.check_visible_area_series_count(chart_div, 0)
+        self.check_visible_line_series_count(chart_div, 0)
+        self.assertIn("off", toggle_series_button.get_attribute("class"))
+        self.assertIn("off", toggle_error_button.get_attribute("class"))
+        toggle_series_button.click()
+        self.check_visible_area_series_count(chart_div, 0)
+        self.check_visible_line_series_count(chart_div, 1)
+        self.assertIn("on", toggle_series_button.get_attribute("class"))
+        self.assertIn("off", toggle_error_button.get_attribute("class"))
+        toggle_error_button.click()
+        self.check_visible_area_series_count(chart_div, 1)
+        self.check_visible_line_series_count(chart_div, 1)
+        self.assertIn("on", toggle_series_button.get_attribute("class"))
+        self.assertIn("on", toggle_error_button.get_attribute("class"))
 
         '''
 
-        # There is one area series
-        area_series = self.get_visible_area_series(chart)
-        self.assertEqual(len(area_series), 1)
 
-        # The area series is just the machine error from the chart
-        for index, line in enumerate(input_data):
-            self.assertEqual(
-             line[0],
-             self.browser.execute_script("return chart.get('main_error').data[%i].x;" % index)
-            )
-            error_low = self.browser.execute_script("return chart.get('main_error').data[%i].low;" % index)
-            error_high = self.browser.execute_script("return chart.get('main_error').data[%i].high;" % index)
-            self.assertAlmostEqual(2 * line[2], error_high - error_low, delta=0.005)
-
-
-        # Below the chart is the config section
-        config = output.find_element_by_id("chart-config")
-
-        # The config div has a div for the main series
-        main_series_div = config.find_element_by_id("main-series-config")
-        main_div_title = main_series_div.find_element_by_class_name("series-title")
-        self.assertEqual(main_div_title.text, "Test Sample I")
 
         # There is an option for displaying error
         error_option = main_series_div.find_element_by_class_name("error-option")

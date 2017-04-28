@@ -131,7 +131,7 @@ class OneSampleScanViewTests(ViewTest):
         ])
 
 
-    '''def test_single_sample_view_gets_correct_sample_name(self):
+    def test_single_sample_view_gets_correct_sample_name(self):
         response = self.client.post("/single/", data={
          "sample_files": self.single_scan_file,
          "sample_name": "Some sample"
@@ -139,7 +139,7 @@ class OneSampleScanViewTests(ViewTest):
         self.assertEqual("Some sample", response.context["sample_name"])
 
 
-    def test_single_sample_view_view_gives_correct_file_series(self):
+    '''def test_single_sample_view_view_gives_correct_file_series(self):
         response = self.client.post("/single/", data={
          "sample_files": self.single_scan_file
         })

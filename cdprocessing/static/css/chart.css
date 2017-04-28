@@ -1,0 +1,29 @@
+#config {
+  margin-top: 20px;
+  border-radius: 10px;
+  border: 2px solid gray;
+  padding: 5px;
+  font-size: 80%;
+}
+
+.series-config {
+  border-radius: 10px;
+  border: 2px solid #4A9586;
+  display: inline-block;
+  padding: 5px;
+}
+
+.config-title {
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.series-config button {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+button.off {
+  opacity: 0.5;
+}
