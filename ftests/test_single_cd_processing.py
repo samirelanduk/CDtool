@@ -92,6 +92,11 @@ class SingleSampleScanTests(FunctionalTest):
          [[w[0], w[1] - w[2], w[1] + w[2]] for w in input_data]
         )
 
+        # The config section has a single series config div for the main series
+        main_config = config_div.find_element_by_id("main-config")
+        self.assertEqual(len(config_div.find_elements_by_tag_name("div")), 1)
+        self.assertIn("series-config", main_config.get_attribute("class"))
+
         '''
 
         # There is one area series
