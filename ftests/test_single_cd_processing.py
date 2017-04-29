@@ -158,9 +158,33 @@ class SingleSampleScanTests(FunctionalTest):
         # This downloads a file with the correct data
         self.check_file_has_data("a_single_sample_test.dat", input_data)
 
-        '''
 
-class AveragingSeriesTests(FunctionalTest):
+    def test_error_on_no_file_submission(self):
+        # User goes to the single run page
+        self.browser.get(self.live_server_url + "/single/")
+
+        # There is an input section
+        input_div = self.browser.find_element_by_id("input")
+
+        # They click the process data button
+        submit_button = input_div.find_element_by_id("submit-input")
+        submit_button.click()
+
+        # They are still on the page
+        self.check_page("/single/")
+
+        # The input section now has an errors section
+        input_div = self.browser.find_element_by_id("input")
+        errors_div = input_div.find_element_by_id("errors")
+
+        # The user is told they need to provide at least one file
+        self.assertIn("at least one file", errors_div.text)
+
+
+
+
+
+'''class AveragingSeriesTests(FunctionalTest):
 
     def test_can_submit_multiple_scans_in_one_file(self):
         # User goes to the single run page

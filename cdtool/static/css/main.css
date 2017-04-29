@@ -210,6 +210,17 @@ p {
   text-align: center;
 }
 
+#errors {
+  color: #A63232;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  padding: 30px;
+  font-weight: bold;
+  background-color: rgba(166, 50, 50, 0.1);
+  border-radius: 10px;
+
+}
+
 @media only screen and (min-width: 568px) {
   /* iPad and up */
 

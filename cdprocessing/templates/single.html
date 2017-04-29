@@ -49,6 +49,18 @@
     </div>
   </fieldset>
 
+  {% if error_text %}
+  <div id="errors">{{ error_text }}</div>
+  <script>
+    $( document ).ready(function() {
+      console.log("Hello");
+      $("html, body").animate({
+        scrollTop: $("#errors").offset().top
+      }, 800);
+    })
+  </script>
+  {% endif %}
+
   <div id="submit-button-div">
     {% csrf_token %}
     <input type="submit" value="Process" id="submit-input">

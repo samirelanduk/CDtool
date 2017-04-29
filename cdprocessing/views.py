@@ -24,7 +24,8 @@ def single_run(request):
             return processing_view(request)
         else:
             return render(request, "single.html", {
-             "display_chart": False, "error_text": "No files were supplied."
+             "display_chart": False,
+             "error_text": "You must supply at least one file."
             })
     else:
         return render(request, "single.html", {"display_output": False})

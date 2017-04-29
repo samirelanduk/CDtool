@@ -26,6 +26,12 @@ class SingleRunViewTests(ViewTest):
         self.assertIs(response, view_output)
 
 
+    def test_single_run_view_returns_error_if_empty_sample_file_variable(self):
+        response = self.client.post("/single/")
+        self.assertTemplateUsed(response, "single.html")
+        self.assertIn("at least one file", response.context["error_text"])
+        
+
     @patch("cdprocessing.views.file_producing_view")
     def test_single_run_view_uses_file_production_view_on_series_posts(self, mock_view):
         view_output = HttpResponse()
