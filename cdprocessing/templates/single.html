@@ -21,7 +21,8 @@
       <h2>Sample Data</h2>
       <div class="input">
 
-        <input id="id-sample-files" name="sample_files" type="file" data-multiple-caption="{count} files selected" multiple>
+        <input id="id-sample-files" name="sample_files" type="file"
+         data-multiple-caption="{count} files selected" multiple>
         <label for="id-sample-files">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" fill="#FFFFFF">
              <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3
@@ -70,7 +71,12 @@
     </div>
   </div>
 
-  <div id="download"></div>
+  <form id="download" method="POST">
+    <input type="hidden" name="series" value="{{ file_series }}">
+    <input type="hidden" name="filename" value="{{ file_name }}">
+    {% csrf_token %}
+    <input id="file-download" type="submit" value="Download Data File">
+  </div>
 
 </div>
 
@@ -81,12 +87,4 @@
 </script>
 {% endif %}
 
-<!--
-  <form method="POST" id="file-output">
-    <input type="hidden" name="series" value="{{ file_series }}">
-    <input type="hidden" name="filename" value="{{ title }}.dat">
-    {% csrf_token %}
-    <input type="submit" id="file-download" value="Download data file">
-  </form>
-</div>-->
 {% endblock %}

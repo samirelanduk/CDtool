@@ -1,4 +1,3 @@
-from os.path import expanduser
 from math import sqrt
 from time import sleep
 import inferi
@@ -148,70 +147,18 @@ class SingleSampleScanTests(FunctionalTest):
         self.assertIn("on", toggle_series_button.get_attribute("class"))
         self.assertIn("on", toggle_error_button.get_attribute("class"))
 
-        '''
-
-
-
-        # There is an option for displaying error
-        error_option = main_series_div.find_element_by_class_name("error-option")
-        error_option.click()
-        area_series = self.get_visible_area_series(chart)
-        self.assertEqual(len(area_series), 0)
-        error_option.click()
-        area_series = self.get_visible_area_series(chart)
-        self.assertEqual(len(area_series), 1)
-
-        # There is an option for displaying the series at all
-        display_option = main_series_div.find_element_by_class_name("display-option")
-        display_option.click()
-        area_series = self.get_visible_area_series(chart)
-        self.assertEqual(len(area_series), 0)
-        line_series = self.get_visible_line_series(chart)
-        self.assertEqual(len(line_series), 0)
-        display_option.click()
-        area_series = self.get_visible_area_series(chart)
-        self.assertEqual(len(area_series), 1)
-        line_series = self.get_visible_line_series(chart)
-        self.assertEqual(len(line_series), 1)
-
-        # The error can be hidden while the series is not visible
-        display_option.click()
-        area_series = self.get_visible_area_series(chart)
-        self.assertEqual(len(area_series), 0)
-        line_series = self.get_visible_line_series(chart)
-        self.assertEqual(len(line_series), 0)
-        error_option.click()
-        area_series = self.get_visible_area_series(chart)
-        self.assertEqual(len(area_series), 0)
-        line_series = self.get_visible_line_series(chart)
-        self.assertEqual(len(line_series), 0)
-        display_option.click()
-        area_series = self.get_visible_area_series(chart)
-        self.assertEqual(len(area_series), 0)
-        line_series = self.get_visible_line_series(chart)
-        self.assertEqual(len(line_series), 1)
-        error_option.click()
-        area_series = self.get_visible_area_series(chart)
-        self.assertEqual(len(area_series), 1)
-
-        # Below the config div is the file output div
-        file_output = output.find_element_by_id("file-output")
-
-        # There is a button to download a data file
-        download_button = file_output.find_element_by_id("file-download")
-
-        # Clicking it produces a file with the correct name and data
+        # The download section has a button to download the data - they click
+        download_button = download_div.find_element_by_id("file-download")
         download_button.click()
-        with open(expanduser("~") + "/Downloads/A Single Sample Test.dat") as f:
-            output_lines = f.readlines()
-        wavelengths = [l[0] for l in input_lines]
-        output_lines = [l for l in output_lines if l[:3].isdigit()]
-        output_lines = [(
-         float(l.split()[0]), float(l.split()[1]), float(l.split()[2])
-        ) for l in output_lines]
-        self.assertEqual(input_data, output_lines)
 
+        # They are still on the same page and the chart is still there
+        self.check_page("/single/")
+        self.check_chart_appears(chart_div)
 
+        # This downloads a file with the correct data
+        self.check_file_has_data("a_single_sample_test.dat", input_data)
+
+        '''
 
 class AveragingSeriesTests(FunctionalTest):
 

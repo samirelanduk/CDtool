@@ -117,3 +117,11 @@ class FunctionalTest(StaticLiveServerTestCase):
               "return chart.get('%s').data[%i].high;" % (error, index)
              ), delta=0.0005
             )
+
+
+    def check_file_has_data(self, filename, data):
+        with open(expanduser("~") + "/Downloads/{}".format(filename)) as f:
+            output_lines = f.readlines()
+        output_lines = [l for l in output_lines if l[:3].isdigit()]
+        output_data = [tuple([float(c) for c in l.split()]) for l in output_lines]
+        self.assertEqual(output_data, data)

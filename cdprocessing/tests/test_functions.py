@@ -1,6 +1,7 @@
 from cdtool.tests import ViewTest
 from cdprocessing.functions import extract_all_series, get_float_groups
 from cdprocessing.functions import filter_float_groups, average_series
+from cdprocessing.functions import get_file_name
 
 class AllSeriesExtractionFromFileTests(ViewTest):
 
@@ -89,3 +90,14 @@ class SeriesAveragingTests(ViewTest):
         self.assertAlmostEqual(average[0][2], 0.1487, delta=0.005)
         self.assertAlmostEqual(average[1][2], 0.01464, delta=0.005)
         self.assertAlmostEqual(average[2][2], 0.1301, delta=0.005)
+
+
+
+class FileNamerTests(ViewTest):
+
+    def test_can_replace_spaces_with_underscores(self):
+        self.assertEqual(get_file_name("a file name"), "a_file_name")
+
+
+    def test_can_force_lower_case(self):
+        self.assertEqual(get_file_name("FILENAME"), "filename")

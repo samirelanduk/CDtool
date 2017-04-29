@@ -76,3 +76,9 @@ def average_series(series):
 
         average.append([wavelength, mean, error])
     return average
+
+
+def get_file_name(title):
+    """Takes an experiment title and turns it into a filename."""
+    
+    return title.lower().replace(" ", "_") if title else ""
