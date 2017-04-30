@@ -37,27 +37,36 @@ def filter_float_groups(float_groups):
     """Takes a a bunch of number groups and returns only the longest ones with
     matching wavelengths, and with more than three values"""
 
-    longest_length = len(sorted(float_groups, key=lambda k: len(k))[-1])
-    correct_length_groups = [
-     group for group in float_groups if len(group) == longest_length
-    ]
-    wavelengths = [
-     tuple([line[0] for line in group]) for group in correct_length_groups
-    ]
-    wavelengths = Counter(wavelengths)
-    most_common_wavelengths = wavelengths.most_common(1)[0][0]
-    correct_wavelength_groups = [group for group in correct_length_groups if tuple(
-     [line[0] for line in group]
-    ) == most_common_wavelengths]
-    groups_at_least_three = []
-    for group in correct_wavelength_groups:
-        add_group = True
-        for line in group:
-            if len(line) < 3:
-                add_group = False
-        if add_group: groups_at_least_three.append(group)
-    final_groups = [[line[:3] for line in group] for group in groups_at_least_three]
-    return final_groups
+    if float_groups:
+        # Remove float groups shorter than the longest float group
+        longest_length = len(sorted(float_groups, key=lambda k: len(k))[-1])
+        correct_length_groups = [
+         group for group in float_groups if len(group) == longest_length
+        ]
+
+        # Remove float groups whose first values (wavelengths) don't match the
+        # first values of the first float group
+        wavelengths = [
+         tuple([line[0] for line in group]) for group in correct_length_groups
+        ]
+        wavelengths = Counter(wavelengths)
+        most_common_wavelengths = wavelengths.most_common(1)[0][0]
+        correct_wavelength_groups = [group for group in correct_length_groups if tuple(
+         [line[0] for line in group]
+        ) == most_common_wavelengths]
+
+        # Remove float groups which don't have at least three values
+        groups_at_least_three = []
+        for group in correct_wavelength_groups:
+            add_group = True
+            for line in group:
+                if len(line) < 3:
+                    add_group = False
+            if add_group: groups_at_least_three.append(group)
+        final_groups = [[line[:3] for line in group] for group in groups_at_least_three]
+        return final_groups
+    else:
+        return []
 
 
 def average_series(series):
@@ -80,5 +89,5 @@ def average_series(series):
 
 def get_file_name(title):
     """Takes an experiment title and turns it into a filename."""
-    
+
     return title.lower().replace(" ", "_") if title else ""

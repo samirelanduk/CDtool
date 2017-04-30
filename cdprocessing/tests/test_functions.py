@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from cdtool.tests import ViewTest
 from cdprocessing.functions import extract_all_series, get_float_groups
 from cdprocessing.functions import filter_float_groups, average_series
@@ -5,20 +6,29 @@ from cdprocessing.functions import get_file_name
 
 class AllSeriesExtractionFromFileTests(ViewTest):
 
-    def test_can_pull_out_single_series_from_single_scan_file(self):
+    @patch("cdprocessing.functions.get_float_groups")
+    def test_extractor_passes_file_lines_to_float_extractor(self, test_get):
+        test_get.return_value = [[[100, 200, 300]], [[279, 2, 3]]]
         series = extract_all_series(self.single_scan_file)
-        self.assertEqual(series, [[
-         [279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]
-        ]])
+        stripped_lines = [
+         "$MDCDATA:1:14:2:3:4:9",
+         "100 200 300",
+         "X  CD_Signal  CD_Error  CD_Current_(Abs)",
+         "279.000  1.0  0.5  1.013  -0.000  242.9  19.98",
+         "278.000  -4.0  0.4  1.013  0.000  243.2  19.99",
+         "277.000  12.0  0.3  1.013  0.000  243.5  19.99"
+        ]
+        test_get.assert_called_with(stripped_lines)
 
 
-    def test_can_pull_out_multiple_series_from_multi_scan_file(self):
-        series = extract_all_series(self.multi_scan_file)
-        self.assertEqual(series, [
-         [[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]],
-         [[279, 0.0, 0.2], [278, -5.0, 0.75], [277, 11.0, 0.4]],
-         [[279, -1.0, 0.1], [278, -6.0, 0.3], [277, 10.0, 0.2]]
-        ])
+    @patch("cdprocessing.functions.filter_float_groups")
+    @patch("cdprocessing.functions.get_float_groups")
+    def test_extractor_filters_float_groups(self, test_get, test_filter):
+        test_get.return_value = [[[100, 200, 300]], [[279, 2, 3]]]
+        test_filter.return_value = [[[1, 2, 3], [4, 5, 6]], [[1, 2, 3], [4, 5, 6]]]
+        series = extract_all_series(self.single_scan_file)
+        test_filter.assert_called_with(test_get.return_value)
+        self.assertEqual(series, test_filter.return_value)
 
 
 
@@ -45,8 +55,23 @@ class FloatGrouperTests(ViewTest):
         ])
 
 
+    def test_float_groups_returns_nothing_if_no_float_groups(self):
+        float_groups = get_float_groups([
+         "Irrelevant string1",
+         "Irrelevant string2",
+         "More random data",
+         "67.6 string",
+         "String 4"
+        ])
+        self.assertEqual(float_groups, [])
+
+
 
 class FloatGroupFilterTests(ViewTest):
+
+    def test_can_filter_zero_float_groups(self):
+        self.assertEqual(filter_float_groups([]), [])
+
 
     def test_can_filter_out_small_float_groups(self):
         filtered_groups = filter_float_groups([
@@ -54,12 +79,38 @@ class FloatGroupFilterTests(ViewTest):
          [[67.4, 45, 1], [45.6, 4, 1]],
          [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]],
          [[7.4, 7.4, 1]],
-         [[3, 76, 1], [4.5, 4, 1], [76.7, 34, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+        ])
+        self.assertEqual(filtered_groups, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]]
+        ])
+
+
+    def test_can_filter_float_groups_whose_wavelengths_dont_match(self):
+        filtered_groups = filter_float_groups([
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.7, 34, 1]]
         ])
         self.assertEqual(filtered_groups, [
          [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
          [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
         ])
+
+
+    def test_can_filter_float_groups_with_fewer_than_3_values(self):
+        filtered_groups = filter_float_groups([
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74], [4.5, 1], [76.8, 4]]
+        ])
+        self.assertEqual(filtered_groups, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]]
+        ])
+
+
+
 
 
 

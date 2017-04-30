@@ -181,6 +181,31 @@ class SingleSampleScanTests(FunctionalTest):
         self.assertIn("at least one file", errors_div.text)
 
 
+    def test_error_if_no_scans_found(self):
+        # User goes to the single run page
+        self.browser.get(self.live_server_url + "/single/")
+
+        # There is an input section and a file input
+        input_div = self.browser.find_element_by_id("input")
+        sample_file_input = input_div.find_elements_by_tag_name("input")[0]
+
+        # They submit a file with no scans
+        sample_file_input.send_keys(BASE_DIR + "/ftests/test_data/no-series.dat")
+        submit_button = input_div.find_element_by_id("submit-input")
+        submit_button.click()
+
+        # They are still on the page
+        self.check_page("/single/")
+
+        # The input section now has an errors section
+        input_div = self.browser.find_element_by_id("input")
+        errors_div = input_div.find_element_by_id("errors")
+
+        # The user is told they need to provide at least one scan
+        self.assertIn("no scans", errors_div.text.lower())
+
+
+
 
 
 

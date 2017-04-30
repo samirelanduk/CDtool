@@ -43,8 +43,13 @@ def processing_view(request):
     scans = functions.extract_all_series(input_files[0])
     if len(scans) > 1:
         return average_sample_view(request, scans)
-    else:
+    elif len(scans):
         return one_sample_scan_view(request, scans[0])
+    else:
+        return render(request, "single.html", {
+         "display_chart": False,
+         "error_text": "No scans were found in the file(s) given."
+        })
 
 
 def one_sample_scan_view(request, scan):

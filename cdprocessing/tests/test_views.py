@@ -30,7 +30,7 @@ class SingleRunViewTests(ViewTest):
         response = self.client.post("/single/")
         self.assertTemplateUsed(response, "single.html")
         self.assertIn("at least one file", response.context["error_text"])
-        
+
 
     @patch("cdprocessing.views.file_producing_view")
     def test_single_run_view_uses_file_production_view_on_series_posts(self, mock_view):
@@ -45,19 +45,33 @@ class SingleRunViewTests(ViewTest):
 
 class ProcessingViewTests(ViewTest):
 
+    @patch("cdprocessing.functions.extract_all_series")
+    def test_processing_view_returns_error_if_no_scans_found(self, mock_extract):
+        mock_extract.return_value = []
+        response = self.client.post("/single/", data={
+         "sample_files": self.no_scan_file
+        })
+        self.assertTemplateUsed(response, "single.html")
+        self.assertIn("no scans", response.context["error_text"].lower())
+
+
+    @patch("cdprocessing.functions.extract_all_series")
     @patch("cdprocessing.views.one_sample_scan_view")
-    def test_processing_view_uses_single_scan_view_if_one_sample_scan(self, mock_view):
+    def test_processing_view_uses_single_scan_view_if_one_sample_scan(self, mock_view, mock_extract):
         view_output = HttpResponse()
         mock_view.return_value = view_output
+        mock_extract.return_value = [
+         [[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]]
+        ]
         response = self.client.post("/single/", data={
          "sample_files": self.single_scan_file
         })
         self.assertIs(response, view_output)
 
 
-    @patch("cdprocessing.views.one_sample_scan_view")
     @patch("cdprocessing.functions.extract_all_series")
-    def test_processing_view_sends_single_scan(self, mock_extract, mock_view):
+    @patch("cdprocessing.views.one_sample_scan_view")
+    def test_processing_view_sends_single_scan(self, mock_view, mock_extract):
         view_output = HttpResponse()
         mock_view.return_value = view_output
         mock_extract.return_value = [
