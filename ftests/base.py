@@ -38,6 +38,16 @@ class FunctionalTest(StaticLiveServerTestCase):
         return input_data
 
 
+    def get_single_gen_scan_from_file(self, file_name):
+        with open("ftests/test_data/" + file_name) as f:
+            lines = f.readlines()
+        lines = [l for l in lines if l[:3].isdigit()]
+        input_data = [(
+         float(l.split()[0]), float(l.split()[1]), float(l.split()[5])
+        ) for l in lines]
+        return input_data
+
+
     def check_chart_appears(self, chart_div):
         self.assertGreater(chart_div.size["width"], 10)
         self.assertGreater(chart_div.size["height"], 10)
@@ -124,4 +134,8 @@ class FunctionalTest(StaticLiveServerTestCase):
             output_lines = f.readlines()
         output_lines = [l for l in output_lines if l[:3].isdigit()]
         output_data = [tuple([float(c) for c in l.split()]) for l in output_lines]
-        self.assertEqual(output_data, data)
+        self.assertEqual(len(output_lines), len(data))
+        for index, line in enumerate(data):
+            self.assertEqual(len(line), len(output_data[index]))
+            for vindex, value in enumerate(line):
+                self.assertAlmostEqual(value, output_data[index][vindex], delta=0.005)

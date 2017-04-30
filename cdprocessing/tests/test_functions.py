@@ -1,14 +1,26 @@
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from cdtool.tests import ViewTest
-from cdprocessing.functions import extract_all_series, get_float_groups
-from cdprocessing.functions import filter_float_groups, average_series
-from cdprocessing.functions import get_file_name
+from cdprocessing.functions import *
 
 class AllSeriesExtractionFromFileTests(ViewTest):
 
     @patch("cdprocessing.functions.get_float_groups")
-    def test_extractor_passes_file_lines_to_float_extractor(self, test_get):
-        test_get.return_value = [[[100, 200, 300]], [[279, 2, 3]]]
+    @patch("cdprocessing.functions.remove_short_float_groups")
+    @patch("cdprocessing.functions.remove_incorrect_wavelengths")
+    @patch("cdprocessing.functions.remove_short_lines")
+    @patch("cdprocessing.functions.strip_float_groups")
+    def test_extractor_calls_correct_functions(self, *mocks):
+        float_groups = Mock()
+        len_filtered_float_groups = Mock()
+        wav_filtered_float_groups = Mock()
+        line_filtered_float_groups = Mock()
+        stripped_float_groups = Mock()
+        mock_strip, mock_line_filter, mock_wav_filter, mock_len_filter, mock_get = mocks
+        mock_get.return_value = float_groups
+        mock_len_filter.return_value = len_filtered_float_groups
+        mock_wav_filter.return_value = wav_filtered_float_groups
+        mock_line_filter.return_value = line_filtered_float_groups
+        mock_strip.return_value = stripped_float_groups
         series = extract_all_series(self.single_scan_file)
         stripped_lines = [
          "$MDCDATA:1:14:2:3:4:9",
@@ -18,17 +30,12 @@ class AllSeriesExtractionFromFileTests(ViewTest):
          "278.000  -4.0  0.4  1.013  0.000  243.2  19.99",
          "277.000  12.0  0.3  1.013  0.000  243.5  19.99"
         ]
-        test_get.assert_called_with(stripped_lines)
-
-
-    @patch("cdprocessing.functions.filter_float_groups")
-    @patch("cdprocessing.functions.get_float_groups")
-    def test_extractor_filters_float_groups(self, test_get, test_filter):
-        test_get.return_value = [[[100, 200, 300]], [[279, 2, 3]]]
-        test_filter.return_value = [[[1, 2, 3], [4, 5, 6]], [[1, 2, 3], [4, 5, 6]]]
-        series = extract_all_series(self.single_scan_file)
-        test_filter.assert_called_with(test_get.return_value)
-        self.assertEqual(series, test_filter.return_value)
+        mock_get.assert_called_with(stripped_lines)
+        mock_len_filter.assert_called_with(float_groups)
+        mock_wav_filter.assert_called_with(len_filtered_float_groups)
+        mock_line_filter.assert_called_with(wav_filtered_float_groups)
+        mock_strip.assert_called_with(line_filtered_float_groups)
+        self.assertIs(series, stripped_float_groups)
 
 
 
@@ -67,14 +74,14 @@ class FloatGrouperTests(ViewTest):
 
 
 
-class FloatGroupFilterTests(ViewTest):
+class ShortFloatGroupRemovalTests(ViewTest):
 
     def test_can_filter_zero_float_groups(self):
-        self.assertEqual(filter_float_groups([]), [])
+        self.assertEqual(remove_short_float_groups([]), [])
 
 
-    def test_can_filter_out_small_float_groups(self):
-        filtered_groups = filter_float_groups([
+    def test_can_remove_short_groups(self):
+        filtered_groups = remove_short_float_groups([
          [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
          [[67.4, 45, 1], [45.6, 4, 1]],
          [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]],
@@ -88,11 +95,18 @@ class FloatGroupFilterTests(ViewTest):
         ])
 
 
-    def test_can_filter_float_groups_whose_wavelengths_dont_match(self):
-        filtered_groups = filter_float_groups([
+
+class IncorrectWavelengthRemovalTests(ViewTest):
+
+    def test_can_filter_zero_float_groups(self):
+        self.assertEqual(remove_incorrect_wavelengths([]), [])
+
+
+    def test_can_remove_incorrect_wavelengths(self):
+        filtered_groups = remove_incorrect_wavelengths([
+         [[3, 76, 1], [4.5, 4, 1], [75.8, 34, 1]],
          [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]],
-         [[3, 76, 1], [4.5, 4, 1], [76.7, 34, 1]]
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
         ])
         self.assertEqual(filtered_groups, [
          [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
@@ -100,17 +114,121 @@ class FloatGroupFilterTests(ViewTest):
         ])
 
 
-    def test_can_filter_float_groups_with_fewer_than_3_values(self):
-        filtered_groups = filter_float_groups([
+
+class ShortLineRemovalTests(ViewTest):
+
+    def test_can_filter_zero_float_groups(self):
+        self.assertEqual(remove_short_lines([]), [])
+
+
+    def test_can_remove_short_lines(self):
+        filtered_groups = remove_short_lines([
          [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 74], [4.5, 1], [76.8, 4]]
+         [[3, 76], [4.5, 4], [76.8, 34]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
         ])
         self.assertEqual(filtered_groups, [
-         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]]
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
         ])
 
 
 
+class FloatGroupStrippingTests(ViewTest):
+
+    def test_can_strip_zero_float_groups(self):
+        self.assertEqual(strip_float_groups([]), [])
+
+
+    def test_stripping_len_3_lines_does_nothing(self):
+        stripped_groups = strip_float_groups([
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
+        self.assertEqual(stripped_groups, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
+
+
+    def test_stripping_just_uses_3_values_per_line(self):
+        stripped_groups = strip_float_groups([
+         [[3, 76, 1, 10], [4.5, 4, 1, 11], [76.8, 34, 1, 10]],
+         [[3, 76, 1, 9], [4.5, 4, 1, 3], [76.8, 34, 1, 8]],
+         [[3, 74, 1, 2], [4.5, 5, 1, 4], [76.8, 4, 1, 5]]
+        ])
+        self.assertEqual(stripped_groups, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
+
+
+    def test_stripping_discards_negative_columns(self):
+        stripped_groups = strip_float_groups([
+         [[3, 76, 1, 1, 1], [4.5, 4, 1, 1, 1], [76.8, 34, 1, 1, 1]],
+         [[3, 76, 1, 1, 1], [4.5, 4, -1, 1, 1], [76.8, 34, 1, 1, 1]],
+         [[3, 74, 1, 1, 1], [4.5, 5, 1, 1, 1], [76.8, 4, 1, -1, 1]]
+        ])
+        self.assertEqual(stripped_groups, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
+
+
+    def test_stripping_discards_100_columns(self):
+        stripped_groups = strip_float_groups([
+         [[3, 76, 1, 1, 1], [4.5, 4, 1, 1, 1], [76.8, 34, 1, 1, 1]],
+         [[3, 76, 1, 1, 1], [4.5, 4, 101, 1, 1], [76.8, 34, 1, 1, 1]],
+         [[3, 74, 1, 1, 1], [4.5, 5, 1, 1, 1], [76.8, 4, 1, 101, 1]]
+        ])
+        self.assertEqual(stripped_groups, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
+
+
+    def test_stripping_discards_columns_that_are_entirely_zero(self):
+        stripped_groups = strip_float_groups([
+         [[3, 76, 0, 0, 1], [4.5, 4, 0, 0, 1], [76.8, 34, 0, 0, 1]],
+         [[3, 76, 0, 0, 1], [4.5, 4, 0, 0, 1], [76.8, 34, 0, 0, 1]],
+         [[3, 74, 0, 0, 1], [4.5, 5, 0, 0, 1], [76.8, 4, 0, 0, 1]]
+        ])
+        self.assertEqual(stripped_groups, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
+
+
+    def test_stripping_handles_running_out_of_columns(self):
+        stripped_groups = strip_float_groups([
+         [[3, 76, 1, 1, 1], [4.5, 4, 1, 1, 1], [76.8, 34, 1, 1, 1]],
+         [[3, 76, 1, 1, 1], [4.5, 4, 101, 1, 1], [76.8, 34, 1, 1, 1]],
+         [[3, 74, 1, 1, 1], [4.5, 5, 1, 1, 1], [76.8, 4, 1, 101, -1]]
+        ])
+        self.assertEqual(stripped_groups, [
+         [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]],
+         [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]],
+         [[3, 74, 0], [4.5, 5, 0], [76.8, 4, 0]]
+        ])
+
+
+    def test_stripping_handles_all_zeroes_columns(self):
+        stripped_groups = strip_float_groups([
+         [[3, 76, 0, 0, 0], [4.5, 4, 0, 0, 0], [76.8, 34, 0, 0, 0]],
+         [[3, 76, 0, 0, 0], [4.5, 4, 0, 0, 0], [76.8, 34, 0, 0, 0]],
+         [[3, 74, 0, 0, 0], [4.5, 5, 0, 0, 0], [76.8, 4, 0, 0, 0]]
+        ])
+        self.assertEqual(stripped_groups, [
+         [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]],
+         [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]],
+         [[3, 74, 0], [4.5, 5, 0], [76.8, 4, 0]]
+        ])
 
 
 

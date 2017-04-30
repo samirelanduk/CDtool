@@ -205,6 +205,95 @@ class SingleSampleScanTests(FunctionalTest):
         self.assertIn("no scans", errors_div.text.lower())
 
 
+    def test_can_submit_single_old_gen_scan(self):
+        # Get data for this test
+        input_data = self.get_single_gen_scan_from_file("single-gen-sample.gen")
+
+        # User goes to the single run page
+        self.browser.get(self.live_server_url + "/single/")
+
+        # There is an input section, but no output section
+        input_div = self.browser.find_element_by_id("input")
+        self.assertEqual(len(self.browser.find_elements_by_id("output")), 0)
+
+        # The input section has a file input section, a parameter section, and a
+        # submit button
+        file_input_div = input_div.find_element_by_id("file-input")
+        input_parameter_div = input_div.find_element_by_id("input-parameters")
+        submit_button = input_div.find_element_by_id("submit-input")
+
+        # The file input section has a section for samples and a section for
+        # blanks
+        sample_input_div = file_input_div.find_element_by_id("sample-input")
+        blank_input_div = file_input_div.find_element_by_id("blank-input")
+
+        # The sample input section has inputs for files and sample name
+        sample_file_input = sample_input_div.find_elements_by_tag_name("input")[0]
+        sample_name_input = sample_input_div.find_elements_by_tag_name("input")[1]
+        self.assertEqual(sample_file_input.get_attribute("type"), "file")
+        self.assertEqual(sample_name_input.get_attribute("type"), "text")
+
+        # They submit a sample file with one scan in it
+        sample_file_input.send_keys(
+         BASE_DIR + "/ftests/test_data/single-gen-sample.gen"
+        )
+        sample_name_input.send_keys("Test Sample II")
+
+        # The parameters section asks for the experiment name
+        experiment_name_div = input_parameter_div.find_element_by_id("experiment-name")
+        experiment_name_input = experiment_name_div.find_element_by_tag_name("input")
+
+        # They give it a name
+        experiment_name_input.send_keys("A Single Gen Sample Test")
+
+        # They submit the data
+        submit_button.click()
+
+        # There is now an output section
+        output_div = self.browser.find_element_by_id("output")
+
+        # It has sections for the chart, for configuration, and downloading
+        chart_div = output_div.find_element_by_id("chart")
+        config_div = output_div.find_element_by_id("config")
+        download_div = output_div.find_element_by_id("download")
+
+        # The chart section has a chart in it
+        sleep(1)
+        self.check_chart_appears(chart_div)
+
+        # The chart has the correct title
+        self.check_chart_title(chart_div, "A Single Gen Sample Test")
+
+        # The chart x axis goes from 190 to 280
+        self.check_chart_x_axis(190, 280)
+
+        # There is a single line series
+        self.check_visible_line_series_count(chart_div, 1)
+
+        # The line series matches the scan in the input data
+        self.check_line_matches_data("main", [w[:2] for w in input_data])
+
+        # There is a single error series
+        self.check_visible_area_series_count(chart_div, 1)
+
+        # The error series matches the scan error in the input data
+        self.check_error_matches_data(
+         "main_error",
+         [[w[0], w[1] - w[2], w[1] + w[2]] for w in input_data]
+        )
+
+        # The download section has a button to download the data - they click
+        download_button = download_div.find_element_by_id("file-download")
+        download_button.click()
+
+        # They are still on the same page and the chart is still there
+        self.check_page("/single/")
+        self.check_chart_appears(chart_div)
+
+        # This downloads a file with the correct data
+        self.check_file_has_data("a_single_gen_sample_test.dat", input_data)
+
+
 
 
 

@@ -11,8 +11,11 @@ def extract_all_series(django_file):
     raw_lines = list(django_file)
     file_lines = [line.decode().strip() for line in raw_lines if line.strip()]
     float_groups = get_float_groups(file_lines)
-    correct_float_groups = filter_float_groups(float_groups)
-    return correct_float_groups
+    filtered_groups = remove_short_float_groups(float_groups)
+    filtered_groups = remove_incorrect_wavelengths(filtered_groups)
+    filtered_groups = remove_short_lines(filtered_groups)
+    stripped_groups = strip_float_groups(filtered_groups)
+    return stripped_groups
 
 
 def get_float_groups(file_lines):
@@ -33,40 +36,82 @@ def get_float_groups(file_lines):
     return float_groups
 
 
-def filter_float_groups(float_groups):
-    """Takes a a bunch of number groups and returns only the longest ones with
-    matching wavelengths, and with more than three values"""
+def remove_short_float_groups(float_groups):
+    """Takes a list of float groups, identifies the longest one, and removes
+    groups shorter than that."""
 
     if float_groups:
-        # Remove float groups shorter than the longest float group
         longest_length = len(sorted(float_groups, key=lambda k: len(k))[-1])
-        correct_length_groups = [
-         group for group in float_groups if len(group) == longest_length
-        ]
+        return [group for group in float_groups if len(group) == longest_length]
+    return []
 
-        # Remove float groups whose first values (wavelengths) don't match the
-        # first values of the first float group
-        wavelengths = [
-         tuple([line[0] for line in group]) for group in correct_length_groups
-        ]
+
+def remove_incorrect_wavelengths(float_groups):
+    """Takes a list of float groups, identifies the wavelength set that is most
+    common (the first number on each line assumed to be wavelength) and removes
+    the groups which don't match."""
+
+    if float_groups:
+        wavelengths = [tuple([line[0] for line in group]) for group in float_groups]
         wavelengths = Counter(wavelengths)
-        most_common_wavelengths = wavelengths.most_common(1)[0][0]
-        correct_wavelength_groups = [group for group in correct_length_groups if tuple(
-         [line[0] for line in group]
-        ) == most_common_wavelengths]
+        correct_wavelengths = list(wavelengths.most_common(1)[0][0])
+        return [
+         g for g in float_groups if [line[0] for line in g] == correct_wavelengths
+        ]
+    return []
 
-        # Remove float groups which don't have at least three values
-        groups_at_least_three = []
-        for group in correct_wavelength_groups:
-            add_group = True
-            for line in group:
-                if len(line) < 3:
-                    add_group = False
-            if add_group: groups_at_least_three.append(group)
-        final_groups = [[line[:3] for line in group] for group in groups_at_least_three]
-        return final_groups
-    else:
-        return []
+
+def remove_short_lines(float_groups):
+    """Takes a list of float groups and removes those with fewer than three
+    values per line."""
+
+    return [g for g in float_groups if len([
+     line for line in g if len(line) >= 3
+    ]) == len(g)]
+
+
+def strip_float_groups(float_groups):
+    """Takes a list of float groups, works out which column is the error, and
+    removes every value on every line apart from wavelength, cd, cd_error.
+
+    The function will start by assuming the third column is an error column. It
+    will decide a column is not an error column if it finds any negative numbers
+    in that column, or any numbers greater than 100. It will also discard a
+    column if it is entirely zero. It will go through each subsequent column,
+    using the same criteria, until it finds one that looks ok.
+
+    If no columns match, an error of zero is used."""
+
+    if float_groups:
+        error_col = 2
+        while error_col > 0:
+            still_good = True
+            non_zero = False
+            for group in float_groups:
+                for line in group:
+                    if error_col > len(line) - 1:
+                        error_col = -1
+                        still_good = False
+                        break
+                    if line[error_col] < 0 or line[error_col] > 100:
+                        error_col += 1
+                        still_good = False
+                        break
+                    if line[error_col] != 0:
+                        non_zero = True
+                    if not still_good: break # The line is no good
+                if not still_good: break # The group is no good
+            # All groups have now been checked
+            if not non_zero:
+                error_col += 1
+                still_good = False
+            if still_good: break
+
+        groups = [[line[:2] + [
+         line[error_col] if error_col > 0 else 0
+        ] for line in g] for g in float_groups]
+        return groups
+    return []
 
 
 def average_series(series):
