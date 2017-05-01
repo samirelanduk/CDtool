@@ -17,46 +17,12 @@ class SingleSampleScanTests(FunctionalTest):
         input_div = self.browser.find_element_by_id("input")
         self.assertEqual(len(self.browser.find_elements_by_id("output")), 0)
 
-        # The input section has a file input section, a parameter section, and a
-        # submit button
-        file_input_div = input_div.find_element_by_id("file-input")
-        input_parameter_div = input_div.find_element_by_id("input-parameters")
-        submit_button = input_div.find_element_by_id("submit-input")
-
-        # The file input section has a section for samples and a section for
-        # blanks
-        sample_input_div = file_input_div.find_element_by_id("sample-input")
-        blank_input_div = file_input_div.find_element_by_id("blank-input")
-
-        # The blank input section is pretty much empty
-        self.assertEqual(
-         len(blank_input_div.find_elements_by_tag_name("input")), 0
+        self.supply_input_data(
+         input_div,
+         input_sample_files=BASE_DIR + "/ftests/test_data/single-sample.dat",
+         sample_name="Test Sample I",
+         experiment_name="A Single Sample Test"
         )
-
-        # The sample input section has inputs for files and sample name
-        sample_file_input = sample_input_div.find_elements_by_tag_name("input")[0]
-        sample_name_input = sample_input_div.find_elements_by_tag_name("input")[1]
-        self.assertEqual(sample_file_input.get_attribute("type"), "file")
-        self.assertEqual(sample_name_input.get_attribute("type"), "text")
-
-        # They submit a sample file with one scan in it
-        sample_file_input.send_keys(
-         BASE_DIR + "/ftests/test_data/single-sample.dat"
-        )
-        sample_name_input.send_keys("Test Sample I")
-
-        # The parameters section asks for the experiment name
-        experiment_name_div = input_parameter_div.find_element_by_id("experiment-name")
-        experiment_name_input = experiment_name_div.find_element_by_tag_name("input")
-
-        # They give it a name
-        experiment_name_input.send_keys("A Single Sample Test")
-
-        # They submit the data
-        submit_button.click()
-
-        # They are still on the same page
-        self.check_page("/single/")
 
         # There is now an output section
         output_div = self.browser.find_element_by_id("output")
@@ -187,15 +153,13 @@ class SingleSampleScanTests(FunctionalTest):
 
         # There is an input section and a file input
         input_div = self.browser.find_element_by_id("input")
-        sample_file_input = input_div.find_elements_by_tag_name("input")[0]
 
-        # They submit a file with no scans
-        sample_file_input.send_keys(BASE_DIR + "/ftests/test_data/no-series.dat")
-        submit_button = input_div.find_element_by_id("submit-input")
-        submit_button.click()
-
-        # They are still on the page
-        self.check_page("/single/")
+        self.supply_input_data(
+         input_div,
+         input_sample_files=BASE_DIR + "/ftests/test_data/no-series.dat",
+         sample_name="",
+         experiment_name=""
+        )
 
         # The input section now has an errors section
         input_div = self.browser.find_element_by_id("input")
@@ -216,38 +180,13 @@ class SingleSampleScanTests(FunctionalTest):
         input_div = self.browser.find_element_by_id("input")
         self.assertEqual(len(self.browser.find_elements_by_id("output")), 0)
 
-        # The input section has a file input section, a parameter section, and a
-        # submit button
-        file_input_div = input_div.find_element_by_id("file-input")
-        input_parameter_div = input_div.find_element_by_id("input-parameters")
-        submit_button = input_div.find_element_by_id("submit-input")
-
-        # The file input section has a section for samples and a section for
-        # blanks
-        sample_input_div = file_input_div.find_element_by_id("sample-input")
-        blank_input_div = file_input_div.find_element_by_id("blank-input")
-
-        # The sample input section has inputs for files and sample name
-        sample_file_input = sample_input_div.find_elements_by_tag_name("input")[0]
-        sample_name_input = sample_input_div.find_elements_by_tag_name("input")[1]
-        self.assertEqual(sample_file_input.get_attribute("type"), "file")
-        self.assertEqual(sample_name_input.get_attribute("type"), "text")
-
-        # They submit a sample file with one scan in it
-        sample_file_input.send_keys(
-         BASE_DIR + "/ftests/test_data/single-gen-sample.gen"
+        # The user supplies input data
+        self.supply_input_data(
+         input_div,
+         input_sample_files=BASE_DIR + "/ftests/test_data/single-gen-sample.gen",
+         sample_name="Gen Sample",
+         experiment_name="A Single Gen Sample Test"
         )
-        sample_name_input.send_keys("Test Sample II")
-
-        # The parameters section asks for the experiment name
-        experiment_name_div = input_parameter_div.find_element_by_id("experiment-name")
-        experiment_name_input = experiment_name_div.find_element_by_tag_name("input")
-
-        # They give it a name
-        experiment_name_input.send_keys("A Single Gen Sample Test")
-
-        # They submit the data
-        submit_button.click()
 
         # There is now an output section
         output_div = self.browser.find_element_by_id("output")
@@ -292,6 +231,49 @@ class SingleSampleScanTests(FunctionalTest):
 
         # This downloads a file with the correct data
         self.check_file_has_data("a_single_gen_sample_test.dat", input_data)
+
+
+
+class MultipleSampleScanTests(FunctionalTest):
+
+    def test_can_submit_multiple_scans(self):
+        # Get data for this test
+        input_data = self.get_multiple_scans_from_file("three-samples.dat")
+
+        # User goes to the single run page
+        self.browser.get(self.live_server_url + "/single/")
+
+        # There is an input section, but no output section
+        input_div = self.browser.find_element_by_id("input")
+        self.assertEqual(len(self.browser.find_elements_by_id("output")), 0)
+
+        # The user supplies input data
+        self.supply_input_data(
+         input_div,
+         input_sample_files=BASE_DIR + "/ftests/test_data/three-samples.dat",
+         sample_name="Multi Sample",
+         experiment_name="Multiple Sample Test"
+        )
+
+        # There is now an output section
+        output_div = self.browser.find_element_by_id("output")
+
+        # It has sections for the chart, for configuration, and downloading
+        chart_div = output_div.find_element_by_id("chart")
+        config_div = output_div.find_element_by_id("config")
+        download_div = output_div.find_element_by_id("download")
+
+        # The chart section has a chart in it
+        sleep(1)
+        self.check_chart_appears(chart_div)
+
+        # The chart has the correct title
+        self.check_chart_title(chart_div, "Multiple Sample Test")
+
+        # The chart x axis goes from 190 to 280
+        self.check_chart_x_axis(190, 280)
+
+
 
 
 

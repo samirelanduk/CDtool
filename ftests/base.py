@@ -1,5 +1,6 @@
 import os
 from os.path import expanduser
+from math import sqrt
 from selenium import webdriver
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
@@ -46,6 +47,70 @@ class FunctionalTest(StaticLiveServerTestCase):
          float(l.split()[0]), float(l.split()[1]), float(l.split()[5])
         ) for l in lines]
         return input_data
+
+
+    def get_multiple_scans_from_file(self, file_name):
+        with open("ftests/test_data/" + file_name) as f:
+            lines = f.readlines()
+        lines = [l for l in lines if l[:3].isdigit()]
+        wavelengths = sorted(list(set([float(l.split()[0]) for l in lines])))
+        input_data = []
+        for wav in wavelengths:
+            relevant_lines = [l for l in lines if float(l.split()[0]) == wav]
+            values = [float(l.split()[1]) for l in relevant_lines]
+            mean = sum(values) / len(values)
+            sd = sqrt(sum([(val - mean) ** 2 for val in values]) / len(values))
+            input_data.append([
+             wav, mean, sd, values
+            ])
+        return input_data
+
+
+    def supply_input_data(
+     self,
+     input_div,
+     input_sample_files="",
+     sample_name="",
+     experiment_name=""
+    ):
+        # The input section has a file input section, a parameter section, and a
+        # submit button
+        file_input_div = input_div.find_element_by_id("file-input")
+        input_parameter_div = input_div.find_element_by_id("input-parameters")
+        submit_button = input_div.find_element_by_id("submit-input")
+
+        # The file input section has a section for samples and a section for
+        # blanks
+        sample_input_div = file_input_div.find_element_by_id("sample-input")
+        blank_input_div = file_input_div.find_element_by_id("blank-input")
+
+        # The blank input section is pretty much empty
+        self.assertEqual(
+         len(blank_input_div.find_elements_by_tag_name("input")), 0
+        )
+
+        # The sample input section has inputs for files and sample name
+        sample_file_input = sample_input_div.find_elements_by_tag_name("input")[0]
+        sample_name_input = sample_input_div.find_elements_by_tag_name("input")[1]
+        self.assertEqual(sample_file_input.get_attribute("type"), "file")
+        self.assertEqual(sample_name_input.get_attribute("type"), "text")
+
+        # They submit a sample file and name it
+        sample_file_input.send_keys(input_sample_files)
+        sample_name_input.send_keys(sample_name)
+
+        # The parameters section asks for the experiment name
+        experiment_name_div = input_parameter_div.find_element_by_id("experiment-name")
+        experiment_name_input = experiment_name_div.find_element_by_tag_name("input")
+
+        # They give it a name
+        experiment_name_input.send_keys(experiment_name)
+
+        # They submit the data
+        submit_button.click()
+
+        # They are still on the same page
+        self.check_page("/single/")
 
 
     def check_chart_appears(self, chart_div):

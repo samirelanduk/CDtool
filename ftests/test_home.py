@@ -15,6 +15,7 @@ class ChangelogTests(FunctionalTest):
 
         # They click it and go to the changelog
         changelog_link.click()
+        sleep(1)
         self.assertEqual(
          self.browser.current_url,
          self.live_server_url + "/changelog/"
