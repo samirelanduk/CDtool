@@ -62,56 +62,10 @@ class SingleSampleScanTests(FunctionalTest):
         self.assertEqual(len(config_div.find_elements_by_xpath("./*")), 1)
         self.assertIn("series-config", main_config.get_attribute("class"))
 
-        # The main config div has a title and two buttons
-        title = main_config.find_element_by_class_name("config-title")
-        self.assertEqual(title.text, "Test Sample I")
-        buttons = main_config.find_elements_by_tag_name("button")
-        self.assertEqual(len(buttons), 2)
-        toggle_series_button, toggle_error_button = buttons
-
-        # Tne two buttons are both 'on'
-        self.assertIn("on", toggle_series_button.get_attribute("class"))
-        self.assertIn("on", toggle_error_button.get_attribute("class"))
-
-        # The error button can make the error disappear and reappear
-        toggle_error_button.click()
-        self.check_visible_area_series_count(chart_div, 0)
-        self.assertIn("off", toggle_error_button.get_attribute("class"))
-        toggle_error_button.click()
-        self.check_visible_area_series_count(chart_div, 1)
-        self.assertIn("on", toggle_error_button.get_attribute("class"))
-
-        # The series button can make everything disappear and reappear
-        toggle_series_button.click()
-        self.check_visible_area_series_count(chart_div, 0)
-        self.check_visible_line_series_count(chart_div, 0)
-        self.assertIn("off", toggle_series_button.get_attribute("class"))
-        toggle_series_button.click()
-        self.check_visible_area_series_count(chart_div, 1)
-        self.check_visible_line_series_count(chart_div, 1)
-        self.assertIn("on", toggle_series_button.get_attribute("class"))
-
-        # The error can be hidden while the series is not visible
-        toggle_series_button.click()
-        self.check_visible_area_series_count(chart_div, 0)
-        self.check_visible_line_series_count(chart_div, 0)
-        self.assertIn("off", toggle_series_button.get_attribute("class"))
-        self.assertIn("on", toggle_error_button.get_attribute("class"))
-        toggle_error_button.click()
-        self.check_visible_area_series_count(chart_div, 0)
-        self.check_visible_line_series_count(chart_div, 0)
-        self.assertIn("off", toggle_series_button.get_attribute("class"))
-        self.assertIn("off", toggle_error_button.get_attribute("class"))
-        toggle_series_button.click()
-        self.check_visible_area_series_count(chart_div, 0)
-        self.check_visible_line_series_count(chart_div, 1)
-        self.assertIn("on", toggle_series_button.get_attribute("class"))
-        self.assertIn("off", toggle_error_button.get_attribute("class"))
-        toggle_error_button.click()
-        self.check_visible_area_series_count(chart_div, 1)
-        self.check_visible_line_series_count(chart_div, 1)
-        self.assertIn("on", toggle_series_button.get_attribute("class"))
-        self.assertIn("on", toggle_error_button.get_attribute("class"))
+        # The config div controls the main series
+        self.check_config_div_controls_series(
+         chart_div, main_config, "main", "main_error", "Test Sample I"
+        )
 
         # The download section has a button to download the data - they click
         download_button = download_div.find_element_by_id("file-download")
@@ -122,7 +76,7 @@ class SingleSampleScanTests(FunctionalTest):
         self.check_chart_appears(chart_div)
 
         # This downloads a file with the correct data
-        self.check_file_has_data("a_single_sample_test.dat", input_data)
+        self.check_file_has_data("a_single_sample_test.dat", input_data[::-1])
 
 
     def test_error_on_no_file_submission(self):
@@ -230,7 +184,7 @@ class SingleSampleScanTests(FunctionalTest):
         self.check_chart_appears(chart_div)
 
         # This downloads a file with the correct data
-        self.check_file_has_data("a_single_gen_sample_test.dat", input_data)
+        self.check_file_has_data("a_single_gen_sample_test.dat", input_data[::-1])
 
 
 
@@ -286,6 +240,16 @@ class MultipleSampleScanTests(FunctionalTest):
         self.check_error_matches_data(
          "main_error",
          [[w[0], w[1] - w[2], w[1] + w[2]] for w in input_data]
+        )
+
+        # The config section has a single series config div for the main series
+        main_config = config_div.find_element_by_id("main-config")
+        self.assertEqual(len(config_div.find_elements_by_xpath("./*")), 1)
+        self.assertIn("series-config", main_config.get_attribute("class"))
+
+        # The config div controls the main series
+        self.check_config_div_controls_series(
+         chart_div, main_config, "main", "main_error", "Multi Sample"
         )
 
 

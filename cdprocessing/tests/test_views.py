@@ -218,6 +218,7 @@ class MultiSampleScanViewTests(ViewTest):
 
     def tearDown(self):
         self.patcher1.stop()
+        self.patcher2.stop()
 
 
     def test_multi_sample_scan_view_uses_single_run_template(self):
@@ -266,6 +267,14 @@ class MultiSampleScanViewTests(ViewTest):
         self.assertEqual(response.context["main_error"], [
          [279.0, 2, 2.5], [280.0, 0.5, 1]
         ])
+
+
+    def test_multi_sample_view_gets_correct_sample_name(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file,
+         "sample_name": "Some sample"
+        })
+        self.assertEqual("Some sample", response.context["sample_name"])
 
 
 

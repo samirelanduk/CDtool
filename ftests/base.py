@@ -35,7 +35,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         lines = [l for l in lines if l[:3].isdigit()]
         input_data = [(
          float(l.split()[0]), float(l.split()[1]), float(l.split()[2])
-        ) for l in lines]
+        ) for l in lines][::-1]
         return input_data
 
 
@@ -45,7 +45,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         lines = [l for l in lines if l[:3].isdigit()]
         input_data = [(
          float(l.split()[0]), float(l.split()[1]), float(l.split()[5])
-        ) for l in lines]
+        ) for l in lines][::-1]
         return input_data
 
 
@@ -136,16 +136,24 @@ class FunctionalTest(StaticLiveServerTestCase):
         )
 
 
-    def check_visible_line_series_count(self, chart_div, count):
+    def count_visible_lines(self, chart_div):
         lines = chart_div.find_elements_by_class_name("highcharts-line-series")
         lines = [line for line in lines if line.is_displayed()]
-        self.assertEqual(len(lines), count)
+        return len(lines)
+
+
+    def count_visible_areas(self, chart_div):
+        areas = chart_div.find_elements_by_class_name("highcharts-arearange-series")
+        areas = [area for area in areas if area.is_displayed()]
+        return len(areas)
+
+
+    def check_visible_line_series_count(self, chart_div, count):
+        self.assertEqual(self.count_visible_lines(chart_div), count)
 
 
     def check_visible_area_series_count(self, chart_div, count):
-        areas = chart_div.find_elements_by_class_name("highcharts-arearange-series")
-        areas = [area for area in areas if area.is_displayed()]
-        self.assertEqual(len(areas), count)
+        self.assertEqual(self.count_visible_areas(chart_div), count)
 
 
     def check_line_matches_data(self, line, data):
@@ -192,6 +200,104 @@ class FunctionalTest(StaticLiveServerTestCase):
               "return chart.get('%s').data[%i].high;" % (error, index)
              ), delta=0.0005
             )
+
+
+    def check_config_div_controls_series(self, chart_div, config, series_name, error_name, title_text):
+        lines_at_start = self.count_visible_lines(chart_div)
+        areas_at_start = self.count_visible_areas(chart_div)
+
+        # The config div has a title and two buttons
+        title = config.find_element_by_class_name("config-title")
+        self.assertEqual(title.text, title_text)
+        buttons = config.find_elements_by_tag_name("button")
+        self.assertEqual(len(buttons), 2)
+        toggle_series_button, toggle_error_button = buttons
+
+        # Tne two buttons are both 'on'
+        self.assertIn("on", toggle_series_button.get_attribute("class"))
+        self.assertIn("on", toggle_error_button.get_attribute("class"))
+
+        # The error button can make the error disappear and reappear
+        toggle_error_button.click()
+        self.assertFalse(self.browser.execute_script(
+         "return chart.get('%s').visible" % error_name
+        ))
+        self.check_visible_area_series_count(chart_div, areas_at_start - 1)
+        self.assertIn("off", toggle_error_button.get_attribute("class"))
+        toggle_error_button.click()
+        self.assertTrue(self.browser.execute_script(
+         "return chart.get('%s').visible" % error_name
+        ))
+        self.check_visible_area_series_count(chart_div, areas_at_start)
+        self.assertIn("on", toggle_error_button.get_attribute("class"))
+
+        # The series button can make everything disappear and reappear
+        toggle_series_button.click()
+        self.assertFalse(self.browser.execute_script(
+         "return chart.get('%s').visible" % error_name
+        ))
+        self.assertFalse(self.browser.execute_script(
+         "return chart.get('%s').visible" % series_name
+        ))
+        self.check_visible_area_series_count(chart_div, areas_at_start - 1)
+        self.check_visible_line_series_count(chart_div, lines_at_start - 1)
+        self.assertIn("off", toggle_series_button.get_attribute("class"))
+        toggle_series_button.click()
+        self.assertTrue(self.browser.execute_script(
+         "return chart.get('%s').visible" % error_name
+        ))
+        self.assertTrue(self.browser.execute_script(
+         "return chart.get('%s').visible" % series_name
+        ))
+        self.check_visible_area_series_count(chart_div, areas_at_start)
+        self.check_visible_line_series_count(chart_div, lines_at_start)
+        self.assertIn("on", toggle_series_button.get_attribute("class"))
+
+        # The error can be hidden while the series is not visible
+        toggle_series_button.click()
+        self.assertFalse(self.browser.execute_script(
+         "return chart.get('%s').visible" % error_name
+        ))
+        self.assertFalse(self.browser.execute_script(
+         "return chart.get('%s').visible" % series_name
+        ))
+        self.check_visible_area_series_count(chart_div, areas_at_start - 1)
+        self.check_visible_line_series_count(chart_div, lines_at_start - 1)
+        self.assertIn("off", toggle_series_button.get_attribute("class"))
+        self.assertIn("on", toggle_error_button.get_attribute("class"))
+        toggle_error_button.click()
+        self.assertFalse(self.browser.execute_script(
+         "return chart.get('%s').visible" % error_name
+        ))
+        self.assertFalse(self.browser.execute_script(
+         "return chart.get('%s').visible" % series_name
+        ))
+        self.check_visible_area_series_count(chart_div, areas_at_start - 1)
+        self.check_visible_line_series_count(chart_div, lines_at_start - 1)
+        self.assertIn("off", toggle_series_button.get_attribute("class"))
+        self.assertIn("off", toggle_error_button.get_attribute("class"))
+        toggle_series_button.click()
+        self.assertFalse(self.browser.execute_script(
+         "return chart.get('%s').visible" % error_name
+        ))
+        self.assertTrue(self.browser.execute_script(
+         "return chart.get('%s').visible" % series_name
+        ))
+        self.check_visible_area_series_count(chart_div, areas_at_start - 1)
+        self.check_visible_line_series_count(chart_div, lines_at_start)
+        self.assertIn("on", toggle_series_button.get_attribute("class"))
+        self.assertIn("off", toggle_error_button.get_attribute("class"))
+        toggle_error_button.click()
+        self.assertTrue(self.browser.execute_script(
+         "return chart.get('%s').visible" % error_name
+        ))
+        self.assertTrue(self.browser.execute_script(
+         "return chart.get('%s').visible" % series_name
+        ))
+        self.check_visible_area_series_count(chart_div, areas_at_start)
+        self.check_visible_line_series_count(chart_div, lines_at_start)
+        self.assertIn("on", toggle_series_button.get_attribute("class"))
+        self.assertIn("on", toggle_error_button.get_attribute("class"))
 
 
     def check_file_has_data(self, filename, data):
