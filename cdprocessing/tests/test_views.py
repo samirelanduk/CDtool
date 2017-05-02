@@ -21,7 +21,7 @@ class SingleRunViewTests(ViewTest):
         view_output = HttpResponse()
         mock_view.return_value = view_output
         response = self.client.post("/single/", data={
-         "sample_files": self.single_scan_file
+         "sample_files": self.test_file
         })
         self.assertIs(response, view_output)
 
@@ -49,7 +49,7 @@ class ProcessingViewTests(ViewTest):
     def test_processing_view_returns_error_if_no_scans_found(self, mock_extract):
         mock_extract.return_value = []
         response = self.client.post("/single/", data={
-         "sample_files": self.no_scan_file
+         "sample_files": self.test_file
         })
         self.assertTemplateUsed(response, "single.html")
         self.assertIn("no scans", response.context["error_text"].lower())
@@ -60,11 +60,9 @@ class ProcessingViewTests(ViewTest):
     def test_processing_view_uses_single_scan_view_if_one_sample_scan(self, mock_view, mock_extract):
         view_output = HttpResponse()
         mock_view.return_value = view_output
-        mock_extract.return_value = [
-         [[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]]
-        ]
+        mock_extract.return_value = [[[280, 1, 0.5], [279, 1, 0.5]]]
         response = self.client.post("/single/", data={
-         "sample_files": self.single_scan_file
+         "sample_files": self.test_file
         })
         self.assertIs(response, view_output)
 
@@ -74,101 +72,123 @@ class ProcessingViewTests(ViewTest):
     def test_processing_view_sends_single_scan(self, mock_view, mock_extract):
         view_output = HttpResponse()
         mock_view.return_value = view_output
-        mock_extract.return_value = [
-         [[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]]
-        ]
+        mock_extract.return_value = [[[280, 1, 0.5], [279, 1, 0.5]]]
         response = self.client.post("/single/", data={
-         "sample_files": self.single_scan_file
+         "sample_files": self.test_file
         })
         args, kwargs = mock_view.call_args
         scan = args[1]
-        self.assertEqual(
-         scan,
-         [[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]]
-        )
+        self.assertEqual(scan, [[280, 1, 0.5], [279, 1, 0.5]])
+
+
+    @patch("cdprocessing.functions.extract_all_series")
+    @patch("cdprocessing.views.multi_sample_scan_view")
+    def test_processing_view_uses_multiple_scan_view_if_multiple_sample_scans(self, mock_view, mock_extract):
+        view_output = HttpResponse()
+        mock_view.return_value = view_output
+        mock_extract.return_value = [
+         [[280, 1, 0.5], [279, 1, 0.5]], [[280, 2, 0.5], [279, 2, 0.5]]
+        ]
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file
+        })
+        self.assertIs(response, view_output)
+
+
+    @patch("cdprocessing.functions.extract_all_series")
+    @patch("cdprocessing.views.multi_sample_scan_view")
+    def test_processing_view_sends_single_scan(self, mock_view, mock_extract):
+        view_output = HttpResponse()
+        mock_view.return_value = view_output
+        mock_extract.return_value = [
+         [[280, 1, 0.5], [279, 1, 0.5]], [[280, 2, 0.5], [279, 2, 0.5]]
+        ]
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file
+        })
+        args, kwargs = mock_view.call_args
+        scans = args[1]
+        self.assertEqual(scans, [
+         [[280, 1, 0.5], [279, 1, 0.5]], [[280, 2, 0.5], [279, 2, 0.5]]
+        ])
 
 
 
 class OneSampleScanViewTests(ViewTest):
 
+    def setUp(self):
+        ViewTest.setUp(self)
+        self.patcher = patch("cdprocessing.functions.extract_all_series")
+        self.mock_extract = self.patcher.start()
+        self.mock_extract.return_value = [[[280, 1, 0.5], [279, 2, 0.4]]]
+
+
+    def tearDown(self):
+        self.patcher.stop()
+
+
     def test_single_sample_scan_view_uses_single_run_template(self):
         response = self.client.post("/single/", data={
-         "sample_files": self.single_scan_file
+         "sample_files": self.test_file
         })
         self.assertTemplateUsed(response, "single.html")
 
 
     def test_single_sample_scan_view_makes_output_display_true(self):
         response = self.client.post("/single/", data={
-         "sample_files": self.single_scan_file,
+         "sample_files": self.test_file,
         })
         self.assertTrue(response.context["display_output"])
 
 
     def test_single_sample_scan_view_gets_correct_title(self):
         response = self.client.post("/single/", data={
-         "sample_files": self.single_scan_file,
+         "sample_files": self.test_file,
          "title": "Some title"
         })
         self.assertEqual("Some title", response.context["title"])
 
 
-    @patch("cdprocessing.functions.extract_all_series")
-    def test_single_sample_scan_view_gets_correct_min_and_max(self, mock_extract):
-        mock_extract.return_value = [
-         [[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]]
-        ]
+    def test_single_sample_scan_view_gets_correct_min_and_max(self):
         response = self.client.post("/single/", data={
-         "sample_files": self.single_scan_file
+         "sample_files": self.test_file
         })
-        self.assertEqual(response.context["min"], 277)
-        self.assertEqual(response.context["max"], 279)
+        self.assertEqual(response.context["min"], 279)
+        self.assertEqual(response.context["max"], 280)
 
 
-    @patch("cdprocessing.functions.extract_all_series")
-    def test_single_sample_scan_view_gives_correct_main_series(self, mock_extract):
-        mock_extract.return_value = [
-         [[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]]
-        ]
+    def test_single_sample_scan_view_gives_correct_main_series(self):
         response = self.client.post("/single/", data={
-         "sample_files": self.single_scan_file
+         "sample_files": self.test_file
         })
         self.assertEqual(response.context["main_series"], [
-         [279.0, 1], [278.0, -4], [277.0, 12]
+         [279.0, 2], [280.0, 1]
         ])
 
 
-    @patch("cdprocessing.functions.extract_all_series")
-    def test_single_sample_gives_correct_main_error(self, mock_extract):
-        mock_extract.return_value = [
-         [[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]]
-        ]
+    def test_single_sample_gives_correct_main_error(self):
         response = self.client.post("/single/", data={
-         "sample_files": self.single_scan_file
+         "sample_files": self.test_file
         })
         self.assertEqual(response.context["main_error"], [
-         [279.0, 0.5, 1.5], [278.0, -4.4, -3.6], [277.0, 11.7, 12.3]
+         [279.0, 1.6, 2.4], [280.0, 0.5, 1.5]
         ])
 
 
     def test_single_sample_view_gets_correct_sample_name(self):
         response = self.client.post("/single/", data={
-         "sample_files": self.single_scan_file,
+         "sample_files": self.test_file,
          "sample_name": "Some sample"
         })
         self.assertEqual("Some sample", response.context["sample_name"])
 
 
-    @patch("cdprocessing.functions.extract_all_series")
-    def test_single_sample_view_view_gives_correct_file_series(self, mock_extract):
-        mock_extract.return_value = [
-         [[279, 1.0, 0.5], [278, -4.0, 0.4], [277, 12.0, 0.3]]
-        ]
+    def test_single_sample_view_view_gives_correct_file_series(self):
         response = self.client.post("/single/", data={
-         "sample_files": self.single_scan_file
+         "sample_files": self.test_file
         })
         self.assertEqual(response.context["file_series"], [
-         [279.0, 1, 0.5], [278.0, -4, 0.4], [277.0, 12, 0.3]
+         [280.0, 1, 0.5], [279.0, 2, 0.4]
         ])
 
 
@@ -176,9 +196,76 @@ class OneSampleScanViewTests(ViewTest):
     def test_single_sample_view_view_gives_correct_file_name(self, mock_namer):
         mock_namer.return_value = "file_name"
         response = self.client.post("/single/", data={
-         "sample_files": self.single_scan_file
+         "sample_files": self.test_file
         })
         self.assertEqual(response.context["file_name"], "file_name.dat")
+
+
+
+class MultiSampleScanViewTests(ViewTest):
+
+    def setUp(self):
+        ViewTest.setUp(self)
+        self.patcher1 = patch("cdprocessing.functions.extract_all_series")
+        self.mock_extract = self.patcher1.start()
+        self.mock_extract.return_value = [
+         [[280, 1, 0.5], [279, 2, 0.4]], [[280, 0.5, 0.5], [279, 2.5, 0.4]]
+        ]
+        self.patcher2 = patch("cdprocessing.functions.average_series")
+        self.mock_average = self.patcher2.start()
+        self.mock_average.return_value = [[280, 0.75, 0.25], [279, 2.25, 0.25]]
+
+
+    def tearDown(self):
+        self.patcher1.stop()
+
+
+    def test_multi_sample_scan_view_uses_single_run_template(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file
+        })
+        self.assertTemplateUsed(response, "single.html")
+
+
+    def test_multi_sample_scan_view_makes_output_display_true(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file,
+        })
+        self.assertTrue(response.context["display_output"])
+
+
+    def test_multi_sample_scan_view_gets_correct_title(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file,
+         "title": "Some title"
+        })
+        self.assertEqual("Some title", response.context["title"])
+
+
+    def test_multi_sample_scan_view_gets_correct_min_and_max(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file
+        })
+        self.assertEqual(response.context["min"], 279)
+        self.assertEqual(response.context["max"], 280)
+
+
+    def test_multi_sample_scan_view_gives_correct_main_series(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file
+        })
+        self.assertEqual(response.context["main_series"], [
+         [279.0, 2.25], [280.0, 0.75]
+        ])
+
+
+    def test_multi_sample_gives_correct_main_error(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file
+        })
+        self.assertEqual(response.context["main_error"], [
+         [279.0, 2, 2.5], [280.0, 0.5, 1]
+        ])
 
 
 

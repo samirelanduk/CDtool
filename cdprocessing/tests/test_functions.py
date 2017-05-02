@@ -21,7 +21,7 @@ class AllSeriesExtractionFromFileTests(ViewTest):
         mock_wav_filter.return_value = wav_filtered_float_groups
         mock_line_filter.return_value = line_filtered_float_groups
         mock_strip.return_value = stripped_float_groups
-        series = extract_all_series(self.single_scan_file)
+        series = extract_all_series(self.test_file)
         stripped_lines = [
          "$MDCDATA:1:14:2:3:4:9",
          "100 200 300",

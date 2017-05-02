@@ -42,7 +42,7 @@ def processing_view(request):
     input_files = request.FILES.getlist("sample_files")
     scans = functions.extract_all_series(input_files[0])
     if len(scans) > 1:
-        return average_sample_view(request, scans)
+        return multi_sample_scan_view(request, scans)
     elif len(scans):
         return one_sample_scan_view(request, scans[0])
     else:
@@ -62,11 +62,27 @@ def one_sample_scan_view(request, scan):
      "title": request.POST.get("title"),
      "min": min_wavelength,
      "max": max_wavelength,
-     "main_series": [[wav, cd] for wav, cd, error in scan],
-     "main_error": [[wav, cd - error, cd + error] for wav, cd, error in scan],
+     "main_series": [[wav, cd] for wav, cd, error in scan][::-1],
+     "main_error": [[wav, cd - error, cd + error] for wav, cd, error in scan][::-1],
      "sample_name": request.POST.get("sample_name"),
      "file_series": scan,
      "file_name": functions.get_file_name(request.POST.get("title")) + ".dat"
+    })
+
+
+def multi_sample_scan_view(request, scans):
+    """This is the view which processes requests which contain multiple sample
+    scans."""
+
+    average = functions.average_series(scans)
+    min_wavelength, max_wavelength = min([w[0] for w in average]), max([w[0] for w in average])
+    return render(request, "single.html", {
+     "display_output": True,
+     "title": request.POST.get("title"),
+     "min": min_wavelength,
+     "max": max_wavelength,
+     "main_series": [[wav, cd] for wav, cd, error in average][::-1],
+     "main_error": [[wav, cd - error, cd + error] for wav, cd, error in average][::-1],
     })
 
 
