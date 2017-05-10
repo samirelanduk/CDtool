@@ -1,3 +1,7 @@
+var COLORS = [
+  "#c0392b", "#2980b9", "#f1c40f", "#2c3e50"
+]
+
 function updateSeries() {
   $(".series-config").each(function() {
     var series = chart.get($(this).attr("data-series"));
@@ -16,8 +20,6 @@ function updateSeries() {
       }
     }
   })
-
-
 }
 
 function makeChart(title, xMin, xMax, mainSeries, mainError, sampleScans, sampleErrors) {
@@ -47,6 +49,7 @@ function makeChart(title, xMin, xMax, mainSeries, mainError, sampleScans, sample
     series.push({
       data: sampleScans[i],
       id: "sample_" + (i + 1),
+      color: COLORS[i],
       lineWidth: 1,
       visible: false,
       enableMouseTracking: false,
@@ -65,6 +68,7 @@ function makeChart(title, xMin, xMax, mainSeries, mainError, sampleScans, sample
       data: sampleErrors[i],
       id: "sample_error_" + (i + 1),
       type: "arearange",
+      color: COLORS[i],
       fillOpacity: 0.2,
       lineWidth: 0,
       enableMouseTracking: false,
@@ -141,25 +145,30 @@ $( document ).ready(function() {
     scrollTop: $("#chart").offset().top
   }, 800);
 
-  // Add an event handler for the main error button
-  $("#main-error-option").click(function () {
-    if ($("#main-error-option").hasClass("on")) {
-      $("#main-error-option").addClass("off").removeClass("on");
-    } else {
-      $("#main-error-option").addClass("on").removeClass("off");
-    }
-    updateSeries();
-  });
+  // Add event handlers for all the series config buttons
+  $(".series-config").each(function() {
+    var series_button = $(this).find(".series-option");
+    var error_button = $(this).find(".error-option");
 
-  // Add an event handler for the main series button
-  $("#main-series-option").click(function () {
-    if ($("#main-series-option").hasClass("on")) {
-      $("#main-series-option").addClass("off").removeClass("on");
-    } else {
-      $("#main-series-option").addClass("on").removeClass("off");
-    }
-    updateSeries();
-  });
+    series_button.click(function () {
+      if ($(this).hasClass("on")) {
+        console.log("Turning off")
+        $(this).addClass("off").removeClass("on");
+      } else {
+        $(this).addClass("on").removeClass("off");
+      }
+      updateSeries();
+    });
+
+    error_button.click(function () {
+      if ($(this).hasClass("on")) {
+        $(this).addClass("off").removeClass("on");
+      } else {
+        $(this).addClass("on").removeClass("off");
+      }
+      updateSeries();
+    });
+  })
 
   // Add an event handler for the sample series button
   $("#sample-series-option").click(function () {

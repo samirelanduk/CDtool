@@ -267,6 +267,17 @@ class MultipleSampleScanTests(FunctionalTest):
         for button in sample_scan_config.find_elements_by_tag_name("button"):
             self.assertNotIn(" on", button.get_attribute("class"))
 
+        # The sample scan config section has three individual series config divs
+        series_configs = sample_scan_config.find_elements_by_class_name("series-config")
+        self.assertEqual(len(series_configs), 3)
+
+        # Each one controls a series
+        all_scan_toggle.click()
+        for index, config in enumerate(series_configs, start=1):
+            self.check_config_div_controls_series(
+             chart_div, config, "sample_%i" % index, "sample_error_%i" % index, "Multi Sample #%i" % index
+            )
+
 
 
 

@@ -84,6 +84,7 @@
 
     {% if sample_scans %}
     <div id="sample-scan-config">
+      <div class="config-title">{{ sample_name }} Scans</div>
       <button id="sample-series-option" class="off">Toggle Sample Scans</button>
       {% for sample_scan in sample_scans %}
       <div id="sample-config-{{forloop.counter}}" class="series-config" data-series="sample_{{ forloop.counter }}" data-error-series="sample_error_{{ forloop.counter }}">
