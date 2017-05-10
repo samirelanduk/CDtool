@@ -83,6 +83,8 @@ def multi_sample_scan_view(request, scans):
      "max": max_wavelength,
      "main_series": [[wav, cd] for wav, cd, error in average][::-1],
      "main_error": [[wav, cd - error, cd + error] for wav, cd, error in average][::-1],
+     "sample_scans": [[line[:2] for line in scan][::-1] for scan in scans],
+     "sample_errors": [[[wav, cd - error, cd + error] for wav, cd, error in scan][::-1] for scan in scans],
      "sample_name": request.POST.get("sample_name"),
     })
 

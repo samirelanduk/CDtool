@@ -1,6 +1,7 @@
 import os
 from os.path import expanduser
 from math import sqrt
+from time import sleep
 from selenium import webdriver
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
@@ -66,13 +67,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         return input_data
 
 
-    def supply_input_data(
-     self,
-     input_div,
-     input_sample_files="",
-     sample_name="",
-     experiment_name=""
-    ):
+    def supply_input_data(self, input_div, input_sample_files="", sample_name="", experiment_name=""):
         # The input section has a file input section, a parameter section, and a
         # submit button
         file_input_div = input_div.find_element_by_id("file-input")
@@ -116,6 +111,7 @@ class FunctionalTest(StaticLiveServerTestCase):
     def check_chart_appears(self, chart_div):
         self.assertGreater(chart_div.size["width"], 10)
         self.assertGreater(chart_div.size["height"], 10)
+        sleep(1)
         y_offset = self.browser.execute_script('return window.pageYOffset;')
         self.assertGreater(y_offset, 100)
 
@@ -168,11 +164,11 @@ class FunctionalTest(StaticLiveServerTestCase):
               "return chart.get('%s').data[%i].x;" % (line, index)
              )
             )
-            self.assertEqual(
+            self.assertAlmostEqual(
              datum[1],
              self.browser.execute_script(
               "return chart.get('%s').data[%i].y;" % (line, index)
-             )
+             ), delta=0.0005
             )
 
 

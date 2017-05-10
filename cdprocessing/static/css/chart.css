@@ -7,7 +7,7 @@
   font-size: 80%;
 }
 
-.series-config {
+.series-config, #sample-scan-config {
   border-radius: 10px;
   border: 2px solid #4A9586;
   display: inline-block;

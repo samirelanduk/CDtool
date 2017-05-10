@@ -260,12 +260,30 @@ class MultiSampleScanViewTests(ViewTest):
         ])
 
 
+    def test_multi_sample_scan_view_gives_sample_scans(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file
+        })
+        self.assertEqual(response.context["sample_scans"], [
+         [[279, 2], [280, 1]], [[279, 2.5], [280, 0.5]]
+        ])
+
+
     def test_multi_sample_gives_correct_main_error(self):
         response = self.client.post("/single/", data={
          "sample_files": self.test_file
         })
         self.assertEqual(response.context["main_error"], [
          [279.0, 2, 2.5], [280.0, 0.5, 1]
+        ])
+
+
+    def test_multi_sample_scan_view_gives_main_error(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file
+        })
+        self.assertEqual(response.context["sample_errors"], [
+         [[279, 1.6, 2.4], [280, 0.5, 1.5]], [[279, 2.1, 2.9], [280, 0, 1]]
         ])
 
 

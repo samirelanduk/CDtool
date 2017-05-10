@@ -218,7 +218,6 @@ class MultipleSampleScanTests(FunctionalTest):
         download_div = output_div.find_element_by_id("download")
 
         # The chart section has a chart in it
-        sleep(1)
         self.check_chart_appears(chart_div)
 
         # The chart has the correct title
@@ -244,13 +243,31 @@ class MultipleSampleScanTests(FunctionalTest):
 
         # The config section has a single series config div for the main series
         main_config = config_div.find_element_by_id("main-config")
-        self.assertEqual(len(config_div.find_elements_by_xpath("./*")), 1)
+        self.assertEqual(len(config_div.find_elements_by_xpath("./*")), 2)
         self.assertIn("series-config", main_config.get_attribute("class"))
 
         # The config div controls the main series
         self.check_config_div_controls_series(
          chart_div, main_config, "main", "main_error", "Multi Sample"
         )
+
+        # The config section also has a sample scan section
+        sample_scan_config = config_div.find_element_by_id("sample-scan-config")
+
+        # It has a button for toggling sample scan visibility
+        all_scan_toggle = sample_scan_config.find_element_by_tag_name("button")
+        all_scan_toggle.click()
+        self.check_visible_line_series_count(chart_div, 4)
+        self.check_visible_area_series_count(chart_div, 4)
+        for button in sample_scan_config.find_elements_by_tag_name("button"):
+            self.assertNotIn(" off", button.get_attribute("class"))
+        all_scan_toggle.click()
+        self.check_visible_line_series_count(chart_div, 1)
+        self.check_visible_area_series_count(chart_div, 1)
+        for button in sample_scan_config.find_elements_by_tag_name("button"):
+            self.assertNotIn(" on", button.get_attribute("class"))
+
+
 
 
 

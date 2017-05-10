@@ -35,7 +35,7 @@
       </div>
       <div class="input">
         <label for="id-sample-name">Sample Name:</label>
-        <input name="sample_name" type="text" placeholder="e.g. 'sample', 'protein' etc.">
+        <input name="sample_name" type="text" autocomplete="off" placeholder="e.g. 'sample', 'protein' etc.">
       </div>
     </fieldset>
     <fieldset id="blank-input">
@@ -45,7 +45,7 @@
   <fieldset id="input-parameters">
     <div id="experiment-name">
       <label for="id-title">Experiment Name:</label>
-      <input type="text" name="title" id="id-title">
+      <input type="text" autocomplete="off" name="title" id="id-title">
     </div>
   </fieldset>
 
@@ -76,11 +76,24 @@
   <div id="chart"></div>
 
   <div id="config">
-    <div id="main-config" class="series-config">
+    <div id="main-config" class="series-config" data-series="main" data-error-series="main_error">
       <div class="config-title">{{ sample_name }}</div>
-      <button id="main-series-option" class="on">Toggle Main Series</button>
-      <button id="main-error-option" class="on">Toggle Main Series Error</button>
+      <button id="main-series-option" class="series-option on">Toggle Main Series</button>
+      <button id="main-error-option" class="error-option on">Toggle Main Series Error</button>
     </div>
+
+    {% if sample_scans %}
+    <div id="sample-scan-config">
+      <button id="sample-series-option" class="off">Toggle Sample Scans</button>
+      {% for sample_scan in sample_scans %}
+      <div id="sample-config-{{forloop.counter}}" class="series-config" data-series="sample_{{ forloop.counter }}" data-error-series="sample_error_{{ forloop.counter }}">
+        <div class="config-title">{{ sample_name }} #{{ forloop.counter }}</div>
+        <button id="sample-series-option-{{forloop.counter}}" class="series-option off">Toggle Sample Series #{{forloop.counter}}</button>
+        <button id="main-error-option-{{forloop.counter}}" class="error-option off">Toggle Sample Series Error #{{forloop.counter}}</button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
 
   <form id="download" method="POST">
@@ -93,9 +106,15 @@
 </div>
 
 <script>
+  {% if sample_scans %}
   chart = makeChart(
-     "{{ title }}", {{ min }}, {{ max }}, {{ main_series }}, {{ main_error }}
+     "{{ title }}", {{ min }}, {{ max }}, {{ main_series }}, {{ main_error }}, {{sample_scans}}, {{sample_errors}}
   )
+  {% else %}
+    chart = makeChart(
+       "{{ title }}", {{ min }}, {{ max }}, {{ main_series }}, {{ main_error }}, [], []
+    )
+  {% endif %}
 </script>
 {% endif %}
 

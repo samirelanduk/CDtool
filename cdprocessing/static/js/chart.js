@@ -1,20 +1,76 @@
 function updateSeries() {
-  series = chart.get("main");
-  error = chart.get("main_error");
-  if ($("#main-series-option").hasClass("off")) {
-    series.hide();
-    error.hide();
-  } else {
-    series.show();
-    if (($("#main-error-option").hasClass("off"))) {
+  $(".series-config").each(function() {
+    var series = chart.get($(this).attr("data-series"));
+    var series_button = $(this).find(".series-option");
+    var error = chart.get($(this).attr("data-error-series"));
+    var error_button = $(this).find(".error-option");
+    if (series_button.hasClass("off")) {
+      series.hide();
       error.hide();
     } else {
-      error.show();
+      series.show();
+      if ((error_button.hasClass("off"))) {
+        error.hide();
+      } else {
+        error.show();
+      }
     }
-  }
+  })
+
+
 }
 
-function makeChart(title, xMin, xMax, mainSeries, mainError) {
+function makeChart(title, xMin, xMax, mainSeries, mainError, sampleScans, sampleErrors) {
+  var series = [{
+    data: mainError,
+    id: "main_error",
+    color: "#4A9586",
+    type: "arearange",
+    fillOpacity: 0.2,
+    lineWidth: 0,
+    enableMouseTracking: false
+  }, {
+    data: mainSeries,
+    id: "main",
+    color: "#4A9586",
+    lineWidth: 1.5,
+    marker: {
+      enabled: false,
+      states: {
+        hover: {
+          enabled: false
+        }
+      }
+    }
+  }]
+  for (var i = 0; i < sampleScans.length; i++) {
+    series.push({
+      data: sampleScans[i],
+      id: "sample_" + (i + 1),
+      lineWidth: 1,
+      visible: false,
+      enableMouseTracking: false,
+      marker: {
+        enabled: false,
+        states: {
+          hover: {
+            enabled: false
+          }
+        }
+      }
+    })
+  }
+  for (var i = 0; i < sampleErrors.length; i++) {
+    series.push({
+      data: sampleErrors[i],
+      id: "sample_error_" + (i + 1),
+      type: "arearange",
+      fillOpacity: 0.2,
+      lineWidth: 0,
+      enableMouseTracking: false,
+      visible: false
+    })
+  }
   var chart = Highcharts.chart("chart", {
       title: {
         text: title,
@@ -72,28 +128,7 @@ function makeChart(title, xMin, xMax, mainSeries, mainError) {
       tooltip: {
         enabled: false
       },
-      series: [{
-        data: mainError,
-        id: "main_error",
-        color: "#4A9586",
-        type: "arearange",
-        fillOpacity: 0.2,
-        lineWidth: 0,
-        enableMouseTracking: false
-      }, {
-        data: mainSeries,
-        id: "main",
-        color: "#4A9586",
-        lineWidth: 1.5,
-        marker: {
-          enabled: false,
-          states: {
-            hover: {
-              enabled: false
-            }
-          }
-        }
-      }]
+      series: series
     });
     return chart;
 }
@@ -122,6 +157,26 @@ $( document ).ready(function() {
       $("#main-series-option").addClass("off").removeClass("on");
     } else {
       $("#main-series-option").addClass("on").removeClass("off");
+    }
+    updateSeries();
+  });
+
+  // Add an event handler for the sample series button
+  $("#sample-series-option").click(function () {
+    if ($("#sample-series-option").hasClass("on")) {
+      $("#sample-series-option").addClass("off").removeClass("on");
+      $("#sample-scan-config").find(".series-config").each(function() {
+        $(this).find("button").each(function() {
+          $(this).addClass("off").removeClass("on");
+        })
+      })
+    } else {
+      $("#sample-series-option").addClass("on").removeClass("off");
+      $("#sample-scan-config").find(".series-config").each(function() {
+        $(this).find("button").each(function() {
+          $(this).addClass("on").removeClass("off");
+        })
+      })
     }
     updateSeries();
   });
