@@ -302,7 +302,6 @@ class FunctionalTest(StaticLiveServerTestCase):
         output_lines = [l for l in output_lines if l[:3].isdigit()]
         output_data = [tuple([float(c) for c in l.split()]) for l in output_lines]
         self.assertEqual(len(output_lines), len(data))
-        for index, line in enumerate(data):
-            self.assertEqual(len(line), len(output_data[index]))
+        for index, line in enumerate(output_data):
             for vindex, value in enumerate(line):
-                self.assertAlmostEqual(value, output_data[index][vindex], delta=0.005)
+                self.assertAlmostEqual(value, data[index][vindex], delta=0.005)

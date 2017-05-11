@@ -295,6 +295,24 @@ class MultiSampleScanViewTests(ViewTest):
         self.assertEqual("Some sample", response.context["sample_name"])
 
 
+    def test_single_sample_view_view_gives_correct_file_series(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file
+        })
+        self.assertEqual(response.context["file_series"], [
+         [280, 0.75, 0.25], [279, 2.25, 0.25]
+        ])
+
+
+    @patch("cdprocessing.functions.get_file_name")
+    def test_single_sample_view_view_gives_correct_file_name(self, mock_namer):
+        mock_namer.return_value = "file_name"
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file
+        })
+        self.assertEqual(response.context["file_name"], "file_name.dat")
+
+
 
 class FileProducingViewTests(ViewTest):
 
