@@ -67,6 +67,20 @@ class FunctionalTest(StaticLiveServerTestCase):
         return input_data
 
 
+    def combine_data_files(self, *data_files):
+        wavelengths = [line[0] for line in data_files[0]]
+        input_data = []
+        for wav in wavelengths:
+            relevant_lines = [[l for l in f if l[0] == wav][0] for f in data_files]
+            values = [l[1] for l in relevant_lines]
+            mean = sum(values) / len(values)
+            sd = sqrt(sum([(val - mean) ** 2 for val in values]) / len(values))
+            input_data.append([
+             wav, mean, sd, values
+            ])
+        return input_data
+
+
     def supply_input_data(self, input_div, input_sample_files="", sample_name="", experiment_name=""):
         # The input section has a file input section, a parameter section, and a
         # submit button

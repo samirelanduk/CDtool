@@ -288,3 +288,57 @@ class MultipleSampleScanTests(FunctionalTest):
 
         # This downloads a file with the correct data
         self.check_file_has_data("multiple_sample_test.dat", input_data[::-1])
+
+
+    def test_can_submit_multiple_scans_in_multiple_files(self):
+        # Get data for this test
+        input_data1 = self.get_single_gen_scan_from_file("single-sample.dat")
+        input_data2 = self.get_single_scan_from_file("single-gen-sample.gen")
+        input_data = self.combine_data_files(input_data1, input_data2)
+
+        # User goes to the single run page
+        self.browser.get(self.live_server_url + "/single/")
+
+        # There is an input section, but no output section
+        input_div = self.browser.find_element_by_id("input")
+        self.assertEqual(len(self.browser.find_elements_by_id("output")), 0)
+
+        # The user supplies input data
+        self.supply_input_data(
+         input_div,
+         input_sample_files="{}/ftests/test_data/single-gen-sample.gen\n{}/ftests/test_data/single-sample.dat".format(BASE_DIR, BASE_DIR),
+         sample_name="A Sample",
+         experiment_name="Multi-File Sample Test"
+        )
+
+        # There is now an output section
+        output_div = self.browser.find_element_by_id("output")
+
+        # It has sections for the chart, for configuration, and downloading
+        chart_div = output_div.find_element_by_id("chart")
+        config_div = output_div.find_element_by_id("config")
+        download_div = output_div.find_element_by_id("download")
+
+        # The chart section has a chart in it
+        self.check_chart_appears(chart_div)
+
+        # The chart has the correct title
+        self.check_chart_title(chart_div, "Multi-File Sample Test")
+
+        # The chart x axis goes from 190 to 280
+        self.check_chart_x_axis(190, 280)
+
+        # There is a single line series
+        self.check_visible_line_series_count(chart_div, 1)
+
+        # The line series matches the scan average in the input data
+        self.check_line_matches_data("main", [w[:2] for w in input_data])
+
+        # There is a single error series
+        self.check_visible_area_series_count(chart_div, 1)
+
+        # The error series matches the scan error in the input data
+        self.check_error_matches_data(
+         "main_error",
+         [[w[0], w[1] - w[2], w[1] + w[2]] for w in input_data]
+        )
