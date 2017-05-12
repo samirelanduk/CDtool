@@ -52,7 +52,6 @@ function makeChart(title, xMin, xMax, mainSeries, mainError, sampleScans, sample
       color: COLORS[i],
       lineWidth: 1,
       visible: false,
-      enableMouseTracking: false,
       marker: {
         enabled: false,
         states: {
@@ -130,7 +129,9 @@ function makeChart(title, xMin, xMax, mainSeries, mainError, sampleScans, sample
         }
       },
       tooltip: {
-        enabled: false
+        enabled: true,
+        headerFormat: '<span style="padding:0">{point.x} nm<br></span>',
+        pointFormat: '<span style="padding:0"><b>{point.y:.2f}</b></span>',
       },
       series: series
     });
