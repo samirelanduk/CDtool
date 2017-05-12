@@ -342,3 +342,14 @@ class MultipleSampleScanTests(FunctionalTest):
          "main_error",
          [[w[0], w[1] - w[2], w[1] + w[2]] for w in input_data]
         )
+
+        # The download section has a button to download the data - they click
+        download_button = download_div.find_element_by_id("file-download")
+        download_button.click()
+
+        # They are still on the same page and the chart is still there
+        self.check_page("/single/")
+        self.check_chart_appears(chart_div)
+
+        # This downloads a file with the correct data
+        self.check_file_has_data("multi-file_sample_test.dat", input_data[::-1])
