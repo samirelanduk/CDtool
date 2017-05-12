@@ -97,7 +97,19 @@ class ProcessingViewTests(ViewTest):
 
     @patch("cdprocessing.functions.extract_all_series")
     @patch("cdprocessing.views.multi_sample_scan_view")
-    def test_processing_view_sends_single_scan(self, mock_view, mock_extract):
+    def test_processing_view_uses_multiple_scan_view_if_multiple_sample_files(self, mock_view, mock_extract):
+        view_output = HttpResponse()
+        mock_view.return_value = view_output
+        mock_extract.return_value = [[[280, 1, 0.5], [279, 1, 0.5]]]
+        response = self.client.post("/single/", data={
+         "sample_files": [self.test_file, self.test_file]
+        })
+        self.assertIs(response, view_output)
+
+
+    @patch("cdprocessing.functions.extract_all_series")
+    @patch("cdprocessing.views.multi_sample_scan_view")
+    def test_processing_view_sends_multiple_scans(self, mock_view, mock_extract):
         view_output = HttpResponse()
         mock_view.return_value = view_output
         mock_extract.return_value = [

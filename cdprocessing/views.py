@@ -40,7 +40,9 @@ def processing_view(request):
     view, along with the scan it extracted."""
 
     input_files = request.FILES.getlist("sample_files")
-    scans = functions.extract_all_series(input_files[0])
+    scans = []
+    for f in input_files:
+        scans += functions.extract_all_series(f)
     if len(scans) > 1:
         return multi_sample_scan_view(request, scans)
     elif len(scans):
