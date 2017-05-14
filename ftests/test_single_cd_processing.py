@@ -377,6 +377,7 @@ class SingleSampleSingleBlankTests(FunctionalTest):
          input_sample_files=BASE_DIR + "/ftests/test_data/single-sample.dat",
          input_blank_files=BASE_DIR + "/ftests/test_data/single-blank.dat",
          sample_name="Start sample",
+         blank_name="Start blank",
          experiment_name="Basic Subtraction Test"
         )
 

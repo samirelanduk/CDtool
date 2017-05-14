@@ -96,7 +96,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         return input_data
 
 
-    def supply_input_data(self, input_div, input_sample_files="", input_blank_files="", sample_name="", experiment_name=""):
+    def supply_input_data(self, input_div, input_sample_files="", input_blank_files="", sample_name="", blank_name="", experiment_name=""):
         # The input section has a file input section, a parameter section, and a
         # submit button
         file_input_div = input_div.find_element_by_id("file-input")
@@ -152,8 +152,9 @@ class FunctionalTest(StaticLiveServerTestCase):
             self.assertEqual(blank_file_input.get_attribute("type"), "file")
             self.assertEqual(blank_name_input.get_attribute("type"), "text")
 
-
-
+            # They submit a baseline file and name it
+            blank_file_input.send_keys(input_blank_files)
+            blank_name_input.send_keys(blank_name)
 
         # The parameters section asks for the experiment name
         experiment_name_div = input_parameter_div.find_element_by_id("experiment-name")
@@ -161,6 +162,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         # They give it a name
         experiment_name_input.send_keys(experiment_name)
+        sleep(100)
 
         # They submit the data
         submit_button.click()
