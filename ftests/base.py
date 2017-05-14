@@ -135,6 +135,25 @@ class FunctionalTest(StaticLiveServerTestCase):
             self.assertEqual(blank_file_input.get_attribute("type"), "file")
             self.assertEqual(blank_name_input.get_attribute("type"), "text")
 
+            # They change their mind and want to make it disappear
+            close_button = blank_input_div.find_element_by_tag_name("button")
+            close_button.click()
+
+            # Things are back to how they were before
+            self.assertEqual(
+             len(blank_input_div.find_elements_by_tag_name("input")), 0
+            )
+            blank_button = blank_input_div.find_element_by_tag_name("button")
+
+            # They change their mind again and open the blank input again
+            blank_button.click()
+            blank_file_input = blank_input_div.find_elements_by_tag_name("input")[0]
+            blank_name_input = blank_input_div.find_elements_by_tag_name("input")[1]
+            self.assertEqual(blank_file_input.get_attribute("type"), "file")
+            self.assertEqual(blank_name_input.get_attribute("type"), "text")
+
+
+
 
         # The parameters section asks for the experiment name
         experiment_name_div = input_parameter_div.find_element_by_id("experiment-name")

@@ -43,7 +43,13 @@
       <button type="button" id="baseline-appear">+</button>
       <script>
       $("#baseline-appear").click(function () {
-        $("#baseline-appear").detach();
+        var appear_button = $("#baseline-appear").detach();
+        $("#blank-input").append("<button>x</button>");
+        $("#blank-input").find("button").attr("type", "button");
+        $("#blank-input").find("button").click(function() {
+          $("#blank-input").empty();
+          $("#blank-input").append(appear_button);
+        });
         $("#sample-input").children().clone().appendTo("#blank-input");
         $("#blank-input").find("h2").text("Baseline Data");
         $("#blank-input").find("#sample-files").attr("id", "blank-files");
