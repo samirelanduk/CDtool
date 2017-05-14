@@ -20,25 +20,48 @@
     <fieldset id="sample-input">
       <h2>Sample Data</h2>
       <div class="input">
-
-        <input id="id-sample-files" name="sample_files" type="file"
+        <input id="sample-files" name="sample_files" type="file"
          data-multiple-caption="{count} files selected" multiple>
-        <label for="id-sample-files">
+        <label for="sample-files" id="sample-files-label">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" fill="#FFFFFF">
              <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3
              11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8
              2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2
              2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0
              1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
-           </svg> Upload Sample Files
+           </svg> <span>Upload Sample Files</span>
          </label>
       </div>
       <div class="input">
-        <label for="id-sample-name">Sample Name:</label>
-        <input name="sample_name" type="text" autocomplete="off" placeholder="e.g. 'sample', 'protein' etc.">
+        <label for="sample-name" id="sample-name-label">Sample Name:</label>
+        <input name="sample_name" id="sample-name" type="text"
+         autocomplete="off" placeholder="e.g. 'sample', 'protein' etc.">
       </div>
     </fieldset>
+
     <fieldset id="blank-input">
+      <button type="button" id="baseline-appear">+</button>
+      <script>
+      $("#baseline-appear").click(function () {
+        $("#baseline-appear").detach();
+        $("#sample-input").children().clone().appendTo("#blank-input");
+        $("#blank-input").find("h2").text("Baseline Data");
+        $("#blank-input").find("#sample-files").attr("id", "blank-files");
+        $("#blank-input").find("#blank-files").attr("name", "blank_files");
+        $("#blank-input").find("#sample-files-label").attr("id", "blank-files-label");
+        $("#blank-input").find("#blank-files-label").attr("for", "blank-files");
+        $("#blank-input").find("#blank-files-label").find("span").text("Upload Baseline Files")
+        $("#blank-input").find("#sample-name-label").attr("id", "blank-name-label");
+        $("#blank-input").find("#blank-name-label").attr("for", "blank-name");
+        $("#blank-input").find("#blank-name-label").text("Baseline Name:");
+        $("#blank-input").find("#sample-name").attr("id", "blank-name");
+        $("#blank-input").find("#blank-name").attr("name", "blank_name");
+        $("#blank-input").find("#blank-name").attr(
+           "placeholder", "e.g. 'baseline', 'blank', 'subtracted'"
+        );
+        assignFileListener();
+      });
+      </script>
     </fieldset>
   </div>
 

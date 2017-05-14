@@ -353,3 +353,32 @@ class MultipleSampleScanTests(FunctionalTest):
 
         # This downloads a file with the correct data
         self.check_file_has_data("multi-file_sample_test.dat", input_data[::-1])
+
+
+
+class SingleSampleSingleBlankTests(FunctionalTest):
+
+    def test_can_do_basic_subtraction(self):
+        # Get data for this test
+        input_sample = self.get_single_scan_from_file("single-sample.dat")
+        input_blank = self.get_single_scan_from_file("single-blank.dat")
+        input_data = self.subtract_data_files(input_sample, input_blank)
+
+        # User goes to the single run page
+        self.browser.get(self.live_server_url + "/single/")
+
+        # There is an input section, but no output section
+        input_div = self.browser.find_element_by_id("input")
+        self.assertEqual(len(self.browser.find_elements_by_id("output")), 0)
+
+        # The user supplies input data
+        self.supply_input_data(
+         input_div,
+         input_sample_files=BASE_DIR + "/ftests/test_data/single-sample.dat",
+         input_blank_files=BASE_DIR + "/ftests/test_data/single-blank.dat",
+         sample_name="Start sample",
+         experiment_name="Basic Subtraction Test"
+        )
+
+        # There is now an output section
+        output_div = self.browser.find_element_by_id("output")

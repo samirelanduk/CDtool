@@ -81,7 +81,22 @@ class FunctionalTest(StaticLiveServerTestCase):
         return input_data
 
 
-    def supply_input_data(self, input_div, input_sample_files="", sample_name="", experiment_name=""):
+    def subtract_data_files(self, sample, blank):
+        wavelengths = [line[0] for line in sample]
+        input_data = []
+        for wav in wavelengths:
+            sample_line, blank_line = [
+             [l for l in f if l[0] == wav][0] for f in (sample, blank)
+            ]
+            sub = sample_line[1] - blank_line[1]
+            error = sample_line[2] + blank_line[2]
+            input_data.append([
+             wav, sub, error, sample_line, blank_line
+            ])
+        return input_data
+
+
+    def supply_input_data(self, input_div, input_sample_files="", input_blank_files="", sample_name="", experiment_name=""):
         # The input section has a file input section, a parameter section, and a
         # submit button
         file_input_div = input_div.find_element_by_id("file-input")
@@ -107,6 +122,19 @@ class FunctionalTest(StaticLiveServerTestCase):
         # They submit a sample file and name it
         sample_file_input.send_keys(input_sample_files)
         sample_name_input.send_keys(sample_name)
+
+        # Blank files?
+        if input_blank_files:
+            # The blank input section has a clickable button
+            blank_button = blank_input_div.find_element_by_tag_name("button")
+
+            # They click it and make a new input div materialise
+            blank_button.click()
+            blank_file_input = blank_input_div.find_elements_by_tag_name("input")[0]
+            blank_name_input = blank_input_div.find_elements_by_tag_name("input")[1]
+            self.assertEqual(blank_file_input.get_attribute("type"), "file")
+            self.assertEqual(blank_name_input.get_attribute("type"), "text")
+
 
         # The parameters section asks for the experiment name
         experiment_name_div = input_parameter_div.find_element_by_id("experiment-name")
