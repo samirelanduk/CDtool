@@ -262,6 +262,36 @@ class SeriesAveragingTests(ViewTest):
 
 
 
+class SeriesSubtractingTests(ViewTest):
+
+    def test_can_subtract_series(self):
+        series1 = [[279, 1, 0.5], [278, 2, 0.4], [277, 3, 0.2]]
+        series2 = [[279, 0.1, 0.5], [278, 0.2, 0.4], [277, 0.3, 0.2]]
+        self.assertEqual(
+         subtract_series(series1, series2),
+         [[279, 0.9, 1], [278, 1.8, 0.8], [277, 2.7, 0.4]]
+        )
+
+
+    def test_can_subtract_series_when_main_bigger_than_baseline(self):
+        series1 = [[279, 1, 0.5], [278, 2, 0.4], [277, 3, 0.2]]
+        series2 = [[279, 0.1, 0.5], [278, 0.2, 0.4]]
+        self.assertEqual(
+         subtract_series(series1, series2),
+         [[279, 0.9, 1], [278, 1.8, 0.8], [277, 3, 0.2]]
+        )
+
+
+    def test_can_subtract_series_when_baseline_bigger_than_main(self):
+        series1 = [[279, 1, 0.5], [278, 2, 0.4]]
+        series2 = [[279, 0.1, 0.5], [278, 0.2, 0.4], [277, 0.3, 0.2]]
+        self.assertEqual(
+         subtract_series(series1, series2),
+         [[279, 0.9, 1], [278, 1.8, 0.8]]
+        )
+
+
+
 class FileNamerTests(ViewTest):
 
     def test_can_replace_spaces_with_underscores(self):

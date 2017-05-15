@@ -132,6 +132,28 @@ def average_series(series):
     return average
 
 
+def subtract_series(series1, series2):
+    """Subtracts one series from another. Series1 is considered to be the
+    canonical set of wavelengths - if a wavelength is there but not in series2,
+    nothing is subtracted from it. If a wavelength is in series2 but not
+    series1, it is ignored."""
+
+    wavelengths = [line[0] for line in series1]
+    series = []
+    for wavelength in wavelengths:
+        minuend = [l for l in series1 if l[0] == wavelength]
+        subtrahend = [l for l in series2 if l[0] == wavelength]
+        if minuend and subtrahend:
+            series.append([
+             wavelength,
+             minuend[0][1] - subtrahend[0][1],
+             minuend[0][2] + subtrahend[0][2]
+            ])
+        elif minuend:
+            series.append(minuend[0])
+    return series
+
+
 def get_file_name(title):
     """Takes an experiment title and turns it into a filename."""
 
