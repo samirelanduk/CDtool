@@ -125,6 +125,21 @@ class ProcessingViewTests(ViewTest):
         ])
 
 
+    @patch("cdprocessing.functions.extract_all_series")
+    @patch("cdprocessing.views.one_sample_one_blank_view")
+    def test_processing_view_uses_one_scan_one_blank_view(self, mock_view, mock_extract):
+        view_output = HttpResponse()
+        mock_view.return_value = view_output
+        mock_extract.side_effect = (
+         [[[280, 1, 0.5], [279, 1, 0.5]]], [[[280, 0.1, 0.5], [279, 0.1, 0.5]]]
+        )
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file,
+         "blank_files": self.test_file
+        })
+        self.assertIs(response, view_output)
+
+
 
 class OneSampleScanViewTests(ViewTest):
 
@@ -323,6 +338,47 @@ class MultiSampleScanViewTests(ViewTest):
          "sample_files": self.test_file
         })
         self.assertEqual(response.context["file_name"], "file_name.dat")
+
+
+
+class OneSampleOneBlankViewTests(ViewTest):
+
+    def setUp(self):
+        ViewTest.setUp(self)
+        self.patcher = patch("cdprocessing.functions.extract_all_series")
+        self.mock_extract = self.patcher.start()
+        self.mock_extract.side_effect = (
+         [[[280, 1, 0.5], [279, 2, 0.4]]], [[[280, 0.1, 0.5], [279, 0.2, 0.4]]]
+        )
+
+
+    def tearDown(self):
+        self.patcher.stop()
+
+
+    def test_1_sample_1_blank_view_uses_single_run_template(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file,
+         "blank_files": self.test_file
+        })
+        self.assertTemplateUsed(response, "single.html")
+
+
+    def test_1_sample_1_blank_view_makes_output_display_true(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file,
+         "blank_files": self.test_file,
+        })
+        self.assertTrue(response.context["display_output"])
+
+
+    def test_1_sample_1_blank_view_gets_correct_title(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file,
+         "blank_files": self.test_file,
+         "title": "Some title"
+        })
+        self.assertEqual("Some title", response.context["title"])
 
 
 

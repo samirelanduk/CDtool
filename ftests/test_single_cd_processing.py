@@ -383,3 +383,32 @@ class SingleSampleSingleBlankTests(FunctionalTest):
 
         # There is now an output section
         output_div = self.browser.find_element_by_id("output")
+
+        # It has sections for the chart, for configuration, and downloading
+        chart_div = output_div.find_element_by_id("chart")
+        config_div = output_div.find_element_by_id("config")
+        download_div = output_div.find_element_by_id("download")
+
+        # The chart section has a chart in it
+        self.check_chart_appears(chart_div)
+
+        # The chart has the correct title
+        self.check_chart_title(chart_div, "Basic Subtraction Test")
+
+        # The chart x axis goes from 190 to 280
+        self.check_chart_x_axis(190, 280)
+
+        # There is a single line series
+        self.check_visible_line_series_count(chart_div, 1)
+
+        # The line series matches the scan in the input data
+        self.check_line_matches_data("main", [w[:2] for w in input_data])
+
+        # There is a single error series
+        self.check_visible_area_series_count(chart_div, 1)
+
+        # The error series matches the scan error in the input data
+        self.check_error_matches_data(
+         "main_error",
+         [[w[0], w[1] - w[2], w[1] + w[2]] for w in input_data]
+        )

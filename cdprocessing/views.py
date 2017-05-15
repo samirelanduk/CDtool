@@ -39,19 +39,26 @@ def processing_view(request):
     with only one scan in it, it will send the request to the single sample scan
     view, along with the scan it extracted."""
 
-    input_files = request.FILES.getlist("sample_files")
-    scans = []
-    for f in input_files:
-        scans += functions.extract_all_series(f)
-    if len(scans) > 1:
-        return multi_sample_scan_view(request, scans)
-    elif len(scans):
-        return one_sample_scan_view(request, scans[0])
+    sample_files = request.FILES.getlist("sample_files")
+    blank_files = request.FILES.getlist("blank_files")
+    sample_scans = []
+    for f in sample_files:
+        sample_scans += functions.extract_all_series(f)
+    blank_scans = []
+    for f in blank_files:
+        blank_scans += functions.extract_all_series(f)
+    if blank_scans:
+        return one_sample_one_blank_view(request)
     else:
-        return render(request, "single.html", {
-         "display_chart": False,
-         "error_text": "No scans were found in the file(s) given."
-        })
+        if len(sample_scans) > 1:
+            return multi_sample_scan_view(request, sample_scans)
+        elif len(sample_scans):
+            return one_sample_scan_view(request, sample_scans[0])
+        else:
+            return render(request, "single.html", {
+             "display_chart": False,
+             "error_text": "No scans were found in the file(s) given."
+            })
 
 
 def one_sample_scan_view(request, scan):
@@ -90,6 +97,16 @@ def multi_sample_scan_view(request, scans):
      "sample_name": request.POST.get("sample_name"),
      "file_series": average,
      "file_name": functions.get_file_name(request.POST.get("title")) + ".dat"
+    })
+
+
+def one_sample_one_blank_view(request):
+    """This is the view which processes requests which contain one sample scan
+    and one blank scan."""
+
+    return render(request, "single.html", {
+     "display_output": True,
+     "title": request.POST.get("title"),
     })
 
 
