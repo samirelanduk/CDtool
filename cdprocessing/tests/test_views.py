@@ -305,15 +305,6 @@ class MultiSampleScanViewTests(ViewTest):
         ])
 
 
-    def test_multi_sample_scan_view_gives_sample_scans(self):
-        response = self.client.post("/single/", data={
-         "sample_files": self.test_file
-        })
-        self.assertEqual(response.context["sample_scans"], [
-         [[279, 2], [280, 1]], [[279, 2.5], [280, 0.5]]
-        ])
-
-
     def test_multi_sample_gives_correct_main_error(self):
         response = self.client.post("/single/", data={
          "sample_files": self.test_file
@@ -323,7 +314,16 @@ class MultiSampleScanViewTests(ViewTest):
         ])
 
 
-    def test_multi_sample_scan_view_gives_main_error(self):
+    def test_multi_sample_scan_view_gives_sample_scans(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file
+        })
+        self.assertEqual(response.context["sample_scans"], [
+         [[279, 2], [280, 1]], [[279, 2.5], [280, 0.5]]
+        ])
+
+
+    def test_multi_sample_scan_view_gives_sample_errors(self):
         response = self.client.post("/single/", data={
          "sample_files": self.test_file
         })
@@ -403,13 +403,33 @@ class OneSampleOneBlankViewTests(ViewTest):
         self.assertEqual("Some title", response.context["title"])
 
 
-    def test_multi_sample_scan_view_gets_correct_min_and_max(self):
+    def test_1_sample_1_blank_view_gets_correct_min_and_max(self):
         response = self.client.post("/single/", data={
          "sample_files": self.test_file,
          "blank_files": self.test_file,
         })
         self.assertEqual(response.context["min"], 279)
         self.assertEqual(response.context["max"], 280)
+
+
+    def test_1_sample_1_blank_view_gives_correct_main_series(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file,
+         "blank_files": self.test_file,
+        })
+        self.assertEqual(response.context["main_series"], [
+         [279.0, 1.8], [280.0, 0.9]
+        ])
+
+
+    def test_1_sample_1_blank_view_gives_correct_main_error(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file,
+         "blank_files": self.test_file,
+        })
+        self.assertEqual(response.context["main_error"], [
+         [279.0, 1.8 - 0.8, 1.8 + 0.8], [280.0, 0.9 - 1, 0.9 + 1]
+        ])
 
 
 

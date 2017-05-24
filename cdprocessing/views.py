@@ -111,6 +111,8 @@ def one_sample_one_blank_view(request, sample, blank):
      "title": request.POST.get("title"),
      "min": min_wavelength,
      "max": max_wavelength,
+     "main_series": [[wav, cd] for wav, cd, error in subtracted][::-1],
+     "main_error": [[wav, cd - error, cd + error] for wav, cd, error in subtracted][::-1],
     })
 
 
