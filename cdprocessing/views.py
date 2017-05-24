@@ -48,7 +48,7 @@ def processing_view(request):
     for f in blank_files:
         blank_scans += functions.extract_all_series(f)
     if blank_scans:
-        return one_sample_one_blank_view(request)
+        return one_sample_one_blank_view(request, sample_scans[0], blank_scans[0])
     else:
         if len(sample_scans) > 1:
             return multi_sample_scan_view(request, sample_scans)
@@ -100,13 +100,17 @@ def multi_sample_scan_view(request, scans):
     })
 
 
-def one_sample_one_blank_view(request):
+def one_sample_one_blank_view(request, sample, blank):
     """This is the view which processes requests which contain one sample scan
     and one blank scan."""
 
+    subtracted = functions.subtract_series(sample, blank)
+    min_wavelength, max_wavelength = min([w[0] for w in subtracted]), max([w[0] for w in subtracted])
     return render(request, "single.html", {
      "display_output": True,
      "title": request.POST.get("title"),
+     "min": min_wavelength,
+     "max": max_wavelength,
     })
 
 

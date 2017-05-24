@@ -140,6 +140,24 @@ class ProcessingViewTests(ViewTest):
         self.assertIs(response, view_output)
 
 
+    @patch("cdprocessing.functions.extract_all_series")
+    @patch("cdprocessing.views.one_sample_one_blank_view")
+    def test_processing_view_sends_one_scan_one_blank(self, mock_view, mock_extract):
+        view_output = HttpResponse()
+        mock_view.return_value = view_output
+        mock_extract.side_effect = (
+         [[[280, 1, 0.5], [279, 1, 0.5]]], [[[280, 0.1, 0.5], [279, 0.1, 0.5]]]
+        )
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file,
+         "blank_files": self.test_file
+        })
+        self.assertIs(response, view_output)
+        args, kwargs = mock_view.call_args
+        sample, blank = args[1:3]
+        self.assertEqual(sample, [[280, 1, 0.5], [279, 1, 0.5]])
+        self.assertEqual(blank, [[280, 0.1, 0.5], [279, 0.1, 0.5]])
+
 
 class OneSampleScanViewTests(ViewTest):
 
@@ -345,15 +363,19 @@ class OneSampleOneBlankViewTests(ViewTest):
 
     def setUp(self):
         ViewTest.setUp(self)
-        self.patcher = patch("cdprocessing.functions.extract_all_series")
-        self.mock_extract = self.patcher.start()
+        self.patcher1 = patch("cdprocessing.functions.extract_all_series")
+        self.mock_extract = self.patcher1.start()
         self.mock_extract.side_effect = (
          [[[280, 1, 0.5], [279, 2, 0.4]]], [[[280, 0.1, 0.5], [279, 0.2, 0.4]]]
         )
+        self.patcher2 = patch("cdprocessing.functions.subtract_series")
+        self.mock_subtract = self.patcher2.start()
+        self.mock_subtract.return_value = [[280, 0.9, 1], [279, 1.8, 0.8]]
 
 
     def tearDown(self):
-        self.patcher.stop()
+        self.patcher1.stop()
+        self.patcher2.stop()
 
 
     def test_1_sample_1_blank_view_uses_single_run_template(self):
@@ -379,6 +401,15 @@ class OneSampleOneBlankViewTests(ViewTest):
          "title": "Some title"
         })
         self.assertEqual("Some title", response.context["title"])
+
+
+    def test_multi_sample_scan_view_gets_correct_min_and_max(self):
+        response = self.client.post("/single/", data={
+         "sample_files": self.test_file,
+         "blank_files": self.test_file,
+        })
+        self.assertEqual(response.context["min"], 279)
+        self.assertEqual(response.context["max"], 280)
 
 
 
