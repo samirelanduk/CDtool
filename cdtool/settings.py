@@ -33,8 +33,6 @@ INSTALLED_APPS = (
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.staticfiles",
-    "home",
-    "cdprocessing"
 )
 
 MIDDLEWARE_CLASSES = (
