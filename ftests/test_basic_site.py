@@ -26,6 +26,31 @@ class LayoutTests(FunctionalTest):
          header.location["y"] + header.size["height"]
         )
 
+        # Thw window is resized to mobile proportions
+        self.browser.set_window_size(350, 600)
+
+        # The nav is no longer visible but there is a menu bar now
+        self.assertFalse(nav.is_displayed())
+        menu_icon = header.find_element_by_id("menu-icon")
+        self.assertTrue(menu_icon.is_displayed())
+        self.assertGreater(
+         menu_icon.location["x"], header.size["width"] / 2
+        )
+
+        # Clicking it makes the menu appear
+        menu_icon.click()
+        self.assertTrue(nav.is_displayed())
+        self.assertEqual(nav_links[0].location["y"], header.size["height"])
+        self.assertGreater(nav_links[1].location["y"], nav_links[0].location["y"])
+        menu_icon.click()
+        sleep(1)
+        self.assertFalse(nav.is_displayed())
+
+        # Thw window is resized back and everything is back to how it was
+        self.browser.set_window_size(800, 600)
+        self.assertTrue(nav.is_displayed())
+        self.assertFalse(menu_icon.is_displayed())
+
 
 
     def test_footer_layout(self):
