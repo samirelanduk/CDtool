@@ -13,6 +13,8 @@ Including another URLconf
     1. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import include, url
+from cdcrunch.views import tool_page
 
 urlpatterns = [
+ url(r"^$", tool_page, name="tool_page")
 ]

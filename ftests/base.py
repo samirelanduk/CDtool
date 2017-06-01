@@ -23,6 +23,10 @@ class FunctionalTest(StaticLiveServerTestCase):
             os.remove(expanduser("~") + "/Downloads/%s" % f)
 
 
+    def get(self, url):
+        self.browser.get(self.live_server_url + url)
+
+
     def check_page(self, url):
         self.assertEqual(
          self.browser.current_url,
