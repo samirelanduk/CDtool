@@ -54,8 +54,27 @@ class LayoutTests(FunctionalTest):
 
 
     def test_footer_layout(self):
-        pass
+        # The user goes to the main page
+        self.get("/")
 
+        # There is a footer at the bottom
+        footer = self.browser.find_element_by_tag_name("footer")
+        self.assertGreater(footer.location["y"], 700)
+
+        # There are at least two lists of links, each having at least three
+        lists = footer.find_elements_by_class_name("footer-list")
+        self.assertGreaterEqual(len(lists), 2)
+        for links in lists:
+            self.assertGreaterEqual(len(links.find_elements_by_tag_name("a")), 3)
+
+        # The lists are side by side
+        self.assertGreater(lists[1].location["x"], lists[0].location["x"])
+
+        # Thw window is resized to mobile proportions
+        self.browser.set_window_size(350, 600)
+
+        # Now the lists are on top of each other
+        self.assertGreater(lists[1].location["y"], lists[0].location["y"])
 
 
 class ChangelogTests(FunctionalTest):

@@ -49,6 +49,40 @@ nav li {
   border: 1px solid #2c3e50;
 }
 
+main {
+  min-height: calc(75vh);
+  padding: 20px;
+}
+
+footer {
+  background-color: #ecf0f1;
+  color: #2c3e50;
+  font-size: 80%;
+  line-height: 200%;
+  padding-top: 40px;
+  padding-bottom: 10px;
+}
+
+.footer-list {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+footer ul {
+  list-style-type: none;
+  margin: 0px;
+  padding: 0px;
+}
+
+footer a {
+  color: inherit;
+}
+
+#copyright {
+  color: #AAAAAA;
+  text-align: center;
+}
+
 @media only screen and (min-width: 769px) {
   /* Small Desktop screens and up */
 
@@ -88,4 +122,22 @@ nav li {
     padding: 30px 50px;;
   }
 
+}
+
+@media only screen and (min-width: 568px) {
+  /* iPad and up */
+
+  .footer-list {
+    display: inline-block;
+    width: 50%;
+    margin: 0px;
+    margin-bottom: 30px;
+    height: 100%;
+    box-sizing: border-box;
+    vertical-align: top;
+  }
+
+  main {
+    padding: 25px 40px;;
+  }
 }
