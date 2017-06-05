@@ -59,7 +59,7 @@ class LayoutTests(FunctionalTest):
 
         # There is a footer at the bottom
         footer = self.browser.find_element_by_tag_name("footer")
-        self.assertGreater(footer.location["y"], 700)
+        self.assertGreater(footer.location["y"], 500)
 
         # There are at least two lists of links, each having at least three
         lists = footer.find_elements_by_class_name("footer-list")
