@@ -44,6 +44,20 @@ class SingleScanTests(FunctionalTest):
         # The user is still on the same page
         self.check_page("/")
 
+         # There is now an output section
+        output_div = self.browser.find_element_by_id("output")
+
+        # It has sections for the chart, for configuration, and downloading
+        chart_div = output_div.find_element_by_id("chart")
+        config_div = output_div.find_element_by_id("chart-config")
+        download_div = output_div.find_element_by_id("download")
+
+        # The chart section has a chart in it
+        sleep(1)
+        self.check_chart_appears(chart_div)
+
+
+
 
     def test_can_crunch_single_gen_scan(self):
         pass

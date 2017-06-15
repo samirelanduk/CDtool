@@ -177,7 +177,6 @@ class FunctionalTest(StaticLiveServerTestCase):
     def check_chart_appears(self, chart_div):
         self.assertGreater(chart_div.size["width"], 10)
         self.assertGreater(chart_div.size["height"], 10)
-        sleep(2)
         y_offset = self.browser.execute_script('return window.pageYOffset;')
         self.assertGreater(y_offset, 100)
 

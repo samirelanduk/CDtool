@@ -7,11 +7,15 @@
 {% endblock %}
 
 {% block js %}
-<script src="/static/js/tool.js" async></script>
+<script src="/static/js/highcharts.js"></script>
+<script src="/static/js/highcharts-more.js"></script>
+<script src="/static/js/highcharts-exporting.js"></script>
+<script src="/static/js/highcharts-exporting-offline.js"></script>
+<script src="/static/js/tool.js"></script>
 {% endblock %}
 
 {% block main %}
-<div id="input">
+<form id="input" method="POST">
 
   <div class="sample-input">
     <div class="scans-input">
@@ -38,7 +42,21 @@
     <input type="text" name="exp-name" id="exp-name">
   </div>
   <div>
+    {% csrf_token %}
     <input type="submit">
   </div>
+</form>
+
+
+{% if output %}
+<div id="output">
+  <div id="chart">
+  </div>
+  <script>makeChart();</script>
+  <div id="chart-config">
+  </div>
+  <div id="download">
+  </div>
 </div>
+{% endif %}
 {% endblock %}
