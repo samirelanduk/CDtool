@@ -12,8 +12,10 @@
 
 {% block main %}
 <div id="input">
+
   <div class="sample-input">
     <div class="scans-input">
+      <h2>Upload Sample Scans</h2>
       <input type="file" name="sample-files" id="sample-files"
        data-multiple-caption="{count} files selected" multiple>
       <label for="sample-files">
@@ -29,7 +31,9 @@
       <input type="text" name="sample-name" id="sample-name" autocomplete="off">
     </div>
   </div>
+
   <div id="input-config">
+    <h2>Adjust Parameters</h2>
     <label for="exp-name">Experiment Name:</label>
     <input type="text" name="exp-name" id="exp-name">
   </div>
