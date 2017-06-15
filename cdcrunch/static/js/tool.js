@@ -23,8 +23,11 @@ function assignFileListener() {
 }
 assignFileListener();
 
-function makeChart() {
+function makeChart(title) {
 	var chart = Highcharts.chart("chart", {
+		title: {
+			text: title
+		},
     chart: {
       type: "line",
       plotBorderWidth: 1,

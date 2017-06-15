@@ -56,6 +56,9 @@ class SingleScanTests(FunctionalTest):
         sleep(1)
         self.check_chart_appears(chart_div)
 
+        # The chart has the correct title
+        self.check_chart_title(chart_div, "Test Experiment")
+
 
 
 
