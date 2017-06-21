@@ -1,3 +1,4 @@
+import inferi
 from unittest.mock import patch, Mock
 from cdtool.tests import ViewTest
 from cdcrunch.parse import *
@@ -9,18 +10,22 @@ class AllScanExtractionFromFileTests(ViewTest):
     @patch("cdcrunch.parse.remove_incorrect_wavelengths")
     @patch("cdcrunch.parse.remove_short_lines")
     @patch("cdcrunch.parse.strip_data_blocks")
+    @patch("cdcrunch.parse.block_to_variables")
     def test_extractor_calls_correct_functions(self, *mocks):
         data_blocks = Mock()
         len_filtered_data_blocks = Mock()
         wav_filtered_data_blocks = Mock()
         line_filtered_data_blocks = Mock()
-        stripped_data_blocks = Mock()
-        mock_strip, mock_line_filter, mock_wav_filter, mock_len_filter, mock_get = mocks
+        stripped_data_blocks = [Mock(), Mock(), Mock()]
+        (mock_variables, mock_strip, mock_line_filter, mock_wav_filter,
+         mock_len_filter, mock_get) = mocks
         mock_get.return_value = data_blocks
         mock_len_filter.return_value = len_filtered_data_blocks
         mock_wav_filter.return_value = wav_filtered_data_blocks
         mock_line_filter.return_value = line_filtered_data_blocks
         mock_strip.return_value = stripped_data_blocks
+
+        mock_variables.return_value = Mock()
         series = extract_all_scans(self.test_file)
         stripped_lines = [
          "$MDCDATA:1:14:2:3:4:9",
@@ -35,7 +40,9 @@ class AllScanExtractionFromFileTests(ViewTest):
         mock_wav_filter.assert_called_with(len_filtered_data_blocks)
         mock_line_filter.assert_called_with(wav_filtered_data_blocks)
         mock_strip.assert_called_with(line_filtered_data_blocks)
-        self.assertIs(series, stripped_data_blocks)
+        for block in mock_strip.return_value:
+            mock_variables.assert_any_call(block)
+        self.assertEqual(series, [mock_variables.return_value] * 3)
 
 
 
@@ -229,3 +236,21 @@ class DataBlockStrippingTests(ViewTest):
          [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]],
          [[3, 74, 0], [4.5, 5, 0], [76.8, 4, 0]]
         ])
+
+
+
+class DataBlockToInferiVariablesTests(ViewTest):
+
+    def test_can_convert_data_block_to_inferi_variables(self):
+        inferi_variables = block_to_variables([
+         [3, 76, 1.2], [4.5, 4, 0.34], [76.8, 34, 0.9]
+        ])
+        wavelength, cd = inferi_variables
+        self.assertIsInstance(wavelength, inferi.Variable)
+        self.assertEqual(wavelength.name(), "wavelength")
+        self.assertEqual([val.value() for val in wavelength], [3, 4.5, 76.8])
+        self.assertEqual([val.error() for val in wavelength], [0, 0, 0])
+        self.assertIsInstance(cd, inferi.Variable)
+        self.assertEqual(cd.name(), "cd")
+        self.assertEqual([val.value() for val in cd], [76, 4, 34])
+        self.assertEqual([val.error() for val in cd], [1.2, 0.34, 0.9])

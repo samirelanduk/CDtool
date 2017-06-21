@@ -1,5 +1,5 @@
 django==1.8.17
 selenium
-inferi
+inferi==0.3
 psycopg2
 gunicorn

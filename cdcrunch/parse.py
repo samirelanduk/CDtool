@@ -1,5 +1,6 @@
 """Contains for functions for parsing CD data files."""
 
+from inferi import Variable
 from collections import Counter
 
 def extract_all_scans(django_file):
@@ -15,7 +16,8 @@ def extract_all_scans(django_file):
     filtered_blocks = remove_incorrect_wavelengths(filtered_blocks)
     filtered_blocks = remove_short_lines(filtered_blocks)
     stripped_blocks = strip_data_blocks(filtered_blocks)
-    return stripped_blocks
+    scans = [block_to_variables(block) for block in stripped_blocks]
+    return scans
 
 
 def get_data_blocks(file_lines):
@@ -109,3 +111,14 @@ def strip_data_blocks(data_blocks):
         ] for line in b] for b in data_blocks]
         return blocks
     return []
+
+
+def block_to_variables(block):
+    """Takes a data block (a list of lists of floats) and turns them into two
+    inferi Variable objects - one for the wavelengths, and one for the cd (with
+    associated error)."""
+
+    wavelength, cd, error = [[line[n] for line in block] for n in range(3)]
+    wavelength = Variable(wavelength, name="wavelength")
+    cd = Variable(cd, error=error, name="cd")
+    return wavelength, cd
