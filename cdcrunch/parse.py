@@ -3,7 +3,7 @@
 from collections import Counter
 
 def get_data_blocks(file_lines):
-    """Takes the lines of a django file objecy and breaks it into sections
+    """Takes the lines of a django file object and breaks it into sections
     composed entirely of space separated numbers."""
 
     data_blocks, data_block = [], []
@@ -52,3 +52,44 @@ def remove_short_lines(data_blocks):
     return [b for b in data_blocks if len([
      line for line in b if len(line) >= 3
     ]) == len(b)]
+
+
+def strip_data_blocks(data_blocks):
+    """Takes a list of daya blocks, works out which column is the error, and
+    removes every value on every line apart from wavelength, cd, cd_error.
+    The function will start by assuming the third column is an error column. It
+    will decide a column is not an error column if it finds any negative numbers
+    in that column, or any numbers greater than 100. It will also discard a
+    column if it is entirely zero. It will go through each subsequent column,
+    using the same criteria, until it finds one that looks ok.
+    If no columns match, an error of zero is used."""
+
+    if data_blocks:
+        error_col = 2
+        while error_col > 0:
+            still_good = True
+            non_zero = False
+            for block in data_blocks:
+                for line in block:
+                    if error_col > len(line) - 1:
+                        error_col = -1
+                        still_good = False
+                        break
+                    if line[error_col] < 0 or line[error_col] > 100:
+                        error_col += 1
+                        still_good = False
+                        break
+                    if line[error_col] != 0:
+                        non_zero = True
+                    if not still_good: break # The line is no good
+                if not still_good: break # The block is no good
+            # All blocks have now been checked
+            if not non_zero:
+                error_col += 1
+                still_good = False
+            if still_good: break
+        blocks = [[line[:2] + [
+         line[error_col] if error_col > 0 else 0
+        ] for line in b] for b in data_blocks]
+        return blocks
+    return []

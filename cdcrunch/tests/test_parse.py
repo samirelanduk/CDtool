@@ -93,3 +93,101 @@ class ShortLineRemovalTests(TestCase):
          [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
          [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
         ])
+
+
+
+class DataBlockStrippingTests(TestCase):
+
+    def test_can_strip_zero_data_blocks(self):
+        self.assertEqual(strip_data_blocks([]), [])
+
+
+    def test_stripping_len_3_lines_does_nothing(self):
+        stripped_blocks = strip_data_blocks([
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
+        self.assertEqual(stripped_blocks, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
+
+
+    def test_stripping_just_uses_3_values_per_line(self):
+        stripped_blocks = strip_data_blocks([
+         [[3, 76, 1, 10], [4.5, 4, 1, 11], [76.8, 34, 1, 10]],
+         [[3, 76, 1, 9], [4.5, 4, 1, 3], [76.8, 34, 1, 8]],
+         [[3, 74, 1, 2], [4.5, 5, 1, 4], [76.8, 4, 1, 5]]
+        ])
+        self.assertEqual(stripped_blocks, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
+
+
+    def test_stripping_discards_negative_columns(self):
+        stripped_blocks = strip_data_blocks([
+         [[3, 76, 1, 1, 1], [4.5, 4, 1, 1, 1], [76.8, 34, 1, 1, 1]],
+         [[3, 76, 1, 1, 1], [4.5, 4, -1, 1, 1], [76.8, 34, 1, 1, 1]],
+         [[3, 74, 1, 1, 1], [4.5, 5, 1, 1, 1], [76.8, 4, 1, -1, 1]]
+        ])
+        self.assertEqual(stripped_blocks, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
+
+
+    def test_stripping_discards_100_columns(self):
+        stripped_blocks = strip_data_blocks([
+         [[3, 76, 1, 1, 1], [4.5, 4, 1, 1, 1], [76.8, 34, 1, 1, 1]],
+         [[3, 76, 1, 1, 1], [4.5, 4, 101, 1, 1], [76.8, 34, 1, 1, 1]],
+         [[3, 74, 1, 1, 1], [4.5, 5, 1, 1, 1], [76.8, 4, 1, 101, 1]]
+        ])
+        self.assertEqual(stripped_blocks, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
+
+
+    def test_stripping_discards_columns_that_are_entirely_zero(self):
+        stripped_blocks = strip_data_blocks([
+         [[3, 76, 0, 0, 1], [4.5, 4, 0, 0, 1], [76.8, 34, 0, 0, 1]],
+         [[3, 76, 0, 0, 1], [4.5, 4, 0, 0, 1], [76.8, 34, 0, 0, 1]],
+         [[3, 74, 0, 0, 1], [4.5, 5, 0, 0, 1], [76.8, 4, 0, 0, 1]]
+        ])
+        self.assertEqual(stripped_blocks, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
+
+
+    def test_stripping_handles_running_out_of_columns(self):
+        stripped_blocks = strip_data_blocks([
+         [[3, 76, 1, 1, 1], [4.5, 4, 1, 1, 1], [76.8, 34, 1, 1, 1]],
+         [[3, 76, 1, 1, 1], [4.5, 4, 101, 1, 1], [76.8, 34, 1, 1, 1]],
+         [[3, 74, 1, 1, 1], [4.5, 5, 1, 1, 1], [76.8, 4, 1, 101, -1]]
+        ])
+        self.assertEqual(stripped_blocks, [
+         [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]],
+         [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]],
+         [[3, 74, 0], [4.5, 5, 0], [76.8, 4, 0]]
+        ])
+
+
+    def test_stripping_handles_all_zeroes_columns(self):
+        stripped_blocks = strip_data_blocks([
+         [[3, 76, 0, 0, 0], [4.5, 4, 0, 0, 0], [76.8, 34, 0, 0, 0]],
+         [[3, 76, 0, 0, 0], [4.5, 4, 0, 0, 0], [76.8, 34, 0, 0, 0]],
+         [[3, 74, 0, 0, 0], [4.5, 5, 0, 0, 0], [76.8, 4, 0, 0, 0]]
+        ])
+        self.assertEqual(stripped_blocks, [
+         [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]],
+         [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]],
+         [[3, 74, 0], [4.5, 5, 0], [76.8, 4, 0]]
+        ])
