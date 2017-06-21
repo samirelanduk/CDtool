@@ -43,3 +43,12 @@ def remove_incorrect_wavelengths(data_blocks):
          b  for b in data_blocks if [l[0] for l in b] == correct_wavelengths
         ]
     return []
+
+
+def remove_short_lines(data_blocks):
+    """Takes a list of data blocks and removes those with fewer than three
+    values per line."""
+
+    return [b for b in data_blocks if len([
+     line for line in b if len(line) >= 3
+    ]) == len(b)]

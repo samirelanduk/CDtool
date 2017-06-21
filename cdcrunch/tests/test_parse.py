@@ -74,3 +74,22 @@ class IncorrectWavelengthRemovalTests(TestCase):
          [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
          [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
         ])
+
+
+
+class ShortLineRemovalTests(TestCase):
+
+    def test_can_filter_zero_data_blocks(self):
+        self.assertEqual(remove_short_lines([]), [])
+
+
+    def test_can_remove_short_lines(self):
+        filtered_blocks = remove_short_lines([
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 76], [4.5, 4], [76.8, 34]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
+        self.assertEqual(filtered_blocks, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+        ])
