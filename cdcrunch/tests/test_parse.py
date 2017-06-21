@@ -1,7 +1,45 @@
-from django.test import TestCase
+from unittest.mock import patch, Mock
+from cdtool.tests import ViewTest
 from cdcrunch.parse import *
 
-class DataGrouperTests(TestCase):
+class AllScanExtractionFromFileTests(ViewTest):
+
+    @patch("cdcrunch.parse.get_data_blocks")
+    @patch("cdcrunch.parse.remove_short_data_blocks")
+    @patch("cdcrunch.parse.remove_incorrect_wavelengths")
+    @patch("cdcrunch.parse.remove_short_lines")
+    @patch("cdcrunch.parse.strip_data_blocks")
+    def test_extractor_calls_correct_functions(self, *mocks):
+        data_blocks = Mock()
+        len_filtered_data_blocks = Mock()
+        wav_filtered_data_blocks = Mock()
+        line_filtered_data_blocks = Mock()
+        stripped_data_blocks = Mock()
+        mock_strip, mock_line_filter, mock_wav_filter, mock_len_filter, mock_get = mocks
+        mock_get.return_value = data_blocks
+        mock_len_filter.return_value = len_filtered_data_blocks
+        mock_wav_filter.return_value = wav_filtered_data_blocks
+        mock_line_filter.return_value = line_filtered_data_blocks
+        mock_strip.return_value = stripped_data_blocks
+        series = extract_all_scans(self.test_file)
+        stripped_lines = [
+         "$MDCDATA:1:14:2:3:4:9",
+         "100 200 300",
+         "X  CD_Signal  CD_Error  CD_Current_(Abs)",
+         "279.000  1.0  0.5  1.013  -0.000  242.9  19.98",
+         "278.000  -4.0  0.4  1.013  0.000  243.2  19.99",
+         "277.000  12.0  0.3  1.013  0.000  243.5  19.99"
+        ]
+        mock_get.assert_called_with(stripped_lines)
+        mock_len_filter.assert_called_with(data_blocks)
+        mock_wav_filter.assert_called_with(len_filtered_data_blocks)
+        mock_line_filter.assert_called_with(wav_filtered_data_blocks)
+        mock_strip.assert_called_with(line_filtered_data_blocks)
+        self.assertIs(series, stripped_data_blocks)
+
+
+
+class DataGrouperTests(ViewTest):
 
     def test_can_find_data_blocks(self):
         data_blocks = get_data_blocks([
@@ -36,7 +74,7 @@ class DataGrouperTests(TestCase):
 
 
 
-class ShortDataBlockRemovalTests(TestCase):
+class ShortDataBlockRemovalTests(ViewTest):
 
     def test_can_filter_zero_data_blocks(self):
         self.assertEqual(remove_short_data_blocks([]), [])
@@ -58,7 +96,7 @@ class ShortDataBlockRemovalTests(TestCase):
 
 
 
-class IncorrectWavelengthRemovalTests(TestCase):
+class IncorrectWavelengthRemovalTests(ViewTest):
 
     def test_can_filter_zero_data_blocks(self):
         self.assertEqual(remove_incorrect_wavelengths([]), [])
@@ -77,7 +115,7 @@ class IncorrectWavelengthRemovalTests(TestCase):
 
 
 
-class ShortLineRemovalTests(TestCase):
+class ShortLineRemovalTests(ViewTest):
 
     def test_can_filter_zero_data_blocks(self):
         self.assertEqual(remove_short_lines([]), [])
@@ -96,7 +134,7 @@ class ShortLineRemovalTests(TestCase):
 
 
 
-class DataBlockStrippingTests(TestCase):
+class DataBlockStrippingTests(ViewTest):
 
     def test_can_strip_zero_data_blocks(self):
         self.assertEqual(strip_data_blocks([]), [])

@@ -2,6 +2,22 @@
 
 from collections import Counter
 
+def extract_all_scans(django_file):
+    """Takes a Django file object and extracts all the CD scans from it. This
+    will be a list of scans, with each scan being a list of wavelength
+    measurments, with each measurment being of the form
+    [wavelength, cd, cd_error]."""
+
+    raw_lines = list(django_file)
+    file_lines = [line.decode().strip() for line in raw_lines if line.strip()]
+    data_blocks = get_data_blocks(file_lines)
+    filtered_blocks = remove_short_data_blocks(data_blocks)
+    filtered_blocks = remove_incorrect_wavelengths(filtered_blocks)
+    filtered_blocks = remove_short_lines(filtered_blocks)
+    stripped_blocks = strip_data_blocks(filtered_blocks)
+    return stripped_blocks
+
+
 def get_data_blocks(file_lines):
     """Takes the lines of a django file object and breaks it into sections
     composed entirely of space separated numbers."""
