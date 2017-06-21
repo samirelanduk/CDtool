@@ -16,3 +16,13 @@ def get_data_blocks(file_lines):
                 data_block = []
     if data_block: data_blocks.append(data_block)
     return data_blocks
+
+
+def remove_short_data_blocks(data_blocks):
+    """Takes a list of data blocks, identifies the longest one, and removes
+    groups shorter than that."""
+
+    if data_blocks:
+        longest_length = len(sorted(data_blocks, key=lambda k: len(k))[-1])
+        return [group for group in data_blocks if len(group) == longest_length]
+    return []

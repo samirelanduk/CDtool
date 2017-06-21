@@ -1,5 +1,5 @@
 from django.test import TestCase
-from cdcrunch.parse import get_data_blocks
+from cdcrunch.parse import *
 
 class DataGrouperTests(TestCase):
 
@@ -24,7 +24,7 @@ class DataGrouperTests(TestCase):
         ])
 
 
-    def test_data_blocks_returns_nothing_if_no_float_groups(self):
+    def test_data_blocks_returns_nothing_if_no_data_blocks(self):
         data_blocks = get_data_blocks([
          "Irrelevant string1",
          "Irrelevant string2",
@@ -33,3 +33,25 @@ class DataGrouperTests(TestCase):
          "String 4"
         ])
         self.assertEqual(data_blocks, [])
+
+
+
+class ShortDataBlockRemovalTests(TestCase):
+
+    def test_can_filter_zero_data_blocks(self):
+        self.assertEqual(remove_short_data_blocks([]), [])
+
+
+    def test_can_remove_short_groups(self):
+        filtered_blocks = remove_short_data_blocks([
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[67.4, 45, 1], [45.6, 4, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]],
+         [[7.4, 7.4, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+        ])
+        self.assertEqual(filtered_blocks, [
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
+         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]],
+         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]]
+        ])
