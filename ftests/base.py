@@ -40,7 +40,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         lines = [l for l in lines if l[:3].isdigit()]
         input_data = [(
          float(l.split()[0]), float(l.split()[1]), float(l.split()[2])
-        ) for l in lines][::-1]
+        ) for l in lines]
         return input_data
 
 

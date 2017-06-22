@@ -6,6 +6,8 @@ from .base import FunctionalTest
 class SingleScanTests(FunctionalTest):
 
     def test_can_crunch_single_scan(self):
+        # Get expected data
+        input_data = self.get_single_scan_from_file("single-sample.dat")
         # The user goes to the main page
         self.get("/")
 
@@ -65,14 +67,14 @@ class SingleScanTests(FunctionalTest):
         self.check_visible_line_series_count(chart_div, 1)
 
         # The line series matches the scan in the input data
-        self.check_line_matches_data("sample", [w[:2] for w in input_data])
+        self.check_line_matches_data("sample0", [w[:2] for w in input_data])
 
         # There is a single error series
         self.check_visible_area_series_count(chart_div, 1)
 
         # The error series matches the scan error in the input data
         self.check_error_matches_data(
-         "sample_error",
+         "sample_error0",
          [[w[0], w[1] - w[2], w[1] + w[2]] for w in input_data]
         )
 

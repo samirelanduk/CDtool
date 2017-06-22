@@ -13,7 +13,6 @@ class UrlTest(TestCase):
 class ViewTest(TestCase):
 
     def setUp(self):
-
         self.test_file = SimpleUploadedFile(
          "single_scan.dat",
          b"""$MDCDATA:1:14:2:3:4:9
@@ -23,3 +22,13 @@ class ViewTest(TestCase):
          278.000  -4.0  0.4  1.013  0.000  243.2  19.99
          277.000  12.0  0.3  1.013  0.000  243.5  19.99"""
         )
+
+        self.sample = {
+         "name": "",
+         "values": [],
+         "error": [],
+         "color": "#4A9586",
+         "width": 1.5,
+         "raw": {},
+         "baseline": {}
+        }

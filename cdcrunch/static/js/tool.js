@@ -22,7 +22,33 @@ function assignFileListener() {
 	});
 }
 
-function makeChart(title, xMin, xMax) {
+function makeChart(title, xMin, xMax, data) {
+	var series = [];
+	for (var i = 0; i < data.length; i++) {
+		series.push({
+			data: data[i].errors,
+			id: "sample_error" + i,
+			color: data[i].color,
+			type: "arearange",
+			fillOpacity: 0.2,
+			lineWidth: 0,
+			enableMouseTracking: false
+		});
+		series.push({
+	    data: data[i].values,
+	    id: "sample" + i,
+	    color: data[i].color,
+	    lineWidth: data[i].width,
+	    marker: {
+	      enabled: false,
+	      states: {
+	        hover: {
+	          enabled: false
+	        }
+	      }
+			}
+    });
+	}
 	var chart = Highcharts.chart("chart", {
 		title: {
 			text: title
@@ -82,7 +108,7 @@ function makeChart(title, xMin, xMax) {
       headerFormat: '<span style="padding:0">{point.x} nm<br></span>',
       pointFormat: '<span style="padding:0"><b>{point.y:.2f}</b></span>',
     },
-    series: [{}]
+    series: series
   });
   return chart;
 }
