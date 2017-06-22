@@ -15,14 +15,14 @@
 {% endblock %}
 
 {% block main %}
-<form id="input" method="POST">
+<form id="input" method="POST" enctype="multipart/form-data">
 
   <div class="sample-input">
     <div class="scans-input">
       <h2>Upload Sample Scans</h2>
-      <input type="file" name="sample-files" id="sample-files"
+      <input type="file" name="raw-files" id="raw-files"
        data-multiple-caption="{count} files selected" multiple>
-      <label for="sample-files">
+      <label for="raw-files">
          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" fill="#FFFFFF">
            <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3
            11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8
@@ -52,7 +52,7 @@
 <div id="output">
   <div id="chart">
   </div>
-  <script>var chart = makeChart("{{title}}");</script>
+  <script>var chart = makeChart("{{title}}", {{x_min}}, {{x_max}});</script>
   <div id="chart-config">
   </div>
   <div id="download">

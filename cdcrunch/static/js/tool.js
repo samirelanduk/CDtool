@@ -21,9 +21,8 @@ function assignFileListener() {
 			});
 	});
 }
-assignFileListener();
 
-function makeChart(title) {
+function makeChart(title, xMin, xMax) {
 	var chart = Highcharts.chart("chart", {
 		title: {
 			text: title
@@ -49,8 +48,8 @@ function makeChart(title) {
       }
     },
     xAxis: {
-      min: 100,
-      max: 300,
+      min: xMin,
+      max: xMax,
       gridLineWidth: 1,
       gridLineColor: "#EEEEEE",
       gridLineDashStyle: "ShortDash",
@@ -83,7 +82,7 @@ function makeChart(title) {
       headerFormat: '<span style="padding:0">{point.x} nm<br></span>',
       pointFormat: '<span style="padding:0"><b>{point.y:.2f}</b></span>',
     },
-    series: []
+    series: [{}]
   });
   return chart;
 }
@@ -95,4 +94,5 @@ $( document ).ready(function() {
 	    scrollTop: $("#chart").offset().top
 	  }, 800);
 	}
+	assignFileListener();
 });
