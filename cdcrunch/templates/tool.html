@@ -68,7 +68,11 @@
     </div>
     {% endfor %}
   </div>
-  <div id="download">
+  <form id="download" method="POST">
+    <input type="hidden" name="series" value="{{file_series}}">
+    <input type="hidden" name="name" value="{{title}}">
+    {% csrf_token %}
+    <input type="submit" id="download-button" value="Download">
   </div>
 </div>
 {% endif %}

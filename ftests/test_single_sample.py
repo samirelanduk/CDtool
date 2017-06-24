@@ -98,6 +98,17 @@ class SingleScanTests(FunctionalTest):
          chart_div, series_config, "Main Series", "sample0", "sample_error0"
         )
 
+        # The download div has a button for downloading a datafile
+        download_button = download_div.find_element_by_id("download-button")
+
+        # Clicking does not make the user leave the page
+        download_button.click()
+        self.check_page("/")
+        self.check_chart_appears(chart_div)
+
+        # This downloads a file with the correct data
+        self.check_file_has_data("test_experiment.dat", input_data[::-1])
+
 
     def test_can_crunch_single_gen_scan(self):
         pass
