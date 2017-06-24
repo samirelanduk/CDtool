@@ -3,6 +3,7 @@ function assignFileListener() {
 		By Osvaldas Valutis, www.osvaldas.info
 		Available for use under the MIT License
 	*/
+	// This function deals with the fancy file inputs
 	var inputs = document.querySelectorAll("input[type=file]");
 	Array.prototype.forEach.call(inputs, function(input) {
 		var label	 = input.nextElementSibling, labelVal = label.innerHTML;
@@ -22,7 +23,11 @@ function assignFileListener() {
 	});
 }
 
+
 function makeChart(title, xMin, xMax, data) {
+	/* Creates the Hghcharts chart from the data given to it */
+
+	// Set up series objects
 	var series = [];
 	for (var i = 0; i < data.length; i++) {
 		series.push({
@@ -49,6 +54,8 @@ function makeChart(title, xMin, xMax, data) {
 			}
     });
 	}
+
+	// Create the chart
 	var chart = Highcharts.chart("chart", {
 		title: {
 			text: title
@@ -113,12 +120,61 @@ function makeChart(title, xMin, xMax, data) {
   return chart;
 }
 
-$( document ).ready(function() {
+
+function updateSeries() {
+	/* Updates the chart based on what config options are currently selected */
+
+  $(".series-config").each(function() {
+    var series = chart.get($(this).attr("data-series"));
+		console.log($(this).attr("data-series"));
+    var series_button = $(this).find(".series-option");
+    var error = chart.get($(this).attr("data-error-series"));
+    var error_button = $(this).find(".error-option");
+    if (series_button.hasClass("off")) {
+      series.hide();
+      error.hide();
+    } else {
+      series.show();
+      if ((error_button.hasClass("off"))) {
+        error.hide();
+      } else {
+        error.show();
+      }
+    }
+  })
+}
+
+
+$(document).ready(function() {
   // Scroll to the top of the chart
 	if ($("#chart").length) {
 	  $("html, body").animate({
 	    scrollTop: $("#chart").offset().top
 	  }, 800);
 	}
+
+	// Assign file input listeners
 	assignFileListener();
+
+	// Add event handlers for all the series config buttons
+  $(".series-config").each(function() {
+    var series_button = $(this).find(".series-option");
+    var error_button = $(this).find(".error-option");
+    series_button.click(function () {
+      if ($(this).hasClass("on")) {
+        $(this).addClass("off").removeClass("on");
+      } else {
+        $(this).addClass("on").removeClass("off");
+      }
+      updateSeries();
+    });
+    error_button.click(function () {
+      if ($(this).hasClass("on")) {
+        $(this).addClass("off").removeClass("on");
+      } else {
+        $(this).addClass("on").removeClass("off");
+      }
+      updateSeries();
+    });
+  });
 });

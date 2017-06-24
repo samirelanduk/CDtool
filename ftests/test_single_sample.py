@@ -87,6 +87,17 @@ class SingleScanTests(FunctionalTest):
         sample_title = sample_div.find_element_by_class_name("sample-title")
         self.assertEqual(sample_title.text, "A very simple sample")
 
+        # There is a single series config
+        series_configs_div = sample_div.find_element_by_class_name("series-configs")
+        series_configs = series_configs_div.find_elements_by_class_name("series-config")
+        self.assertEqual(len(series_configs), 1)
+        series_config = series_configs[0]
+
+        # This series config controls the series
+        self.check_config_div_controls_series(
+         chart_div, series_config, "Main Series", "sample0", "sample_error0"
+        )
+
 
     def test_can_crunch_single_gen_scan(self):
         pass

@@ -264,12 +264,12 @@ class FunctionalTest(StaticLiveServerTestCase):
             )
 
 
-    def check_config_div_controls_series(self, chart_div, config, series_name, error_name, title_text):
+    def check_config_div_controls_series(self, chart_div, config, title_text, series_name, error_name):
         lines_at_start = self.count_visible_lines(chart_div)
         areas_at_start = self.count_visible_areas(chart_div)
 
         # The config div has a title and two buttons
-        title = config.find_element_by_class_name("config-title")
+        title = config.find_element_by_class_name("series-title")
         self.assertEqual(title.text, title_text)
         buttons = config.find_elements_by_tag_name("button")
         self.assertEqual(len(buttons), 2)

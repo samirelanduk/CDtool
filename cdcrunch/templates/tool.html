@@ -57,6 +57,14 @@
     {% for sample in data %}
     <div class="sample-config">
       <div class="sample-title">{{ sample.name }}</div>
+      <div class="series-configs">
+        <div class="series-config" data-series="sample{{forloop.counter0}}"
+         data-error-series="sample_error{{forloop.counter0}}">
+          <div class="series-title">Main Series</div>
+          <button class="series-option on">Toggle Series</button>
+          <button class="error-option on">Toggle Error</button>
+        </div>
+      </div>
     </div>
     {% endfor %}
   </div>
