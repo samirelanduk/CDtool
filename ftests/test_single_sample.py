@@ -78,7 +78,14 @@ class SingleScanTests(FunctionalTest):
          [[w[0], w[1] - w[2], w[1] + w[2]] for w in input_data]
         )
 
+        # The config div has one sample div
+        sample_divs = config_div.find_elements_by_class_name("sample-config")
+        self.assertEqual(len(sample_divs), 1)
+        sample_div = sample_divs[0]
 
+        # That sample div has a title with the sample's name
+        sample_title = sample_div.find_element_by_class_name("sample-title")
+        self.assertEqual(sample_title.text, "A very simple sample")
 
 
     def test_can_crunch_single_gen_scan(self):

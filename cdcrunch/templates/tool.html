@@ -54,6 +54,11 @@
   </div>
   <script>var chart = makeChart("{{title}}", {{x_min}}, {{x_max}}, {{data|safe}});</script>
   <div id="chart-config">
+    {% for sample in data %}
+    <div class="sample-config">
+      <div class="sample-title">{{ sample.name }}</div>
+    </div>
+    {% endfor %}
   </div>
   <div id="download">
   </div>
