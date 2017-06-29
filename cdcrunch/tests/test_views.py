@@ -71,7 +71,14 @@ class ToolPageViewTests(ViewTest):
 
     def test_tool_sends_error_if_no_files_given(self):
         response = self.client.post("/")
-        self.assertIn("didn't submiy any files", response.context["error_text"])
+        self.assertIn("didn't submit any files", response.context["error_text"])
+
+
+    @patch("cdcrunch.parse.extract_all_scans")
+    def test_tool_sends_error_if_no_scans_found(self, mock_extract):
+        mock_extract.return_value = []
+        response = self.client.post("/", data={"raw-files": self.test_file})
+        self.assertIn("no scans", response.context["error_text"])
 
 
 

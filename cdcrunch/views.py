@@ -23,6 +23,10 @@ def tool_page(request):
              request, "tool.html", {"error_text": "You didn't submit any files."}
             )
         scans = parse.extract_all_scans(request.FILES.getlist("raw-files")[0])
+        if not scans:
+            return render(request, "tool.html", {
+             "error_text": "There were no scans found in the file(s) provided."
+            })
         scan = scans[0]
         data = series.copy()
         data["name"] = request.POST.get("sample-name", "")
