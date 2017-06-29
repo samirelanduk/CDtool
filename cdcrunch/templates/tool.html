@@ -16,6 +16,9 @@
 
 {% block main %}
 <form id="input" method="POST" enctype="multipart/form-data">
+  {% if error_text %}
+  <div class="error-message">{{ error_text}}</div>
+  {% endif %}
 
   <div class="sample-input">
     <div class="scans-input">

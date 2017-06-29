@@ -69,6 +69,11 @@ class ToolPageViewTests(ViewTest):
         ])
 
 
+    def test_tool_sends_error_if_no_files_given(self):
+        response = self.client.post("/")
+        self.assertIn("didn't submiy any files", response.context["error_text"])
+
+
 
 class DownloadViewTests(ViewTest):
 

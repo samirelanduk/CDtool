@@ -113,3 +113,13 @@ button {
 button.off {
   opacity: 0.5;
 }
+
+.error-message {
+  color: #D8000C;
+  background-color: #FFBABA;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-radius: 30px;
+  padding: 20px;
+  text-align: center;
+}

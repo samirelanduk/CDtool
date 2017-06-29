@@ -18,6 +18,10 @@ def tool_page(request):
     if request.method == "POST":
         if "series" in request.POST:
             return download_view(request)
+        if "raw-files" not in request.FILES:
+            return render(
+             request, "tool.html", {"error_text": "You didn't submit any files."}
+            )
         scans = parse.extract_all_scans(request.FILES.getlist("raw-files")[0])
         scan = scans[0]
         data = series.copy()
