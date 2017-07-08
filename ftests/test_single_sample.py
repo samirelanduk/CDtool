@@ -358,6 +358,53 @@ class MultipleScanTests(FunctionalTest):
          [[w[0], w[1] - w[2], w[1] + w[2]] for w in input_data]
         )
 
+        # The config div has one sample div
+        sample_divs = config_div.find_elements_by_class_name("sample-config")
+        self.assertEqual(len(sample_divs), 1)
+        sample_div = sample_divs[0]
+
+        # That sample div has a title with the sample's name
+        sample_title = sample_div.find_element_by_class_name("sample-title")
+        self.assertEqual(sample_title.text, "multi-scan")
+
+        # There is a series config for the main series
+        main_config = sample_div.find_elements_by_class_name("series-config")[0]
+        self.check_config_div_controls_series(
+         chart_div, main_config, "Main Series", "sample0", "sample_error0"
+        )
+
+        # There is a div for the scans
+        scans_div = sample_div.find_elements_by_class_name("scans-config")
+        self.assertEqual(len(scans_div), 1)
+        scans_div = scans_div[0]
+
+        # It has a button for toggling sample scan visibility
+        all_scan_toggle = scans_div.find_element_by_tag_name("button")
+        all_scan_toggle.click()
+        self.check_visible_line_series_count(chart_div, 4)
+        self.check_visible_area_series_count(chart_div, 4)
+        for button in scans_div.find_elements_by_tag_name("button"):
+            self.assertNotIn(" off", button.get_attribute("class"))
+        all_scan_toggle.click()
+        self.check_visible_line_series_count(chart_div, 1)
+        self.check_visible_area_series_count(chart_div, 1)
+        for button in scans_div.find_elements_by_tag_name("button"):
+            self.assertNotIn(" on", button.get_attribute("class"))
+
+        # There are configs for each scan
+        all_scan_toggle.click()
+        scan_configs = scans_div.find_elements_by_class_name("series-config")
+        self.assertEqual(len(scan_configs), 3)
+        for index, config in enumerate(scan_configs):
+            self.check_config_div_controls_series(
+             chart_div,
+             config,
+             "Scan #{}".format(index + 1),
+             "sample0_scan{}".format(index),
+             "sample_error0_scan{}".format(index)
+            )
+
+
 
     def test_can_crunch_multiple_files(self):
         pass

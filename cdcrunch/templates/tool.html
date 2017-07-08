@@ -61,12 +61,24 @@
     <div class="sample-config">
       <div class="sample-title">{{ sample.name }}</div>
       <div class="series-configs">
-        <div class="series-config" data-series="sample{{forloop.counter0}}"
-         data-error-series="sample_error{{forloop.counter0}}">
+        <!-- Main Config -->
+        <div class="series-config">
           <div class="series-title">Main Series</div>
-          <button class="series-option on">Toggle Series</button>
-          <button class="error-option on">Toggle Error</button>
+          <button class="series-button series-option on" data-series="sample{{forloop.counter0}}">Toggle Series</button>
+          <button class="series-button error-option on" data-series="sample_error{{forloop.counter0}}">Toggle Error</button>
         </div>
+        {% if sample.scans %}
+        <div class="scans-config">
+          <button class="multi-scan-toggle off">Toggle Scans</button>
+          {% for scan in sample.scans %}
+          <div class="series-config">
+            <div class="series-title">Scan #{{forloop.counter0|add:1}}</div>
+            <button class="series-button series-option off" data-series="sample{{forloop.parentloop.counter0}}_scan{{forloop.counter0}}">Toggle Series</button>
+            <button class="series-button error-option off" data-series="sample_error{{forloop.parentloop.counter0}}_scan{{forloop.counter0}}">Toggle Error</button>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
       </div>
     </div>
     {% endfor %}

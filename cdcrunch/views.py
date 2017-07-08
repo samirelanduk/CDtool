@@ -14,7 +14,7 @@ series = {
  "width": 0,
 }
 
-COLORS = ["#9C0F5F", "#C91B26", "#F2671F"]
+COLORS = ["#F2671F", "#9C0F5F", "#C91B26"]
 
 # Create your views here.
 def tool_page(request):
@@ -44,12 +44,12 @@ def tool_page(request):
         for wav, val in zip(*average)]
         data["scans"] = []
         if len(scans) > 1:
-            for scan in scans:
+            for index, scan in enumerate(scans):
                 scan[1] = scan[1].values(error=True)
                 d = series.copy()
                 del d["name"]
                 d["width"] = 1
-                d["color"] = COLORS.pop()
+                d["color"] = COLORS[index]
                 d["values"] = [[wav, val.value()] for wav, val in zip(*scan)]
                 d["errors"] = [[wav, *val.error_range()] for wav, val in zip(*scan)]
                 data["scans"].append(d)

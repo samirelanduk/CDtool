@@ -123,3 +123,15 @@ button.off {
   padding: 20px;
   text-align: center;
 }
+
+.scans-config {
+  border-radius: 10px;
+  display: inline-block;
+  border: 2px solid #4A9586;
+  padding: 5px;
+}
+
+.multi-scan-toggle {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}

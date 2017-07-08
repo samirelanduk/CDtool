@@ -29,30 +29,53 @@ function makeChart(title, xMin, xMax, data) {
 
 	// Set up series objects
 	var series = [];
-	for (var i = 0; i < data.length; i++) {
+	for (var s = 0; s < data.length; s++) {
+		// Add this series' main line
 		series.push({
-			data: data[i].errors,
-			id: "sample_error" + i,
-			color: data[i].color,
+			data: data[s].errors,
+			id: "sample_error" + s,
+			color: data[s].color,
 			type: "arearange",
 			fillOpacity: 0.2,
 			lineWidth: 0,
-			enableMouseTracking: false
+			enableMouseTracking: false,
+			zIndex: 99
 		});
 		series.push({
-	    data: data[i].values,
-	    id: "sample" + i,
-	    color: data[i].color,
-	    lineWidth: data[i].width,
+	    data: data[s].values,
+	    id: "sample" + s,
+	    color: data[s].color,
+	    lineWidth: data[s].width,
 	    marker: {
 	      enabled: false,
-	      states: {
-	        hover: {
-	          enabled: false
-	        }
-	      }
-			}
+	      states: {hover: {enabled: false}}
+			},
+			zIndex: 100
     });
+		// Add any scans for main series
+		for (var i = 0; i < data[s].scans.length; i++) {
+			series.push({
+				data: data[s].scans[i].errors,
+				id: "sample_error" + s + "_scan" + i,
+				color: data[s].scans[i].color,
+				type: "arearange",
+				fillOpacity: 0.2,
+				lineWidth: 0,
+				enableMouseTracking: false,
+				visible: false
+			});
+			series.push({
+		    data: data[s].scans[i].values,
+		    id: "sample" + s + "_scan" + i,
+		    color: data[s].scans[i].color,
+		    lineWidth: data[s].scans[i].width,
+		    marker: {
+		      enabled: false,
+		      states: {hover: {enabled: false}}
+				},
+				visible: false
+	    });
+		}
 	}
 
 	// Create the chart
@@ -120,30 +143,13 @@ function makeChart(title, xMin, xMax, data) {
   return chart;
 }
 
-
-function updateSeries() {
-	/* Updates the chart based on what config options are currently selected */
-
-  $(".series-config").each(function() {
-    var series = chart.get($(this).attr("data-series"));
-		console.log($(this).attr("data-series"));
-    var series_button = $(this).find(".series-option");
-    var error = chart.get($(this).attr("data-error-series"));
-    var error_button = $(this).find(".error-option");
-    if (series_button.hasClass("off")) {
-      series.hide();
-      error.hide();
-    } else {
-      series.show();
-      if ((error_button.hasClass("off"))) {
-        error.hide();
-      } else {
-        error.show();
-      }
-    }
-  })
+function toggleButton(button) {
+	if ($(button).hasClass("on")) {
+		$(button).addClass("off").removeClass("on");
+	} else {
+		$(button).addClass("on").removeClass("off");
+	}
 }
-
 
 $(document).ready(function() {
   // Scroll to the top of the chart
@@ -157,24 +163,58 @@ $(document).ready(function() {
 	assignFileListener();
 
 	// Add event handlers for all the series config buttons
-  $(".series-config").each(function() {
-    var series_button = $(this).find(".series-option");
-    var error_button = $(this).find(".error-option");
-    series_button.click(function () {
-      if ($(this).hasClass("on")) {
-        $(this).addClass("off").removeClass("on");
-      } else {
-        $(this).addClass("on").removeClass("off");
-      }
-      updateSeries();
+  $(".series-option").each(function() {
+    $(this).click(function () {
+      toggleButton(this);
+			var nextButton = $(this).next("button");
+			var series = chart.get($(this).attr("data-series"));
+			var errorSeries = chart.get($(nextButton).attr("data-series"));
+			if ($(this).hasClass("off")) {
+	      series.hide();
+				errorSeries.hide();
+	    } else {
+	      series.show();
+				if ($(nextButton).hasClass("on")) {
+					errorSeries.show();
+				}
+	    }
     });
-    error_button.click(function () {
-      if ($(this).hasClass("on")) {
-        $(this).addClass("off").removeClass("on");
-      } else {
-        $(this).addClass("on").removeClass("off");
-      }
-      updateSeries();
-    });
-  });
+	});
+
+	// Add event handlers for all the series error config buttons
+  $(".error-option").each(function() {
+    $(this).click(function () {
+      toggleButton(this);
+			var previousButton = $(this).prev("button");
+			var series = chart.get($(this).attr("data-series"));
+			var masterSeries = chart.get($(previousButton).attr("data-series"));
+			if ($(this).hasClass("off")) {
+	      series.hide();
+	    } else {
+				if ($(previousButton).hasClass("on")) {
+					series.show();
+				}
+	    }
+		});
+	});
+
+	// Add event handlers for all multi-scan toggles
+	$(".multi-scan-toggle").each(function() {
+		$(this).click(function() {
+			toggleButton(this);
+			var visible = $(this).hasClass("on");
+			var buttons = $(this).parent().find(".series-button");
+			buttons.each(function() {
+				var series = chart.get($(this).attr("data-series"));
+				if (visible) {
+					$(this).addClass("on").removeClass("off");
+					series.show();
+				} else {
+					$(this).addClass("off").removeClass("on");
+					series.hide();
+				}
+			});
+		})
+	});
+
 });
