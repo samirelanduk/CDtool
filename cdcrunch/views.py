@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+from inferi import Variable
 from django.shortcuts import render
 from django.http.response import HttpResponse
 from cdtool import version
@@ -8,10 +9,12 @@ from cdcrunch import parse, files
 series = {
  "name": "",
  "values": [],
- "error": [],
+ "errors": [],
  "color": "",
  "width": 0,
 }
+
+COLORS = ["#9C0F5F", "#C91B26", "#F2671F"]
 
 # Create your views here.
 def tool_page(request):
@@ -27,23 +30,37 @@ def tool_page(request):
             return render(request, "tool.html", {
              "error_text": "There were no scans found in the file(s) provided."
             })
-        scan = scans[0]
+        average = scans[0]
+        if len(scans) > 1:
+            average = [scans[0][0], Variable.average(*[scan[1] for scan in scans], sd_err=True)]
+        average[1] = average[1].values(error=True)
         data = series.copy()
         data["name"] = request.POST.get("sample-name", "")
         data["color"], data["width"] = "#4A9586", 1.5
         data["raw"], data["baseline"] = {}, {}
-        data["values"] = [[wav.value(), val.value()] for wav, val in zip(*scan)]
+        data["values"] = [[wav, val.value()] for wav, val in zip(*average)]
         data["errors"] = [
-         [wav.value(), *val.error_range()]
-        for wav, val in zip(*scan)]
+         [wav, *val.error_range()]
+        for wav, val in zip(*average)]
+        data["scans"] = []
+        if len(scans) > 1:
+            for scan in scans:
+                scan[1] = scan[1].values(error=True)
+                d = series.copy()
+                del d["name"]
+                d["width"] = 1
+                d["color"] = COLORS.pop()
+                d["values"] = [[wav, val.value()] for wav, val in zip(*scan)]
+                d["errors"] = [[wav, *val.error_range()] for wav, val in zip(*scan)]
+                data["scans"].append(d)
         file_series = [
-         [wav.value(), value.value(), value.error()] for wav, value in zip(*scan)
+         [wav, value.value(), value.error()] for wav, value in zip(*average)
         ][::-1]
         return render(request, "tool.html", {
          "output": True,
          "title": request.POST.get("exp-name", ""),
-         "x_min": scan[0].min(),
-         "x_max": scan[0].max(),
+         "x_min": average[0].min(),
+         "x_max": average[0].max(),
          "data": [data],
          "file_series": file_series
         })

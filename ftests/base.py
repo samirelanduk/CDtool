@@ -48,7 +48,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         with open("ftests/test_data/" + file_name) as f:
             lines = f.readlines()
         lines = [l for l in lines if l[:3].isdigit()]
-        input_data = [(
+        input_data =[(
          float(l.split()[0]), float(l.split()[1]), float(l.split()[5])
         ) for l in lines]
         return input_data
@@ -58,13 +58,15 @@ class FunctionalTest(StaticLiveServerTestCase):
         with open("ftests/test_data/" + file_name) as f:
             lines = f.readlines()
         lines = [l for l in lines if l[:3].isdigit()]
-        wavelengths = sorted(list(set([float(l.split()[0]) for l in lines])))
+        wavelengths = sorted(list(set([float(l.split()[0]) for l in lines])))[::-1]
         input_data = []
         for wav in wavelengths:
             relevant_lines = [l for l in lines if float(l.split()[0]) == wav]
-            values = [float(l.split()[1]) for l in relevant_lines]
-            mean = sum(values) / len(values)
-            sd = sqrt(sum([(val - mean) ** 2 for val in values]) / len(values))
+            values = [
+             (float(l.split()[1]), float(l.split()[2])) for l in relevant_lines
+            ]
+            mean = sum([v[0] for v in values]) / len(values)
+            sd = sqrt(sum([(val - mean) ** 2 for val, error in values]) / len(values))
             input_data.append([
              wav, mean, sd, values
             ])

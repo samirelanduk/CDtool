@@ -121,4 +121,4 @@ def block_to_variables(block):
     wavelength, cd, error = [[line[n] for line in block] for n in range(3)]
     wavelength = Variable(wavelength, name="wavelength")
     cd = Variable(cd, error=error, name="cd")
-    return wavelength, cd
+    return [wavelength, cd]

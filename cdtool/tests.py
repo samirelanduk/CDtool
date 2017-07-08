@@ -1,3 +1,4 @@
+from fuzz import Value
 from django.core.urlresolvers import resolve
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -26,9 +27,52 @@ class ViewTest(TestCase):
         self.sample = {
          "name": "",
          "values": [],
-         "error": [],
+         "errors": [],
+         "scans": [],
          "color": "#4A9586",
          "width": 1.5,
          "raw": {},
          "baseline": {}
         }
+
+
+    def check_data_equal(self, data1, data2):
+        # Check no fuzz values
+        self.assertNotIn("±", str(data1))
+        self.assertNotIn("±", str(data2))
+        
+        # Same number of samples
+        self.assertEqual(len(data1), len(data2))
+
+        # Samples equal
+        for sample1, sample2 in zip(data1, data2):
+            # Sample attributes equal
+            self.assertEqual(sample1["name"], sample2["name"])
+            self.assertEqual(sample1["color"], sample2["color"])
+            self.assertEqual(sample1["width"], sample2["width"])
+
+            # Sample values and error equal
+            self.assertEqual(len(sample1["values"]), len(sample2["values"]))
+            self.assertEqual(len(sample1["errors"]), len(sample2["errors"]))
+            for value1, value2 in zip(sample1["values"], sample2["values"]):
+                self.assertEqual(value1[0], value2[0])
+                self.assertAlmostEqual(value1[1], value2[1], delta=0.005)
+            for error1, error2 in zip(sample1["errors"], sample2["errors"]):
+                self.assertEqual(error1[0], error2[0])
+                self.assertAlmostEqual(error1[1], error2[1], delta=0.005)
+                self.assertAlmostEqual(error1[2], error2[2], delta=0.005)
+
+            # Sample scans equal
+            self.assertEqual(len(sample1["scans"]), len(sample2["scans"]))
+            for scan1, scan2 in zip(sample1["scans"], sample2["scans"]):
+                self.assertEqual(scan1["color"], scan2["color"])
+                self.assertEqual(scan1["width"], scan2["width"])
+                self.assertEqual(len(scan1["values"]), len(scan2["values"]))
+                self.assertEqual(len(scan1["errors"]), len(scan2["errors"]))
+                for value1, value2 in zip(scan1["values"], scan2["values"]):
+                    self.assertEqual(value1[0], value2[0])
+                    self.assertAlmostEqual(value1[1], value2[1], delta=0.005)
+                for error1, error2 in zip(scan1["errors"], scan2["errors"]):
+                    self.assertEqual(error1[0], error2[0])
+                    self.assertAlmostEqual(error1[1], error2[1], delta=0.005)
+                    self.assertAlmostEqual(error1[2], error2[2], delta=0.005)

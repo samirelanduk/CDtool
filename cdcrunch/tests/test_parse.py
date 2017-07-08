@@ -248,9 +248,9 @@ class DataBlockToInferiVariablesTests(ViewTest):
         wavelength, cd = inferi_variables
         self.assertIsInstance(wavelength, inferi.Variable)
         self.assertEqual(wavelength.name(), "wavelength")
-        self.assertEqual([val.value() for val in wavelength], [3, 4.5, 76.8])
-        self.assertEqual([val.error() for val in wavelength], [0, 0, 0])
+        self.assertEqual(wavelength.values(), (3, 4.5, 76.8))
+        self.assertEqual(wavelength.error(), (0, 0, 0))
         self.assertIsInstance(cd, inferi.Variable)
         self.assertEqual(cd.name(), "cd")
-        self.assertEqual([val.value() for val in cd], [76, 4, 34])
-        self.assertEqual([val.error() for val in cd], [1.2, 0.34, 0.9])
+        self.assertEqual(cd.values(), (76, 4, 34))
+        self.assertEqual(cd.error(), (1.2, 0.34, 0.9))
