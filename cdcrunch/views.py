@@ -14,7 +14,7 @@ series = {
  "width": 0,
 }
 
-COLORS = ["#F2671F", "#9C0F5F", "#C91B26"]
+COLORS = ["#F2671F", "#C91B26", "#9C0F5F"]
 
 # Create your views here.
 def tool_page(request):
@@ -25,7 +25,9 @@ def tool_page(request):
             return render(
              request, "tool.html", {"error_text": "You didn't submit any files."}
             )
-        scans = parse.extract_all_scans(request.FILES.getlist("raw-files")[0])
+        scans = []
+        for f in request.FILES.getlist("raw-files"):
+            scans += parse.extract_all_scans(f)
         if not scans:
             return render(request, "tool.html", {
              "error_text": "There were no scans found in the file(s) provided."

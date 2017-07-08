@@ -96,6 +96,40 @@ class ToolPageViewTests(ViewTest):
         self.check_data_equal(response.context["data"], [self.sample])
 
 
+    @patch("cdcrunch.parse.extract_all_scans")
+    def test_tool_sends_data_object_for_multiple_files(self, mock_extract):
+        mock_extract.side_effect = [
+         [[Variable(174, 173, 172), Variable(11, 13, 12, error=[0.3, 0.4, 0.2])]],
+         [[Variable(174, 173, 172), Variable(12, 9, 12.4, error=[0.3, 0.4, 0.2])]],
+         [[Variable(174, 173, 172), Variable(13, 8, 12.5, error=[0.3, 0.4, 0.2])]]
+        ]
+        self.sample["name"] = "Test Sample"
+        self.sample["values"] = [[174, 12], [173, 10], [172, 12.3]]
+        self.sample["errors"] = [
+         [174, 11.185, 12.816], [173, 7.84, 12.16], [172, 12.084, 12.516]
+        ]
+        self.sample["scans"] = [{
+         "values": [[174, 11], [173, 13], [172, 12]],
+         "errors": [[174, 10.7, 11.3], [173, 12.6, 13.4], [172, 11.8, 12.2]],
+         "width": 1,
+         "color": "#F2671F"
+        }, {
+         "values": [[174, 12], [173, 9], [172, 12.4]],
+         "errors": [[174, 11.7, 12.3], [173, 8.6, 9.4], [172, 12.2, 12.6]],
+         "width": 1,
+         "color": "#C91B26"
+        }, {
+         "values": [[174, 13], [173, 8], [172, 12.5]],
+         "errors": [[174, 12.7, 13.3], [173, 7.6, 8.4], [172, 12.3, 12.7]],
+         "width": 1,
+         "color": "#9C0F5F"
+        }]
+        response = self.client.post("/", data={
+         "raw-files": [self.test_file, self.test_file, self.test_file], "sample-name": "Test Sample"
+        })
+        self.check_data_equal(response.context["data"], [self.sample])
+
+
     def test_tool_sends_file_series(self):
         response = self.client.post("/", data={"raw-files": self.test_file})
         self.assertEqual(response.context["file_series"], [
