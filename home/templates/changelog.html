@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Changelog{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="/static/css/home.css">
+{% endblock %}
+
+{% block js %}
+{% endblock %}
+
+{% block main %}
+<h1>Changelog</h1>
+
+<div class="release">
+  <h2><a href="https://github.com/samirelanduk/CDtool/tree/v0.2"
+     target="_blank">0.2.0</a></h2>
+  <div class="release-date">?? July, 2017</div>
+  <ul>
+    <li>Removed sample/blank distinction.</li>
+    <li>Imporoved look and feel.</li>
+    <li>Added chart conmfiguration.</li>
+    <li>Added option to save/print chart as image.</li>
+  </ul>
+</div>
+
+<div class="release">
+  <h2><a href="https://github.com/samirelanduk/CDtool/tree/v0.1"
+     target="_blank">0.1.0</a></h2>
+  <div class="release-date">30 March, 2017</div>
+  <ul>
+    <li>Added basic averaging of multiple CD scans.</li>
+  </ul>
+</div>
+{% endblock %}

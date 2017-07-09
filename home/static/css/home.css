@@ -1,0 +1,17 @@
+.release {
+  border: 1.25px solid #D0D0D0;
+  padding: 20px 50px;
+  border-radius: 30px;
+  margin-bottom: 20px;
+  line-height: 1.5;
+  font-size: 120%;
+}
+
+.release h2 a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+.release-date {
+  font-style: italic;
+}

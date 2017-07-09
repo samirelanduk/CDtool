@@ -14,7 +14,9 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from cdcrunch.views import tool_page
+import home.views as home_views
 
 urlpatterns = [
+ url(r"^changelog/$", home_views.changelog_page, name="changelog_page"),
  url(r"^$", tool_page, name="tool_page")
 ]

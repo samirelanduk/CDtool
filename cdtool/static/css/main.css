@@ -19,6 +19,11 @@ header {
   margin: 0px;
 }
 
+#logo a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
 nav {
   display: none;
   width: 100%;
