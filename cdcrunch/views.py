@@ -14,7 +14,7 @@ series = {
  "width": 0,
 }
 
-COLORS = ["#F2671F", "#C91B26", "#9C0F5F"]
+COLORS = ["#F2671F", "#C91B26", "#9C0F5F"] * 30
 
 # Create your views here.
 def tool_page(request):

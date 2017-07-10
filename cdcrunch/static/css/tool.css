@@ -85,9 +85,17 @@ button {
   border: 0px;
 }
 
+.sample-config {
+  text-align: center;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
 .sample-title {
   text-align: center;
   font-weight: bold;
+  border-bottom: 1.25px solid #D0D0D0;
+  margin-bottom: 10px;
 }
 
 .series-title {
