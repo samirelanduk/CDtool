@@ -120,4 +120,23 @@ class ChangelogTests(FunctionalTest):
 class HelpTests(FunctionalTest):
 
     def test_help_structure(self):
-        pass
+        # The user goes to the main page
+        self.get("/")
+
+        # There is a link to the help page in the header, which they follow
+        nav = self.browser.find_element_by_tag_name("nav")
+        nav_links = nav.find_elements_by_tag_name("a")
+        nav_links[0].click()
+        self.check_page("/help/")
+
+        # There is a heading, and numerous sub-headings
+        h1 = self.browser.find_element_by_tag_name("h1")
+        self.assertIn("help", h1.text.lower())
+        h2s = self.browser.find_elements_by_tag_name("h2")
+        self.assertGreater(len(h2s), 2)
+
+        # They click the main logo to go back to the home page
+        header = self.browser.find_element_by_tag_name("header")
+        logo = header.find_element_by_id("logo")
+        logo.click()
+        self.check_page("/")

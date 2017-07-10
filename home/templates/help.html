@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Changelog{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="/static/css/home.css">
+{% endblock %}
+
+{% block js %}
+{% endblock %}
+
+{% block main %}
+<h1>Help</h1>
+
+<h2>Samples</h2>
+
+<p>CDtool can currently process a single sample. You can provide a single
+  machine scan, or multiple scans, which CDtool will average.</p>
+<p>Sample file(s) are provided by clicking the 'Upload Sample Files' button at
+  the top of the page. Each file can contain multiple scans, and multiple files
+  can be provided (currently CDtool supports
+  <a href="http://www.avivbiomedical.com/circular.php">AVIV</a> .dat files and
+  .gen files from the <a href="http://cdtools.cryst.bbk.ac.uk/">legacy
+  CDtool</a>).</p>
+<p>You can (and should) give the sample a name. You can also provide a name for
+  the experiment - this will be used as the title of the resultant chart. Both
+  of these names can be left blank if you so wish.</p>
+
+<h2>Chart Configuration</h2>
+
+<p>Once you click submit you will be presented with a chart of the circular
+  dichroism. If you provided a single scan, the line will represent that one
+  scan, and the area around it the error associated with that scan in the
+  file</p>
+<p>If you provided more than one scan, the line you see will be the average of
+  those scans, and the area around it will be be the standard deviation of the
+  original scans.</p>
+<p>Below the chart you will find options for toggling the appearance of the
+  different series, and their error. If there was only one scan there will only
+  be one set of configuration options, but if there were multiple scans there
+  will be options for toggling the visiblity of the scans and the average.</p>
+
+<h2>Outputs</h2>
+<p>You can save or print the chart in whatever state you like by clicking the
+  three horizontal lines in the upper right corner of the chart. A variety of
+  formats are supported.</p>
+<p>A data file can be downloaded by clicking the download button at the bottom.
+  This will contain the data for the averaged series only.</p>
+
+{% endblock %}

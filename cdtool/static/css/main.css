@@ -54,6 +54,11 @@ nav li {
   border: 1px solid #2c3e50;
 }
 
+nav a {
+  text-decoration: inherit;
+  color: inherit;
+}
+
 main {
   min-height: calc(75vh);
   padding: 20px;

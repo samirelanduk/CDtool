@@ -18,5 +18,6 @@ import home.views as home_views
 
 urlpatterns = [
  url(r"^changelog/$", home_views.changelog_page, name="changelog_page"),
+ url(r"^help/$", home_views.help_page, name="help_page"),
  url(r"^$", tool_page, name="tool_page")
 ]
