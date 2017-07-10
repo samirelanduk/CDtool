@@ -7,3 +7,7 @@ def changelog_page(request):
 
 def help_page(request):
     return render(request, "help.html")
+
+
+def about_page(request):
+    return render(request, "about.html")

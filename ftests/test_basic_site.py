@@ -140,3 +140,27 @@ class HelpTests(FunctionalTest):
         logo = header.find_element_by_id("logo")
         logo.click()
         self.check_page("/")
+
+
+
+class AboutTests(FunctionalTest):
+
+    def test_help_structure(self):
+        # The user goes to the main page
+        self.get("/")
+
+        # There is a link to the about page in the header, which they follow
+        nav = self.browser.find_element_by_tag_name("nav")
+        nav_links = nav.find_elements_by_tag_name("a")
+        nav_links[1].click()
+        self.check_page("/about/")
+
+        # There is a heading
+        h1 = self.browser.find_element_by_tag_name("h1")
+        self.assertIn("about", h1.text.lower())
+
+        # They click the main logo to go back to the home page
+        header = self.browser.find_element_by_tag_name("header")
+        logo = header.find_element_by_id("logo")
+        logo.click()
+        self.check_page("/")

@@ -13,3 +13,11 @@ class HelpViewTests(ViewTest):
     def test_help_view_uses_help_template(self):
         response = self.client.get("/help/")
         self.assertTemplateUsed(response, "help.html")
+
+
+
+class AboutViewTests(ViewTest):
+
+    def test_about_view_uses_about_template(self):
+        response = self.client.get("/about/")
+        self.assertTemplateUsed(response, "about.html")
