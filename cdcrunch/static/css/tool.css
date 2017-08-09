@@ -44,7 +44,16 @@ input[type=file] + label:hover {
 }
 
 label svg {
-  margin-right: 10px;
+  margin-right: auto;
+  display: block;
+  margin-left: auto;
+}
+
+label span {
+  text-align: center;
+  display: block;
+  margin-top: 5px;
+  font-size: 80%;
 }
 
 input[type=submit] {
@@ -142,4 +151,25 @@ button.off {
 .multi-scan-toggle {
   margin-top: 5px;
   margin-bottom: 5px;
+}
+
+
+
+@media only screen and (min-width: 568px) {
+  /* iPad and up */
+
+  label svg {
+    margin-right: 10px;
+    display: inline;
+    margin-left: 0px;
+  }
+
+  label span {
+    text-align: left;
+    display: inline;
+    margin-top: 0px;
+    font-size: 100%;
+  }
+
+
 }
