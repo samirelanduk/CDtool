@@ -45,6 +45,11 @@ class AllScanExtractionFromFileTests(ViewTest):
         self.assertEqual(series, [mock_variables.return_value] * 3)
 
 
+    def test_exctractor_handles_binary_data(self):
+        scans = extract_all_scans(self.binary_file)
+        self.assertEqual(scans, [])
+
+
 
 class DataGrouperTests(ViewTest):
 

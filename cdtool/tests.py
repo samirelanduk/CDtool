@@ -24,6 +24,10 @@ class ViewTest(TestCase):
          277.000  12.0  0.3  1.013  0.000  243.5  19.99"""
         )
 
+        self.binary_file = SimpleUploadedFile(
+         "binary.dat", b"\xfc"
+        )
+
         self.sample = {
          "name": "",
          "values": [],
@@ -40,7 +44,7 @@ class ViewTest(TestCase):
         # Check no fuzz values
         self.assertNotIn("±", str(data1))
         self.assertNotIn("±", str(data2))
-        
+
         # Same number of samples
         self.assertEqual(len(data1), len(data2))
 

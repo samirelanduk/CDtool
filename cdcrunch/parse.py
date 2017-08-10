@@ -10,14 +10,17 @@ def extract_all_scans(django_file):
     [wavelength, cd, cd_error]."""
 
     raw_lines = list(django_file)
-    file_lines = [line.decode().strip() for line in raw_lines if line.strip()]
-    data_blocks = get_data_blocks(file_lines)
-    filtered_blocks = remove_short_data_blocks(data_blocks)
-    filtered_blocks = remove_incorrect_wavelengths(filtered_blocks)
-    filtered_blocks = remove_short_lines(filtered_blocks)
-    stripped_blocks = strip_data_blocks(filtered_blocks)
-    scans = [block_to_variables(block) for block in stripped_blocks]
-    return scans
+    try:
+        file_lines = [line.decode().strip() for line in raw_lines if line.strip()]
+        data_blocks = get_data_blocks(file_lines)
+        filtered_blocks = remove_short_data_blocks(data_blocks)
+        filtered_blocks = remove_incorrect_wavelengths(filtered_blocks)
+        filtered_blocks = remove_short_lines(filtered_blocks)
+        stripped_blocks = strip_data_blocks(filtered_blocks)
+        scans = [block_to_variables(block) for block in stripped_blocks]
+        return scans
+    except UnicodeDecodeError:
+        return []
 
 
 def get_data_blocks(file_lines):
