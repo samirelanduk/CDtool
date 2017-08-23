@@ -95,5 +95,6 @@ def download_view(request):
 def produce_filename(title):
     """Takes an experiment title and returns a valid filename."""
 
+    title = title if title else "cdresults"
     return title.lower().replace(" ", "_").replace(":", "-").replace(
      "@", "-") + ".dat"

@@ -212,6 +212,9 @@ class DownloadViewTests(ViewTest):
 
 class FileNameProductionTests(ViewTest):
 
+    def test_can_peoduce_default_filename(self):
+        self.assertEqual(produce_filename(""), "cdresults.dat")
+
     def test_can_append_dat(self):
         self.assertEqual(produce_filename("string"), "string.dat")
 
