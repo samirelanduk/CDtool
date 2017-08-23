@@ -78,6 +78,12 @@ input[type=submit]:hover {
   transition: 0.5s;
 }
 
+#zoom-instructions {
+  text-align: center;
+  font-size: 70%;
+  color: #888888;
+}
+
 #chart {
   margin-bottom: 75px;
 }

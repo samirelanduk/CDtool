@@ -53,6 +53,7 @@
 
 {% if output %}
 <div id="output">
+  <div id="zoom-instructions">Click and drag to zoom</div>
   <div id="chart">
   </div>
   <script>var chart = makeChart("{{title}}", {{x_min}}, {{x_max}}, {{data|safe}});</script>
