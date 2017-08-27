@@ -15,7 +15,8 @@ subprocess.call(
 
 # What branch are we on?
 branch = subprocess.check_output("git branch", shell=True).decode()
-branch = branch.split("\n")[0].split()[1]
+branch = [line for line in branch.split("\n") if "*" in line][0]
+branch = branch.split()[1]
 
 # What files is git tracking?
 tracked_files = subprocess.check_output(
