@@ -1,10 +1,14 @@
 .release {
   border: 1.25px solid #D0D0D0;
   padding: 20px 50px;
-  border-radius: 30px;
+  border-radius: 20px;
   margin-bottom: 20px;
   line-height: 1.5;
-  font-size: 120%;
+  background-color: rgba(44, 62, 80, 0.05);
+}
+
+.release h2 {
+  margin-bottom: 5px;
 }
 
 .release h2 a {
@@ -14,6 +18,11 @@
 
 .release-date {
   font-style: italic;
+}
+
+.release ul {
+  list-style-type: circle;
+  padding-left: 40px;
 }
 
 p {
