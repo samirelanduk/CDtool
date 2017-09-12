@@ -42,11 +42,11 @@ It may record other things at each wavelength, such as the degree of 'tension' (
 
 So, at the end, you will have data that is a list of wavelengths, and for each wavelength there will be measurements associated. This data is referred to here as a **scan**. An example of a scan might be:
 
-`Wavelength (nm)   CD    Error    HT`
-`270               0.04  0.00021  0.124`
-`269               0.03  0.00065  0.127`
-`268               0.07  0.00009  0.140`
-`...`
+    Wavelength (nm)   CD    Error    HT
+    270               0.04  0.00021  0.124
+    269               0.03  0.00065  0.127
+    268               0.07  0.00009  0.140
+    ...
 
 Often multiple scans are taken back to back. That is, the last measurement is made, and then the machine goes back to the original wavelength and goes through them all again. The idea being that the scans will be averaged to get a more reliable picture.
 
@@ -79,4 +79,3 @@ Submitting this form will send a `POST` request to the `\` URL, with a field for
 Because the `\` URL is so heavily used, the view that it maps to simply passes the request on to different views depending on the nature of he request that is sent to it. For example, the root view will pass the request on to either the `root_get` view or the `root_post` view depending on the method used, with `root_get` being the view that returns the page described above.
 
 `root_post` in this case will see that scans are being uploaded and so will forward the request on to the `process_scans` view.
-
