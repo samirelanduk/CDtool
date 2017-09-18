@@ -1,70 +1,69 @@
-import inferi
+from inferi import Dataset
 from unittest.mock import patch, Mock
 from cdtool.tests import ViewTest
 from cdcrunch.parse import *
 
-class AllScanExtractionFromFileTests(ViewTest):
+class ScanExtractionTests(ViewTest):
 
-    @patch("cdcrunch.parse.get_data_blocks")
+    @patch("cdcrunch.parse.file_to_lines")
+    @patch("cdcrunch.parse.extract_data_blocks")
     @patch("cdcrunch.parse.remove_short_data_blocks")
     @patch("cdcrunch.parse.remove_incorrect_wavelengths")
     @patch("cdcrunch.parse.remove_short_lines")
     @patch("cdcrunch.parse.strip_data_blocks")
-    @patch("cdcrunch.parse.block_to_variables")
-    def test_extractor_calls_correct_functions(self, *mocks):
-        data_blocks = Mock()
-        len_filtered_data_blocks = Mock()
-        wav_filtered_data_blocks = Mock()
-        line_filtered_data_blocks = Mock()
-        stripped_data_blocks = [Mock(), Mock(), Mock()]
-        (mock_variables, mock_strip, mock_line_filter, mock_wav_filter,
-         mock_len_filter, mock_get) = mocks
-        mock_get.return_value = data_blocks
-        mock_len_filter.return_value = len_filtered_data_blocks
-        mock_wav_filter.return_value = wav_filtered_data_blocks
-        mock_line_filter.return_value = line_filtered_data_blocks
-        mock_strip.return_value = stripped_data_blocks
+    @patch("cdcrunch.parse.block_to_dataset")
+    def test_can_extract_scans(self, mock_data, mock_strip, mock_line, mock_wav,
+                               mock_short, mock_blocks, mock_lines):
+        mock_lines.return_value = ["line1", "line2", "line3"]
+        mock_blocks.return_value = ["b1", "b2", "b3", "b4", "b5", "b6"]
+        mock_short.return_value = ["b1", "b2", "b3", "b4", "b5"]
+        mock_wav.return_value = ["b1", "b2", "b3", "b4"]
+        mock_line.return_value = ["b1", "b2", "b3"]
+        mock_strip.return_value = ["1", "2", "3"]
+        dataset1, dataset2, dataset3 = Mock(), Mock(), Mock()
+        mock_data.side_effect = [dataset1, dataset2, dataset3]
+        scans = extract_scans(self.test_file)
+        mock_lines.assert_called_with(self.test_file)
+        mock_blocks.assert_called_with(["line1", "line2", "line3"])
+        mock_short.assert_called_with(["b1", "b2", "b3", "b4", "b5", "b6"])
+        mock_wav.assert_called_with(["b1", "b2", "b3", "b4", "b5"])
+        mock_line.assert_called_with(["b1", "b2", "b3", "b4"])
+        mock_strip.assert_called_with(["b1", "b2", "b3"])
+        mock_data.assert_any_call("1")
+        mock_data.assert_any_call("2")
+        mock_data.assert_any_call("3")
+        self.assertEqual(scans, [dataset1, dataset2, dataset3])
 
-        mock_variables.return_value = Mock()
-        series = extract_all_scans(self.test_file)
-        stripped_lines = [
+
+
+class FileToLinesTests(ViewTest):
+
+    def test_can_get_lines_from_file(self):
+        lines = file_to_lines(self.test_file)
+        self.assertEqual(lines, [
          "$MDCDATA:1:14:2:3:4:9",
          "100 200 300",
          "X  CD_Signal  CD_Error  CD_Current_(Abs)",
          "279.000  1.0  0.5  1.013  -0.000  242.9  19.98",
          "278.000  -4.0  0.4  1.013  0.000  243.2  19.99",
-         "277.000  12.0  0.3  1.013  0.000  243.5  19.99"
-        ]
-        mock_get.assert_called_with(stripped_lines)
-        mock_len_filter.assert_called_with(data_blocks)
-        mock_wav_filter.assert_called_with(len_filtered_data_blocks)
-        mock_line_filter.assert_called_with(wav_filtered_data_blocks)
-        mock_strip.assert_called_with(line_filtered_data_blocks)
-        for block in mock_strip.return_value:
-            mock_variables.assert_any_call(block)
-        self.assertEqual(series, [mock_variables.return_value] * 3)
+         "277.000  12.0  0.3  1.013  0.000  243.5  19.99",
+        ])
 
 
-    def test_exctractor_handles_binary_data(self):
-        scans = extract_all_scans(self.binary_file)
-        self.assertEqual(scans, [])
+    def test_empty_list_returned_if_file_is_binary(self):
+        lines = file_to_lines(self.binary_file)
+        self.assertEqual(lines, [])
 
 
 
-class DataGrouperTests(ViewTest):
+class DataBlockExtractionTests(ViewTest):
 
     def test_can_find_data_blocks(self):
-        data_blocks = get_data_blocks([
-         "Irrelevant string1",
-         "Irrelevant string2",
-         "3 76 34",
-         "4.5 4 32",
-         "76.8 34 3",
+        data_blocks = extract_data_blocks([
+         "Irrelevant string1", "Irrelevant string2",
+         "3 76 34", "4.5 4 32", "76.8 34 3",
          "More random data",
-         "67.4 45",
-         "45.6 4 4 4",
-         "67.6 string",
-         "7.4 7.4",
+         "67.4 45", "45.6 4 4 4", "67.6 string", "7.4 7.4",
          "String 4"
         ])
         self.assertEqual(data_blocks, [
@@ -74,13 +73,10 @@ class DataGrouperTests(ViewTest):
         ])
 
 
-    def test_data_blocks_returns_nothing_if_no_data_blocks(self):
-        data_blocks = get_data_blocks([
-         "Irrelevant string1",
-         "Irrelevant string2",
-         "More random data",
-         "67.6 string",
-         "String 4"
+    def test_can_get_zero_data_blocks(self):
+        data_blocks = extract_data_blocks([
+         "Irrelevant string1", "Irrelevant string2",
+         "More random data", "67.6 string", "String 4"
         ])
         self.assertEqual(data_blocks, [])
 
@@ -146,116 +142,212 @@ class ShortLineRemovalTests(ViewTest):
 
 
 
-class DataBlockStrippingTests(ViewTest):
+class BlockStrippingTests(ViewTest):
 
     def test_can_strip_zero_data_blocks(self):
         self.assertEqual(strip_data_blocks([]), [])
 
 
-    def test_stripping_len_3_lines_does_nothing(self):
+    @patch("cdcrunch.parse.is_possible_error_column")
+    def test_three_column_blocks_with_valid_error_unchanged(self, mock_check):
+        mock_check.return_value = True
         stripped_blocks = strip_data_blocks([
-         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+         [[3, 76, 1], [4.5, 4, 0.5], [76.8, 34, 1.2]],
+         [[3, 77, 0.9], [4.5, 3, 4], [76.8, 34, 1]],
+         [[3, 74, 17], [4.5, 5, 18], [76.8, 4, 19]]
         ])
+        mock_check.assert_called_with(
+         [1, 0.5, 1.2, 0.9, 4, 1, 17, 18, 19],
+         [76, 4, 34, 77, 3, 34, 74, 5, 4]
+        )
         self.assertEqual(stripped_blocks, [
-         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
+         [[3, 76, 1], [4.5, 4, 0.5], [76.8, 34, 1.2]],
+         [[3, 77, 0.9], [4.5, 3, 4], [76.8, 34, 1]],
+         [[3, 74, 17], [4.5, 5, 18], [76.8, 4, 19]]
         ])
 
 
-    def test_stripping_just_uses_3_values_per_line(self):
+    @patch("cdcrunch.parse.is_possible_error_column")
+    def test_three_column_blocks_with_invalid_error(self, mock_check):
+        mock_check.return_value = False
         stripped_blocks = strip_data_blocks([
-         [[3, 76, 1, 10], [4.5, 4, 1, 11], [76.8, 34, 1, 10]],
-         [[3, 76, 1, 9], [4.5, 4, 1, 3], [76.8, 34, 1, 8]],
-         [[3, 74, 1, 2], [4.5, 5, 1, 4], [76.8, 4, 1, 5]]
+         [[3, 76, 1], [4.5, 4, 0.5], [76.8, 34, 1.2]],
+         [[3, 77, 0.9], [4.5, 3, 4], [76.8, 34, 1]],
+         [[3, 74, 17], [4.5, 5, 18], [76.8, 4, 19]]
         ])
-        self.assertEqual(stripped_blocks, [
-         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
-        ])
-
-
-    def test_stripping_discards_negative_columns(self):
-        stripped_blocks = strip_data_blocks([
-         [[3, 76, 1, 1, 1], [4.5, 4, 1, 1, 1], [76.8, 34, 1, 1, 1]],
-         [[3, 76, 1, 1, 1], [4.5, 4, -1, 1, 1], [76.8, 34, 1, 1, 1]],
-         [[3, 74, 1, 1, 1], [4.5, 5, 1, 1, 1], [76.8, 4, 1, -1, 1]]
-        ])
-        self.assertEqual(stripped_blocks, [
-         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
-        ])
-
-
-    def test_stripping_discards_100_columns(self):
-        stripped_blocks = strip_data_blocks([
-         [[3, 76, 1, 1, 1], [4.5, 4, 1, 1, 1], [76.8, 34, 1, 1, 1]],
-         [[3, 76, 1, 1, 1], [4.5, 4, 101, 1, 1], [76.8, 34, 1, 1, 1]],
-         [[3, 74, 1, 1, 1], [4.5, 5, 1, 1, 1], [76.8, 4, 1, 101, 1]]
-        ])
-        self.assertEqual(stripped_blocks, [
-         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
-        ])
-
-
-    def test_stripping_discards_columns_that_are_entirely_zero(self):
-        stripped_blocks = strip_data_blocks([
-         [[3, 76, 0, 0, 1], [4.5, 4, 0, 0, 1], [76.8, 34, 0, 0, 1]],
-         [[3, 76, 0, 0, 1], [4.5, 4, 0, 0, 1], [76.8, 34, 0, 0, 1]],
-         [[3, 74, 0, 0, 1], [4.5, 5, 0, 0, 1], [76.8, 4, 0, 0, 1]]
-        ])
-        self.assertEqual(stripped_blocks, [
-         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 76, 1], [4.5, 4, 1], [76.8, 34, 1]],
-         [[3, 74, 1], [4.5, 5, 1], [76.8, 4, 1]]
-        ])
-
-
-    def test_stripping_handles_running_out_of_columns(self):
-        stripped_blocks = strip_data_blocks([
-         [[3, 76, 1, 1, 1], [4.5, 4, 1, 1, 1], [76.8, 34, 1, 1, 1]],
-         [[3, 76, 1, 1, 1], [4.5, 4, 101, 1, 1], [76.8, 34, 1, 1, 1]],
-         [[3, 74, 1, 1, 1], [4.5, 5, 1, 1, 1], [76.8, 4, 1, 101, -1]]
-        ])
+        mock_check.assert_called_with(
+         [1, 0.5, 1.2, 0.9, 4, 1, 17, 18, 19],
+         [76, 4, 34, 77, 3, 34, 74, 5, 4]
+        )
         self.assertEqual(stripped_blocks, [
          [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]],
-         [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]],
+         [[3, 77, 0], [4.5, 3, 0], [76.8, 34, 0]],
          [[3, 74, 0], [4.5, 5, 0], [76.8, 4, 0]]
         ])
 
 
-    def test_stripping_handles_all_zeroes_columns(self):
+    @patch("cdcrunch.parse.is_possible_error_column")
+    def test_first_valid_column_used(self, mock_check):
+        mock_check.return_value = True
         stripped_blocks = strip_data_blocks([
-         [[3, 76, 0, 0, 0], [4.5, 4, 0, 0, 0], [76.8, 34, 0, 0, 0]],
-         [[3, 76, 0, 0, 0], [4.5, 4, 0, 0, 0], [76.8, 34, 0, 0, 0]],
-         [[3, 74, 0, 0, 0], [4.5, 5, 0, 0, 0], [76.8, 4, 0, 0, 0]]
+         [[3, 76, 1, 9], [4.5, 4, 0.5, 9], [76.8, 34, 1.2, 9]],
+         [[3, 77, 0.9, 9], [4.5, 3, 4, 9], [76.8, 34, 1, 9]],
+         [[3, 74, 17, 9], [4.5, 5, 18, 9], [76.8, 4, 19, 9]]
         ])
+        mock_check.assert_any_call(
+         [1, 0.5, 1.2, 0.9, 4, 1, 17, 18, 19],
+         [76, 4, 34, 77, 3, 34, 74, 5, 4]
+        )
+        mock_check.assert_any_call(
+         [9] * 9,
+         [76, 4, 34, 77, 3, 34, 74, 5, 4]
+        )
+        self.assertEqual(stripped_blocks, [
+         [[3, 76, 1], [4.5, 4, 0.5], [76.8, 34, 1.2]],
+         [[3, 77, 0.9], [4.5, 3, 4], [76.8, 34, 1]],
+         [[3, 74, 17], [4.5, 5, 18], [76.8, 4, 19]]
+        ])
+
+
+    @patch("cdcrunch.parse.is_possible_error_column")
+    def test_can_skip_columns(self, mock_check):
+        mock_check.side_effect = [False, True]
+        stripped_blocks = strip_data_blocks([
+         [[3, 76, 1, 9], [4.5, 4, 0.5, 9], [76.8, 34, 1.2, 9]],
+         [[3, 77, 0.9, 9], [4.5, 3, 4, 9], [76.8, 34, 1, 9]],
+         [[3, 74, 17, 9], [4.5, 5, 18, 9], [76.8, 4, 19, 9]]
+        ])
+        mock_check.assert_any_call(
+         [1, 0.5, 1.2, 0.9, 4, 1, 17, 18, 19],
+         [76, 4, 34, 77, 3, 34, 74, 5, 4]
+        )
+        mock_check.assert_any_call(
+         [9] * 9,
+         [76, 4, 34, 77, 3, 34, 74, 5, 4]
+        )
+        self.assertEqual(stripped_blocks, [
+         [[3, 76, 9], [4.5, 4, 9], [76.8, 34, 9]],
+         [[3, 77, 9], [4.5, 3, 9], [76.8, 34, 9]],
+         [[3, 74, 9], [4.5, 5, 9], [76.8, 4, 9]]
+        ])
+
+
+    @patch("cdcrunch.parse.is_possible_error_column")
+    def test_can_discard_all_columns(self, mock_check):
+        mock_check.return_value = False
+        stripped_blocks = strip_data_blocks([
+         [[3, 76, 1, 9], [4.5, 4, 0.5, 9], [76.8, 34, 1.2, 9]],
+         [[3, 77, 0.9, 9], [4.5, 3, 4, 9], [76.8, 34, 1, 9]],
+         [[3, 74, 17, 9], [4.5, 5, 18, 9], [76.8, 4, 19, 9]]
+        ])
+        mock_check.assert_any_call(
+         [1, 0.5, 1.2, 0.9, 4, 1, 17, 18, 19],
+         [76, 4, 34, 77, 3, 34, 74, 5, 4]
+        )
+        mock_check.assert_any_call(
+         [9] * 9,
+         [76, 4, 34, 77, 3, 34, 74, 5, 4]
+        )
         self.assertEqual(stripped_blocks, [
          [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]],
-         [[3, 76, 0], [4.5, 4, 0], [76.8, 34, 0]],
+         [[3, 77, 0], [4.5, 3, 0], [76.8, 34, 0]],
          [[3, 74, 0], [4.5, 5, 0], [76.8, 4, 0]]
         ])
 
 
 
-class DataBlockToInferiVariablesTests(ViewTest):
+class ErrorColumnValidationTests(ViewTest):
 
-    def test_can_convert_data_block_to_inferi_variables(self):
-        inferi_variables = block_to_variables([
-         [3, 76, 1.2], [4.5, 4, 0.34], [76.8, 34, 0.9]
-        ])
-        wavelength, cd = inferi_variables
-        self.assertIsInstance(wavelength, inferi.Variable)
-        self.assertEqual(wavelength.name(), "wavelength")
-        self.assertEqual(wavelength.values(), (3, 4.5, 76.8))
-        self.assertEqual(wavelength.error(), (0, 0, 0))
-        self.assertIsInstance(cd, inferi.Variable)
-        self.assertEqual(cd.name(), "cd")
-        self.assertEqual(cd.values(), (76, 4, 34))
-        self.assertEqual(cd.error(), (1.2, 0.34, 0.9))
+    def test_discarding_of_negative_columns(self):
+        self.assertFalse(is_possible_error_column(
+         [0.6, 0.4, 0.3, -0.1, 0.6], [12, 13, 11, 9, 12]
+        ))
+        self.assertTrue(is_possible_error_column(
+         [0.6, 0.4, 0.3, 0.1, 0.6], [12, 13, 11, 9, 12]
+        ))
+
+
+    def test_discarding_of_all_zero_columns(self):
+        self.assertFalse(is_possible_error_column(
+         [0, 0, 0, 0, 0], [12, 13, 11, 9, 12]
+        ))
+        self.assertTrue(is_possible_error_column(
+         [0, 0, 0, 1, 0], [12, 13, 11, 9, 12]
+        ))
+
+
+    def test_discarding_of_too_large_values(self):
+        self.assertFalse(is_possible_error_column(
+         [0.6, 0.4, 0.3, 1.8, 0.6], [0.1, 0.6, -0.3, 0.01, -0.2]
+        ))
+        self.assertTrue(is_possible_error_column(
+         [0.6, 0.4, 0.3, 1.7, 0.6], [0.1, 0.6, -0.3, 0.01, -0.2]
+        ))
+
+
+
+class BlockToDatasetTests(ViewTest):
+
+    def test_can_convert_block_to_dataset(self):
+        block = [[3, 76, 1], [4.5, 4, 2], [76.8, 34, 3]]
+        dataset = block_to_dataset(block)
+        self.assertIsInstance(dataset, Dataset)
+        self.assertEqual(len(dataset.variables()), 2)
+        self.assertEqual(dataset.variables()[0].values(), (3, 4.5, 76.8))
+        self.assertEqual(dataset.variables()[0].error(), (0, 0, 0))
+        self.assertEqual(dataset.variables()[1].values(), (76, 4, 34))
+        self.assertEqual(dataset.variables()[1].error(), (1, 2, 3))
+
+
+
+class DatasetToDictTests(ViewTest):
+
+    def setUp(self):
+        ViewTest.setUp(self)
+        wav = Variable(180, 179, 178)
+        cd = Variable(1, -1, 4, error=[0.5, 1.1, 0.2])
+        self.dataset = Dataset(wav, cd)
+
+
+    def test_can_convert_dataset_to_dict(self):
+        json = dataset_to_dict(self.dataset)
+        self.assertEqual(json, {
+         "series": [[178, 4], [179, -1], [180, 1]],
+         "error": [[178, 3.8, 4.2], [179, -2.1, 0.1], [180, 0.5, 1.5]],
+         "linewidth": 1,
+         "color": "#000000",
+         "name": ""
+        })
+
+
+    def test_can_set_linewidth(self):
+        json = dataset_to_dict(self.dataset, linewidth=2)
+        self.assertEqual(json, {
+         "series": [[178, 4], [179, -1], [180, 1]],
+         "error": [[178, 3.8, 4.2], [179, -2.1, 0.1], [180, 0.5, 1.5]],
+         "linewidth": 2,
+         "color": "#000000",
+         "name": ""
+        })
+
+
+    def test_can_set_color(self):
+        json = dataset_to_dict(self.dataset, color="#FF00FF")
+        self.assertEqual(json, {
+         "series": [[178, 4], [179, -1], [180, 1]],
+         "error": [[178, 3.8, 4.2], [179, -2.1, 0.1], [180, 0.5, 1.5]],
+         "linewidth": 1,
+         "color": "#FF00FF",
+         "name": ""
+        })
+
+
+    def test_can_set_color(self):
+        json = dataset_to_dict(self.dataset, name="Samplename")
+        self.assertEqual(json, {
+         "series": [[178, 4], [179, -1], [180, 1]],
+         "error": [[178, 3.8, 4.2], [179, -2.1, 0.1], [180, 0.5, 1.5]],
+         "linewidth": 1,
+         "color": "#000000",
+         "name": "Samplename"
+        })

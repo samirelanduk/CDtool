@@ -78,4 +78,14 @@ Submitting this form will send a `POST` request to the `\` URL, with a field for
 
 Because the `\` URL is so heavily used, the view that it maps to simply passes the request on to different views depending on the nature of he request that is sent to it. For example, the root view will pass the request on to either the `root_get` view or the `root_post` view depending on the method used, with `root_get` being the view that returns the page described above.
 
-`root_post` in this case will see that scans are being uploaded and so will forward the request on to the `process_scans` view.
+`root_post` in this case will see that scans are being uploaded and so will forward the request on to the `root_parse` view.
+
+The uploaded file is then passed to the `extract_scans` function. This function takes a file, and returns one or more inferior `Dataset` objects, one for each scan in the file. It does this as follows:
+
+1. The file is turned into a list of string lines, stripped of whitespace at both ends. Blank lines are ignored here.
+2. Zero or more 'data blocks' are pulled out from the lines. These are consecutive lines composed solely of whitespace separated numbers. Each one of these is a potential scan.
+3. CDtool assumes that all scans in a file will be of the same length, so the function then works out which is the longest data block, and removes any data blocks that are shorter than it.
+4. CDtool also assumes that all scans in a file will have the same first column (the wavelengths). So, it then goes through each potential data blocks, get the most common first column, and removes those which don't match.
+5. CDtool *also* assumes that a scan will have at least three values per line. So, those data blocks with lines that have fewer than this are then removed.
+6. At this point, any remaining data blocks are assumed to be scans. They all have the same length, the same wavelengths, and all have more than three values per line. Only three columns are needed from each scan though - the wavelength column, the cd absorbance column, and the cd error column. Columns 1 and 2 are assumed to be wavelength and absorbance, but the error could be in any of the other columns. S0, CDtool takes the data blocks, works out which is the error column (if any) and removes all other columns.
+7. Each scan is then turned into an inferi Dataset.

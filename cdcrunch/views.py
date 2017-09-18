@@ -4,7 +4,7 @@ from inferi import Variable
 from django.shortcuts import render
 from django.http.response import HttpResponse
 from cdtool import version
-from cdcrunch import parse, files
+from cdcrunch import parse, downloads
 
 series = {
  "name": "",
@@ -16,85 +16,70 @@ series = {
 
 COLORS = ["#F2671F", "#C91B26", "#9C0F5F"] * 30
 
-# Create your views here.
 def tool_page(request):
+    """The first port of call for requests to the ``/`` URL. It forwards the
+    request to the relevant view based on whether the request is ``GET`` or
+    ``POST``"""
+
     if request.method == "POST":
-        if "series" in request.POST:
-            return download_view(request)
-        if "raw-files" not in request.FILES:
-            return render(
-             request, "tool.html", {"error_text": "You didn't submit any files."}
-            )
-        scans = []
-        for f in request.FILES.getlist("raw-files"):
-            scans += parse.extract_all_scans(f)
-        if not scans:
-            return render(request, "tool.html", {
-             "error_text": "There were no scans found in the file(s) provided."
-            })
-        average = scans[0]
-        if len(scans) > 1:
-            average = [scans[0][0], Variable.average(*[scan[1] for scan in scans], sd_err=True)]
-        average[1] = average[1].values(error=True)
-        data = series.copy()
-        data["name"] = request.POST.get("sample-name", "")
-        data["color"], data["width"] = "#4A9586", 1.5
-        data["raw"], data["baseline"] = {}, {}
-        data["values"] = [[wav, val.value()] for wav, val in zip(*average)]
-        data["errors"] = [
-         [wav, *val.error_range()]
-        for wav, val in zip(*average)]
-        data["scans"] = []
-        if len(scans) > 1:
-            for index, scan in enumerate(scans):
-                scan[1] = scan[1].values(error=True)
-                d = series.copy()
-                del d["name"]
-                d["width"] = 1
-                d["color"] = COLORS[index]
-                d["values"] = [[wav, val.value()] for wav, val in zip(*scan)]
-                d["errors"] = [[wav, *val.error_range()] for wav, val in zip(*scan)]
-                data["scans"].append(d)
-        file_series = [
-         [wav, value.value(), value.error()] for wav, value in zip(*average)
-        ][::-1]
-        return render(request, "tool.html", {
-         "output": True,
-         "title": request.POST.get("exp-name", ""),
-         "x_min": average[0].min(),
-         "x_max": average[0].max(),
-         "data": [data],
-         "file_series": file_series
-        })
+        return root_post(request)
+    else:
+        return root_get(request)
+
+
+def root_get(request):
+    """If the root page is requested with a ``GET`` request, the basic tool
+    page is returned and nothing more."""
+
     return render(request, "tool.html")
 
 
-def download_view(request):
-    """Handles requests for data files"""
+def root_post(request):
+    """If the root page is requested with a ``POST`` request, CDtool checks to
+    see if a series is submitted with it. If so, the request is sent to the
+    download view. Otherwise, the parse view is used."""
 
-    header = files.data_file % (
-     version,
-     datetime.now().strftime("%d %B, %Y (%A)"),
-     datetime.now().strftime("%H:%M:%S (UK Time)")
-    )
-    series = json.loads(request.POST["series"])
-    lines = ["{:.1f}         {:10.4f}   {:10.4f}".format(
-     line[0],
-     line[1],
-     line[2]
-    ) for line in series]
+    if "series" in request.POST:
+        return root_download(request)
+    else:
+        return root_parse(request)
+
+
+def root_parse(request):
+    """This is the view that provides a response if the user submits scan files.
+    It extracts the data contained in them, combines them as necessary, and
+    returns the relevant response."""
+
+    if request.FILES.getlist("raw-files"):
+        scans = parse.extract_scans(request.FILES.getlist("raw-files")[0])
+    else:
+        return render(request, "tool.html", {
+         "error_text": "You didn't submit any files."
+        })
+    if scans:
+        series = parse.dataset_to_dict(
+         scans[0], linewidth=2, color="#16A085", name=request.POST["sample-name"]
+        )
+    else:
+        return render(request, "tool.html", {
+         "error_text": "There were no scans found in the file(s) provided."
+        })
+    return render(request, "tool.html", {
+     "output": True,
+     "title": request.POST["exp-name"],
+     "series": series
+    })
+
+
+def root_download(request):
+    """This is the view that sends a file containing the main series when a
+    series object is posted to it."""
+
+    filebody = downloads.series_to_file(request.POST["series"])
     response = HttpResponse(
-     header + "\n".join(lines), content_type="application/plain-text"
+     filebody, content_type="application/plain-text"
     )
-    response["Content-Disposition"] = 'attachment; filename="%s"' % (
-     produce_filename(request.POST["name"])
+    response["Content-Disposition"] = 'attachment; filename="{}"'.format(
+     downloads.produce_filename(request.POST["name"])
     )
     return response
-
-
-def produce_filename(title):
-    """Takes an experiment title and returns a valid filename."""
-
-    title = title if title else "cdresults"
-    return title.lower().replace(" ", "_").replace(":", "-").replace(
-     "@", "-") + ".dat"

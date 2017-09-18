@@ -24,59 +24,34 @@ function assignFileListener() {
 }
 
 
-function makeChart(title, xMin, xMax, data) {
+function makeChart(title, data) {
 	/* Creates the Hghcharts chart from the data given to it */
 
 	// Set up series objects
 	var series = [];
-	for (var s = 0; s < data.length; s++) {
-		// Add this series' main line
-		series.push({
-			data: data[s].errors,
-			id: "sample_error" + s,
-			color: data[s].color,
-			type: "arearange",
-			fillOpacity: 0.2,
-			lineWidth: 0,
-			enableMouseTracking: false,
-			zIndex: 99
-		});
-		series.push({
-	    data: data[s].values,
-	    id: "sample" + s,
-	    color: data[s].color,
-	    lineWidth: data[s].width,
-	    marker: {
-	      enabled: false,
-	      states: {hover: {enabled: false}}
-			},
-			zIndex: 100
-    });
-		// Add any scans for main series
-		for (var i = 0; i < data[s].scans.length; i++) {
-			series.push({
-				data: data[s].scans[i].errors,
-				id: "sample_error" + s + "_scan" + i,
-				color: data[s].scans[i].color,
-				type: "arearange",
-				fillOpacity: 0.2,
-				lineWidth: 0,
-				enableMouseTracking: false,
-				visible: false
-			});
-			series.push({
-		    data: data[s].scans[i].values,
-		    id: "sample" + s + "_scan" + i,
-		    color: data[s].scans[i].color,
-		    lineWidth: data[s].scans[i].width,
-		    marker: {
-		      enabled: false,
-		      states: {hover: {enabled: false}}
-				},
-				visible: false
-	    });
-		}
-	}
+
+	// Add the series' main line
+	series.push({
+		data: data.error,
+		id: "sample_error",
+		color: data.color,
+		type: "arearange",
+		fillOpacity: 0.2,
+		lineWidth: 0,
+		enableMouseTracking: false,
+		zIndex: 99
+	});
+	series.push({
+    data: data.series,
+    id: "sample",
+    color: data.color,
+    lineWidth: data.linewidth,
+    marker: {
+      enabled: false,
+      states: {hover: {enabled: false}}
+		},
+		zIndex: 100
+  });
 
 	// Create the chart
 	var chart = Highcharts.chart("chart", {
@@ -104,8 +79,8 @@ function makeChart(title, xMin, xMax, data) {
       }
     },
     xAxis: {
-      min: xMin,
-      max: xMax,
+      min: data.series[0][0],
+      max: data.series[data.series.length - 1][0],
       gridLineWidth: 1,
       gridLineColor: "#EEEEEE",
       gridLineDashStyle: "ShortDash",
@@ -149,6 +124,11 @@ function toggleButton(button) {
 	} else {
 		$(button).addClass("on").removeClass("off");
 	}
+}
+
+function submitDownload() {
+	$("#download").find('input[name=series]').val(JSON.stringify(series));
+	return true;
 }
 
 $(document).ready(function() {

@@ -21,7 +21,9 @@ class ViewTest(TestCase):
           X  CD_Signal  CD_Error  CD_Current_(Abs)
          279.000  1.0  0.5  1.013  -0.000  242.9  19.98
          278.000  -4.0  0.4  1.013  0.000  243.2  19.99
-         277.000  12.0  0.3  1.013  0.000  243.5  19.99"""
+         277.000  12.0  0.3  1.013  0.000  243.5  19.99
+
+         """
         )
 
         self.binary_file = SimpleUploadedFile(

@@ -52,22 +52,36 @@
 
 
 {% if output %}
+<script>var series = {{series|safe}}</script>
 <div id="output">
   <div id="zoom-instructions">Click and drag to zoom</div>
   <div id="chart">
   </div>
-  <script>var chart = makeChart("{{title}}", {{x_min}}, {{x_max}}, {{data|safe}});</script>
+  <script>var chart = makeChart("{{title}}", series);</script>
   <div id="chart-config">
-    {% for sample in data %}
     <div class="sample-config">
-      <div class="sample-title">{{ sample.name }}</div>
+      <div class="sample-title">{{ series.name }}</div>
       <div class="series-configs">
-        <!-- Main Config -->
         <div class="series-config">
           <div class="series-title">Main Series</div>
           <button class="series-button series-option on" data-series="sample{{forloop.counter0}}">Toggle Series</button>
           <button class="series-button error-option on" data-series="sample_error{{forloop.counter0}}">Toggle Error</button>
         </div>
+      </div>
+    </div>
+  </div>
+  <form id="download" method="POST" onsubmit="submitDownload();">
+    <input type="hidden" name="series" value="">
+    <input type="hidden" name="name" value="{{title}}">
+    {% csrf_token %}
+    <input type="submit" id="download-button" value="Download">
+  </div>
+  <!--
+  <div id="chart-config">
+    {% for sample in data %}
+
+
+
         {% if sample.scans %}
         <div class="scans-config">
           <button class="multi-scan-toggle off">Toggle Scans</button>
@@ -83,13 +97,7 @@
       </div>
     </div>
     {% endfor %}
-  </div>
-  <form id="download" method="POST">
-    <input type="hidden" name="series" value="{{file_series}}">
-    <input type="hidden" name="name" value="{{title}}">
-    {% csrf_token %}
-    <input type="submit" id="download-button" value="Download">
-  </div>
+  </div>-->
 </div>
 {% endif %}
 {% endblock %}

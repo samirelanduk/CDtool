@@ -1,6 +1,6 @@
 django==1.8.17
 selenium
-inferi==0.3
+inferi==0.4
 psycopg2
 gunicorn
 fuzz

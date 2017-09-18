@@ -4,9 +4,11 @@ from math import sqrt
 from time import sleep
 from selenium import webdriver
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from cdtool.settings import BASE_DIR
 
 class FunctionalTest(StaticLiveServerTestCase):
 
+    # Setup and Teardown code
     def setUp(self):
         self.browser = webdriver.Chrome()
         self.current_location = os.path.dirname(os.path.realpath(__file__))
@@ -23,6 +25,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             os.remove(expanduser("~") + "/Downloads/%s" % f)
 
 
+    # General checks
     def get(self, url):
         self.browser.get(self.live_server_url + url)
 
@@ -34,17 +37,28 @@ class FunctionalTest(StaticLiveServerTestCase):
         )
 
 
-    def get_single_scan_from_file(self, file_name):
-        with open("ftests/test_data/" + file_name) as f:
+    # File readers
+    def get_aviv_data(self, file_name):
+        with open("ftests/files/" + file_name) as f:
             lines = f.readlines()
         lines = [l for l in lines if l[:3].isdigit()]
-        input_data = [(
+        input_data = [[
          float(l.split()[0]), float(l.split()[1]), float(l.split()[2])
-        ) for l in lines]
+        ] for l in lines]
         return input_data
 
 
-    def get_single_gen_scan_from_file(self, file_name):
+    def get_old_gen_data(self, file_name):
+        with open("ftests/files/" + file_name) as f:
+            lines = f.readlines()
+        lines = [l for l in lines if l[:3].isdigit()]
+        input_data = [[
+         float(l.split()[0]), float(l.split()[1]), float(l.split()[5])
+        ] for l in lines]
+        return input_data
+
+
+    '''def get_single_gen_scan_from_file(self, file_name):
         with open("ftests/test_data/" + file_name) as f:
             lines = f.readlines()
         lines = [l for l in lines if l[:3].isdigit()]
@@ -100,104 +114,140 @@ class FunctionalTest(StaticLiveServerTestCase):
              wav, sub, error, sample_line, blank_line
             ])
         return input_data
+'''
 
+    # Input checks
+    def input_data(self, files="", sample_name="", exp_name=""):
+        # There is an input section but no output section
+        inputdiv = self.browser.find_element_by_id("input")
+        self.assertEqual(len(self.browser.find_elements_by_id("output")), 0)
 
-    def supply_input_data(self, input_div, input_sample_files="", input_blank_files="", sample_name="", blank_name="", experiment_name=""):
-        # The input section has a file input section, a parameter section, and a
-        # submit button
-        file_input_div = input_div.find_element_by_id("file-input")
-        input_parameter_div = input_div.find_element_by_id("input-parameters")
-        submit_button = input_div.find_element_by_id("submit-input")
+        # There is a single sample input div
+        sampleinputs = inputdiv.find_elements_by_class_name("sample-input")
+        self.assertEqual(len(sampleinputs), 1)
+        sampleinput = sampleinputs[0]
 
-        # The file input section has a section for samples and a section for
-        # blanks
-        sample_input_div = file_input_div.find_element_by_id("sample-input")
-        blank_input_div = file_input_div.find_element_by_id("blank-input")
+        # The sample input has a div for uploading scans
+        scansinputs = sampleinput.find_elements_by_class_name("scans-input")
+        self.assertEqual(len(scansinputs), 1)
+        scansinput = scansinputs[0]
 
-        # The blank input section is pretty much empty
-        self.assertEqual(
-         len(blank_input_div.find_elements_by_tag_name("input")), 0
-        )
+        # The scans input has inputs for files and sample name
+        fileinput, nameinput = scansinput.find_elements_by_tag_name("input")[:2]
 
-        # The sample input section has inputs for files and sample name
-        sample_file_input = sample_input_div.find_elements_by_tag_name("input")[0]
-        sample_name_input = sample_input_div.find_elements_by_tag_name("input")[1]
-        self.assertEqual(sample_file_input.get_attribute("type"), "file")
-        self.assertEqual(sample_name_input.get_attribute("type"), "text")
+        # The sample scans are uploaded
+        if files:
+            fileinput.send_keys("{}/ftests/files/{}".format(BASE_DIR, files))
+        nameinput.send_keys(sample_name)
 
-        # They submit a sample file and name it
-        sample_file_input.send_keys(input_sample_files)
-        sample_name_input.send_keys(sample_name)
+        # There is a configuration div
+        configdiv = inputdiv.find_element_by_id("input-config")
 
-        # Blank files?
-        if input_blank_files:
-            # The blank input section has a clickable button
-            blank_button = blank_input_div.find_element_by_tag_name("button")
+        # The user enters the experiment name
+        exp_name_input = configdiv.find_elements_by_tag_name("input")[0]
+        exp_name_input.send_keys(exp_name)
 
-            # They click it and make a new input div materialise
-            blank_button.click()
-            blank_file_input = blank_input_div.find_elements_by_tag_name("input")[0]
-            blank_name_input = blank_input_div.find_elements_by_tag_name("input")[1]
-            self.assertEqual(blank_file_input.get_attribute("type"), "file")
-            self.assertEqual(blank_name_input.get_attribute("type"), "text")
-
-            # They change their mind and want to make it disappear
-            close_button = blank_input_div.find_element_by_tag_name("button")
-            close_button.click()
-
-            # Things are back to how they were before
-            self.assertEqual(
-             len(blank_input_div.find_elements_by_tag_name("input")), 0
-            )
-            blank_button = blank_input_div.find_element_by_tag_name("button")
-
-            # They change their mind again and open the blank input again
-            blank_button.click()
-            blank_file_input = blank_input_div.find_elements_by_tag_name("input")[0]
-            blank_name_input = blank_input_div.find_elements_by_tag_name("input")[1]
-            self.assertEqual(blank_file_input.get_attribute("type"), "file")
-            self.assertEqual(blank_name_input.get_attribute("type"), "text")
-
-            # They submit a baseline file and name it
-            blank_file_input.send_keys(input_blank_files)
-            blank_name_input.send_keys(blank_name)
-
-        # The parameters section asks for the experiment name
-        experiment_name_div = input_parameter_div.find_element_by_id("experiment-name")
-        experiment_name_input = experiment_name_div.find_element_by_tag_name("input")
-
-        # They give it a name
-        experiment_name_input.send_keys(experiment_name)
-
-        # They submit the data
+        # The user submits the data
+        submit_button = inputdiv.find_elements_by_tag_name("input")[-1]
         submit_button.click()
 
-        # They are still on the same page
-        self.check_page("/single/")
+
+    def check_error_message(self, message):
+        # There is no output section
+        self.assertEqual(len(self.browser.find_elements_by_id("output")), 0)
+
+        # There is an error message
+        inputdiv = self.browser.find_element_by_id("input")
+        error = inputdiv.find_element_by_class_name("error-message")
+        self.assertIn(message, error.text)
 
 
-    def check_chart_appears(self, chart_div):
+    # Output checks
+    def check_output_section_there(self):
+        output_div = self.browser.find_element_by_id("output")
+        chart_div = output_div.find_element_by_id("chart")
+        config_div = output_div.find_element_by_id("chart-config")
+        download_div = output_div.find_element_by_id("download")
+
+
+    def check_chart_ok(self, title, xmin, xmax, input_data):
+        # Chart is correct size
+        output_div = self.browser.find_element_by_id("output")
+        chart_div = output_div.find_element_by_id("chart")
         sleep(1)
         self.assertGreater(chart_div.size["width"], 10)
         self.assertGreater(chart_div.size["height"], 10)
         y_offset = self.browser.execute_script('return window.pageYOffset;')
         self.assertGreater(y_offset, 100)
 
-
-    def check_chart_title(self, chart_div, title):
+        # Title is ok
         title_element = chart_div.find_element_by_class_name("highcharts-title")
         self.assertEqual(title_element.text, title)
         title_text = self.browser.execute_script("return chart.title.textStr;")
         self.assertEqual(title_text, title)
 
+        # x axis is correct
+        self.assertEqual(
+         self.browser.execute_script("return chart.xAxis[0].min;"), xmin
+        )
+        self.assertEqual(
+         self.browser.execute_script("return chart.xAxis[0].max;"), xmax
+        )
 
-    def check_chart_x_axis(self, x_min, x_max):
-        self.assertEqual(
-         self.browser.execute_script("return chart.xAxis[0].min;"), x_min
+        # There is one line and one area
+        self.assertEqual(self.count_visible_areas(chart_div), 1)
+        self.assertEqual(self.count_visible_lines(chart_div), 1)
+
+        # Series are correct
+        self.check_line_matches_data("sample", input_data)
+        self.check_area_matches_data("sample_error", input_data)
+
+
+    def check_chart_config_ok(self, sample_title):
+        # The config div has one sample div
+        output_div = self.browser.find_element_by_id("output")
+        chart_div = output_div.find_element_by_id("chart")
+        config_div = output_div.find_element_by_id("chart-config")
+        sample_divs = config_div.find_elements_by_class_name("sample-config")
+        self.assertEqual(len(sample_divs), 1)
+        sample_div = sample_divs[0]
+
+        # That sample div has a title with the sample's name
+        sample_title_div = sample_div.find_element_by_class_name("sample-title")
+        self.assertEqual(sample_title_div.text, sample_title)
+
+        # There is a single series config
+        series_configs_div = sample_div.find_element_by_class_name("series-configs")
+        series_configs = series_configs_div.find_elements_by_class_name("series-config")
+        self.assertEqual(len(series_configs), 1)
+        series_config = series_configs[0]
+
+        # This series config controls the series
+        self.check_config_div_controls_series(
+         chart_div, series_config, "Main Series", "sample", "sample_error"
         )
-        self.assertEqual(
-         self.browser.execute_script("return chart.xAxis[0].max;"), x_max
-        )
+
+
+    def check_file_download_ok(self, filename, file_data):
+        # The download div has a button for downloading a datafile
+        output_div = self.browser.find_element_by_id("output")
+        download_div = output_div.find_element_by_id("download")
+        download_button = download_div.find_element_by_id("download-button")
+
+        # Clicking does not make the user leave the page
+        download_button.click()
+        self.check_page("/")
+        self.assertTrue(download_div.is_displayed())
+
+        # This downloads a file with the correct data
+        with open(expanduser("~") + "/Downloads/{}".format(filename)) as f:
+            output_lines = f.readlines()
+        output_lines = [l for l in output_lines if l[:3].isdigit()]
+        output_data = [tuple([float(c) for c in l.split()]) for l in output_lines]
+        self.assertEqual(len(output_lines), len(file_data))
+        for index, line in enumerate(output_data):
+            for vindex, value in enumerate(line):
+                self.assertAlmostEqual(value, file_data[index][vindex], delta=0.005)
 
 
     def count_visible_lines(self, chart_div):
@@ -210,14 +260,6 @@ class FunctionalTest(StaticLiveServerTestCase):
         areas = chart_div.find_elements_by_class_name("highcharts-arearange-series")
         areas = [area for area in areas if area.is_displayed()]
         return len(areas)
-
-
-    def check_visible_line_series_count(self, chart_div, count):
-        self.assertEqual(self.count_visible_lines(chart_div), count)
-
-
-    def check_visible_area_series_count(self, chart_div, count):
-        self.assertEqual(self.count_visible_areas(chart_div), count)
 
 
     def check_line_matches_data(self, line, data):
@@ -240,7 +282,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             )
 
 
-    def check_error_matches_data(self, error, data):
+    def check_area_matches_data(self, error, data):
         error_length = self.browser.execute_script(
          "return chart.get('%s').data.length" % error
         )
@@ -253,17 +295,25 @@ class FunctionalTest(StaticLiveServerTestCase):
              )
             )
             self.assertAlmostEqual(
-             datum[1],
+             datum[1] - datum[2],
              self.browser.execute_script(
               "return chart.get('%s').data[%i].low;" % (error, index)
              ), delta=0.0005
             )
             self.assertAlmostEqual(
-             datum[2],
+             datum[1] + datum[2],
              self.browser.execute_script(
               "return chart.get('%s').data[%i].high;" % (error, index)
              ), delta=0.0005
             )
+
+
+    def check_visible_line_series_count(self, chart_div, count):
+        self.assertEqual(self.count_visible_lines(chart_div), count)
+
+
+    def check_visible_area_series_count(self, chart_div, count):
+        self.assertEqual(self.count_visible_areas(chart_div), count)
 
 
     def check_config_div_controls_series(self, chart_div, config, title_text, series_name, error_name):
@@ -362,14 +412,3 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.check_visible_line_series_count(chart_div, lines_at_start)
         self.assertIn("on", toggle_series_button.get_attribute("class"))
         self.assertIn("on", toggle_error_button.get_attribute("class"))
-
-
-    def check_file_has_data(self, filename, data):
-        with open(expanduser("~") + "/Downloads/{}".format(filename)) as f:
-            output_lines = f.readlines()
-        output_lines = [l for l in output_lines if l[:3].isdigit()]
-        output_data = [tuple([float(c) for c in l.split()]) for l in output_lines]
-        self.assertEqual(len(output_lines), len(data))
-        for index, line in enumerate(output_data):
-            for vindex, value in enumerate(line):
-                self.assertAlmostEqual(value, data[index][vindex], delta=0.005)
