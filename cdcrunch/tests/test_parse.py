@@ -1,9 +1,63 @@
 from inferi import Dataset
+from imagipy import Color
 from unittest.mock import patch, Mock
 from cdtool.tests import ViewTest
 from cdcrunch.parse import *
 
-class ScanExtractionTests(ViewTest):
+class FilesToSampleTests(ViewTest):
+
+    @patch("cdcrunch.parse.file_to_scans")
+    def test_can_convert_files_to_sample_no_scan(self, mock_scans):
+        mock_scans.return_value = []
+        sample = files_to_sample([self.test_file1], name="SSS")
+        self.assertIsNone(sample)
+
+
+    @patch("cdcrunch.parse.file_to_scans")
+    @patch("cdcrunch.parse.average_scans")
+    @patch("cdcrunch.parse.scan_to_dict")
+    def test_convert_files_to_sample_1_scan(self, mock_dict, mock_average,
+                                            mock_scans):
+        scan1 =  Mock()
+        mock_scans.return_value = [scan1]
+        mock_dict.return_value = {"scan": "yes"}
+        sample = files_to_sample([self.test_file1], name="SSS")
+        mock_scans.assert_called_with(self.test_file1)
+        self.assertFalse(mock_average.called)
+        mock_dict.assert_any_call(scan1, linewidth=2, color="#16A085")
+        self.assertEqual(sample, {"scan": "yes", "name": "SSS", "scans": []})
+
+
+    @patch("cdcrunch.parse.file_to_scans")
+    @patch("cdcrunch.parse.generate_colors")
+    @patch("cdcrunch.parse.average_scans")
+    @patch("cdcrunch.parse.scan_to_dict")
+    def test_convert_files_to_sample_multi_scans(self, mock_dict, mock_average,
+                                                 mock_color, mock_scans):
+        scan1, scan2, scan3 = Mock(), Mock(), Mock()
+        mock_scans.side_effect = [[scan1, scan2], [scan3]]
+        average = Mock()
+        mock_average.return_value = average
+        mock_dict.side_effect = [
+         {"average": "yes"}, {"scan": "1"}, {"scan": "2"}, {"scan": "3"}
+        ]
+        mock_color.return_value = ["RED", "BLUE", "ORANGE"]
+        sample = files_to_sample([self.test_file1, self.test_file2], name="SSS")
+        mock_scans.assert_any_call(self.test_file1)
+        mock_scans.assert_any_call(self.test_file2)
+        mock_average.assert_called_with(scan1, scan2, scan3)
+        mock_color.assert_called_with(3)
+        mock_dict.assert_any_call(average, linewidth=2, color="#16A085")
+        mock_dict.assert_any_call(scan1, linewidth=1, color="RED")
+        mock_dict.assert_any_call(scan2, linewidth=1, color="BLUE")
+        mock_dict.assert_any_call(scan3, linewidth=1, color="ORANGE")
+        self.assertEqual(sample, {"average": "yes", "name": "SSS", "scans": [
+         {"scan": "1"}, {"scan": "2"}, {"scan": "3"}
+        ]})
+
+
+
+class FileToScanTests(ViewTest):
 
     @patch("cdcrunch.parse.file_to_lines")
     @patch("cdcrunch.parse.extract_data_blocks")
@@ -12,7 +66,7 @@ class ScanExtractionTests(ViewTest):
     @patch("cdcrunch.parse.remove_short_lines")
     @patch("cdcrunch.parse.strip_data_blocks")
     @patch("cdcrunch.parse.block_to_dataset")
-    def test_can_extract_scans(self, mock_data, mock_strip, mock_line, mock_wav,
+    def test_can_file_to_scans(self, mock_data, mock_strip, mock_line, mock_wav,
                                mock_short, mock_blocks, mock_lines):
         mock_lines.return_value = ["line1", "line2", "line3"]
         mock_blocks.return_value = ["b1", "b2", "b3", "b4", "b5", "b6"]
@@ -22,8 +76,8 @@ class ScanExtractionTests(ViewTest):
         mock_strip.return_value = ["1", "2", "3"]
         dataset1, dataset2, dataset3 = Mock(), Mock(), Mock()
         mock_data.side_effect = [dataset1, dataset2, dataset3]
-        scans = extract_scans(self.test_file)
-        mock_lines.assert_called_with(self.test_file)
+        scans = file_to_scans(self.test_file1)
+        mock_lines.assert_called_with(self.test_file1)
         mock_blocks.assert_called_with(["line1", "line2", "line3"])
         mock_short.assert_called_with(["b1", "b2", "b3", "b4", "b5", "b6"])
         mock_wav.assert_called_with(["b1", "b2", "b3", "b4", "b5"])
@@ -39,7 +93,7 @@ class ScanExtractionTests(ViewTest):
 class FileToLinesTests(ViewTest):
 
     def test_can_get_lines_from_file(self):
-        lines = file_to_lines(self.test_file)
+        lines = file_to_lines(self.test_file1)
         self.assertEqual(lines, [
          "$MDCDATA:1:14:2:3:4:9",
          "100 200 300",
@@ -300,54 +354,96 @@ class BlockToDatasetTests(ViewTest):
 
 
 
-class DatasetToDictTests(ViewTest):
+class ColorGenerationTests(ViewTest):
+
+    def test_can_get_all_imagipy_colors(self):
+        colors = generate_colors(6)
+        self.assertEqual(colors, [
+         Color.RED.hex(), Color.BLUE.hex(), Color.ORANGE.hex(),
+         Color.PURPLE.hex(), Color.GREEN.hex(), Color.BROWN.hex()
+        ])
+
+
+    def test_can_get_some_imagipy_colors(self):
+        colors = generate_colors(2)
+        self.assertEqual(colors, [Color.RED.hex(), Color.BLUE.hex()])
+
+
+    @patch("cdcrunch.parse.Color.mutate")
+    def test_can_get_variants_on_imaginary_colors(self, mock_mutate):
+        mutated_colors = [Mock(Color) for _ in range(6)]
+        for color in mutated_colors:
+            color.hex.return_value = color
+        mock_mutate.side_effect = mutated_colors
+        colors = generate_colors(12)
+        self.assertEqual(colors, [
+         Color.RED.hex(), Color.BLUE.hex(), Color.ORANGE.hex(),
+         Color.PURPLE.hex(), Color.GREEN.hex(), Color.BROWN.hex(),
+         *mutated_colors
+        ])
+
+
+
+class DatasetAveragingTests(ViewTest):
+
+    def setUp(self):
+        ViewTest.setUp(self)
+        self.wav1, self.wav2 = Mock(Variable), Mock(Variable)
+        self.cd1, self.cd2 = Mock(Variable), Mock(Variable)
+        self.wav1.length.return_value = self.cd1.length.return_value = 5
+        self.wav2.length.return_value = self.cd2.length.return_value = 5
+        self.dataset1 = Dataset(self.wav1, self.cd1)
+        self.dataset2 = Dataset(self.wav2, self.cd2)
+
+
+    @patch("cdcrunch.parse.Variable.average")
+    def test_can_average_scans(self, mock_average):
+        averaged_cd = Mock(Variable)
+        averaged_cd.length.return_value = 5
+        mock_average.return_value = averaged_cd
+        average = average_scans(self.dataset1, self.dataset2)
+        self.assertIsInstance(average, Dataset)
+        mock_average.assert_called_with(self.cd1, self.cd2, sd_err=True)
+        self.assertEqual(len(average.variables()), 2)
+        self.assertIs(average.variables()[0], self.wav1)
+        self.assertIs(average.variables()[1], averaged_cd)
+
+
+
+class ScanToDictTests(ViewTest):
 
     def setUp(self):
         ViewTest.setUp(self)
         wav = Variable(180, 179, 178)
         cd = Variable(1, -1, 4, error=[0.5, 1.1, 0.2])
-        self.dataset = Dataset(wav, cd)
+        self.scan = Dataset(wav, cd)
 
 
-    def test_can_convert_dataset_to_dict(self):
-        json = dataset_to_dict(self.dataset)
+    def test_can_convert_scan_to_dict(self):
+        json = scan_to_dict(self.scan)
         self.assertEqual(json, {
          "series": [[178, 4], [179, -1], [180, 1]],
          "error": [[178, 3.8, 4.2], [179, -2.1, 0.1], [180, 0.5, 1.5]],
          "linewidth": 1,
-         "color": "#000000",
-         "name": ""
+         "color": "#000000"
         })
 
 
     def test_can_set_linewidth(self):
-        json = dataset_to_dict(self.dataset, linewidth=2)
+        json = scan_to_dict(self.scan, linewidth=2)
         self.assertEqual(json, {
          "series": [[178, 4], [179, -1], [180, 1]],
          "error": [[178, 3.8, 4.2], [179, -2.1, 0.1], [180, 0.5, 1.5]],
          "linewidth": 2,
-         "color": "#000000",
-         "name": ""
+         "color": "#000000"
         })
 
 
     def test_can_set_color(self):
-        json = dataset_to_dict(self.dataset, color="#FF00FF")
+        json = scan_to_dict(self.scan, color="#FF00FF")
         self.assertEqual(json, {
          "series": [[178, 4], [179, -1], [180, 1]],
          "error": [[178, 3.8, 4.2], [179, -2.1, 0.1], [180, 0.5, 1.5]],
          "linewidth": 1,
-         "color": "#FF00FF",
-         "name": ""
-        })
-
-
-    def test_can_set_color(self):
-        json = dataset_to_dict(self.dataset, name="Samplename")
-        self.assertEqual(json, {
-         "series": [[178, 4], [179, -1], [180, 1]],
-         "error": [[178, 3.8, 4.2], [179, -2.1, 0.1], [180, 0.5, 1.5]],
-         "linewidth": 1,
-         "color": "#000000",
-         "name": "Samplename"
+         "color": "#FF00FF"
         })

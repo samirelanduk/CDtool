@@ -14,7 +14,7 @@ class UrlTest(TestCase):
 class ViewTest(TestCase):
 
     def setUp(self):
-        self.test_file = SimpleUploadedFile(
+        self.test_file1 = SimpleUploadedFile(
          "single_scan.dat",
          b"""$MDCDATA:1:14:2:3:4:9
          100 200 300
@@ -22,6 +22,18 @@ class ViewTest(TestCase):
          279.000  1.0  0.5  1.013  -0.000  242.9  19.98
          278.000  -4.0  0.4  1.013  0.000  243.2  19.99
          277.000  12.0  0.3  1.013  0.000  243.5  19.99
+
+         """
+        )
+
+        self.test_file2 = SimpleUploadedFile(
+         "single_scan_two.dat",
+         b"""$MDCDATA:1:14:2:3:4:9
+         400 100 900
+          X  CD_Signal  CD_Error  CD_Current_(Abs)
+         279.000  1.1  0.5  1.013  -0.000  241.9  19.98
+         278.000  -4.0  0.4  1.013  0.000  243.2  19.99
+         277.000  12.5  0.3  1.014  0.000  243.5  19.99
 
          """
         )

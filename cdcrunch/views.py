@@ -1,20 +1,7 @@
 from datetime import datetime
-import json
-from inferi import Variable
 from django.shortcuts import render
 from django.http.response import HttpResponse
-from cdtool import version
 from cdcrunch import parse, downloads
-
-series = {
- "name": "",
- "values": [],
- "errors": [],
- "color": "",
- "width": 0,
-}
-
-COLORS = ["#F2671F", "#C91B26", "#9C0F5F"] * 30
 
 def tool_page(request):
     """The first port of call for requests to the ``/`` URL. It forwards the
@@ -50,24 +37,19 @@ def root_parse(request):
     It extracts the data contained in them, combines them as necessary, and
     returns the relevant response."""
 
-    if request.FILES.getlist("raw-files"):
-        scans = parse.extract_scans(request.FILES.getlist("raw-files")[0])
-    else:
+    if not request.FILES.getlist("raw-files"):
         return render(request, "tool.html", {
          "error_text": "You didn't submit any files."
         })
-    if scans:
-        series = parse.dataset_to_dict(
-         scans[0], linewidth=2, color="#16A085", name=request.POST["sample-name"]
-        )
-    else:
+    sample = parse.files_to_sample(
+     request.FILES.getlist("raw-files"), name=request.POST["sample-name"]
+    )
+    if sample is None:
         return render(request, "tool.html", {
          "error_text": "There were no scans found in the file(s) provided."
         })
     return render(request, "tool.html", {
-     "output": True,
-     "title": request.POST["exp-name"],
-     "series": series
+     "output": True, "title": request.POST["exp-name"], "sample": sample
     })
 
 

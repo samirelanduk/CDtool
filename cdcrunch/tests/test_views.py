@@ -4,7 +4,6 @@ from unittest.mock import patch, Mock
 from django.http.response import HttpResponse
 from cdtool import version
 from cdtool.tests import ViewTest
-#from cdcrunch.views import produce_filename
 
 class RootViewTests(ViewTest):
 
@@ -57,8 +56,16 @@ class RootParseViewTests(ViewTest):
     def setUp(self):
         ViewTest.setUp(self)
         self.data = {
-         "raw-files": self.test_file, "exp-name": "Title", "sample-name": "SS"
+         "raw-files": [self.test_file1, self.test_file2],
+         "exp-name": "Title", "sample-name": "SS"
         }
+        self.patcher = patch("cdcrunch.parse.files_to_sample")
+        self.mock_sample = self.patcher.start()
+        self.mock_sample.return_value = {"sample": "yes"}
+
+
+    def tearDown(self):
+        self.patcher.stop()
 
 
     def test_parse_view_returns_tool_template(self):
@@ -76,30 +83,25 @@ class RootParseViewTests(ViewTest):
         self.assertEqual(response.context["title"], "Title")
 
 
-    @patch("cdcrunch.parse.extract_scans")
-    @patch("cdcrunch.parse.dataset_to_dict")
-    def test_parse_sends_chart_series(self, mock_dict, mock_scans):
-        mock_scans.return_value = ["scan1", "scan2", 'scan3']
-        series = Mock()
-        mock_dict.return_value = series
-        response = self.client.post("/", data=self.data)
-        args, kwargs = mock_scans.call_args_list[0]
-        self.assertEqual(str(args[0]), "single_scan.dat")
-        mock_dict.assert_called_with(
-         "scan1", linewidth=2, color="#16A085", name="SS"
-        )
-        self.assertEqual(response.context["series"], series)
-
-
     def test_error_on_no_file_sent(self):
         self.data["raw-files"] = ""
         response = self.client.post("/", data=self.data)
         self.assertIn("didn't submit any files", response.context["error_text"])
 
 
-    @patch("cdcrunch.parse.extract_scans")
-    def test_error_on_no_scans_in_file(self, mock_scans):
-        mock_scans.return_value = []
+    def test_parse_view_sends_sample(self):
+        response = self.client.post("/", data=self.data)
+        args, kwargs = self.mock_sample.call_args_list[0]
+        self.assertIsInstance(args[0], list)
+        self.assertEqual(len(args[0]), 2)
+        self.assertEqual(str(args[0][0]), "single_scan.dat")
+        self.assertEqual(str(args[0][1]), "single_scan_two.dat")
+        self.assertEqual(kwargs, {"name": "SS"})
+        self.assertEqual(response.context["sample"], {"sample": "yes"})
+
+
+    def test_error_on_no_scans_in_file(self):
+        self.mock_sample.return_value = None
         response = self.client.post("/", data=self.data)
         self.assertIn("no scans", response.context["error_text"])
 

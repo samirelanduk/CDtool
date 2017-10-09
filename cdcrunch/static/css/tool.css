@@ -1,10 +1,3 @@
-.scans-input, #input-config, .sample-config {
-  border: 1.25px solid #D0D0D0;
-  padding: 20px 50px;
-  border-radius: 30px;
-  margin-bottom: 20px;
-}
-
 label {
   display: block;
   margin-top: 30px;
@@ -91,26 +84,82 @@ input[type=submit]:hover {
 button {
   display: block;
   width: 100%;
-  background-color: #45596d;
+  background-color: #4e6479;
   padding: 8px;
   font-size: 70%;
   cursor: pointer;
   color: #FFFFFF;
   border-radius: 15px;
-  border: 0px;
+  border: 2px solid #45596d;
+}
+
+.scans-input, #input-config, .sample-config {
+  border: 1.25px solid #D0D0D0;
+  padding: 20px 50px;
+  border-radius: 30px;
+  margin-bottom: 20px;
 }
 
 .sample-config {
-  text-align: center;
-  padding-left: 0px;
-  padding-right: 0px;
+  padding: 0px;
 }
 
-.sample-title {
-  text-align: center;
+.main-config {
+  padding: 0px;
+  display: flex;
+  align-items: stretch;
+}
+
+.sample-name {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 30%;
   font-weight: bold;
-  border-bottom: 1.25px solid #D0D0D0;
-  margin-bottom: 10px;
+  vertical-align: middle;
+  border-right: 1.25px solid #D0D0D0;
+}
+
+.series-control {
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  flex-grow: 5;
+}
+
+.series-control button {
+  display: inline;
+  width: 25%;
+  margin-left: 5%;
+  margin-right: 5%;
+  padding: 4px;
+}
+
+.show-more {
+  border-left: 1.25px solid #D0D0D0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 10%;
+  font-weight: bold;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.scans-config {
+  display: none;
+  padding: 0px;
+}
+
+.scan-config {
+  border-top: 1px solid #D0D0D0;
+  margin: 0px;
+  font-size: 70%;
 }
 
 .series-title {
@@ -129,8 +178,7 @@ button {
 }
 
 .series-config button {
-  margin-top: 10px;
-  margin-bottom: 10px;
+
 }
 
 button.off {
@@ -145,18 +193,6 @@ button.off {
   border-radius: 30px;
   padding: 20px;
   text-align: center;
-}
-
-.scans-config {
-  border-radius: 10px;
-  display: inline-block;
-  border: 2px solid #4A9586;
-  padding: 5px;
-}
-
-.multi-scan-toggle {
-  margin-top: 5px;
-  margin-bottom: 5px;
 }
 
 

@@ -53,6 +53,33 @@ function makeChart(title, data) {
 		zIndex: 100
   });
 
+	// Add any component scans
+	for (var s = 0; s < data.scans.length; s++) {
+		series.push({
+			data: data.scans[s].error,
+			id: "sample_scan_" + s + "_error",
+			color: data.scans[s].color,
+			type: "arearange",
+			fillOpacity: 0.2,
+			lineWidth: 0,
+			enableMouseTracking: false,
+			zIndex: 99,
+			visible: false
+		});
+		series.push({
+	    data: data.scans[s].series,
+	    id: "sample_scan_" + s,
+	    color: data.scans[s].color,
+	    lineWidth: data.scans[s].linewidth,
+	    marker: {
+	      enabled: false,
+	      states: {hover: {enabled: false}}
+			},
+			zIndex: 100,
+			visible: false
+    });
+	}
+
 	// Create the chart
 	var chart = Highcharts.chart("chart", {
 		title: {
@@ -118,6 +145,7 @@ function makeChart(title, data) {
   return chart;
 }
 
+
 function toggleButton(button) {
 	if ($(button).hasClass("on")) {
 		$(button).addClass("off").removeClass("on");
@@ -127,7 +155,7 @@ function toggleButton(button) {
 }
 
 function submitDownload() {
-	$("#download").find('input[name=series]').val(JSON.stringify(series));
+	$("#download").find('input[name=series]').val(JSON.stringify(sample));
 	return true;
 }
 
@@ -141,6 +169,11 @@ $(document).ready(function() {
 
 	// Assign file input listeners
 	assignFileListener();
+
+	// Make show-more button work
+	$(".show-more").click(function() {
+		$(".scans-config").slideToggle("fast");
+	});
 
 	// Add event handlers for all the series config buttons
   $(".series-option").each(function() {

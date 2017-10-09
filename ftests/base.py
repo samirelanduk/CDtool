@@ -58,6 +58,22 @@ class FunctionalTest(StaticLiveServerTestCase):
         return input_data
 
 
+    def average(self, data):
+        wavelengths = []
+        for line in data:
+            if line[0] not in wavelengths:
+                wavelengths.append(line[0])
+        averaged_data = []
+        for wav in wavelengths:
+            lines = [line for line in data if line[0] == wav]
+            mean = sum([l[1] for l in lines]) / len(lines)
+            sd = sqrt(sum([(val - mean) ** 2 for _, val, error in lines]) / len(lines))
+            line = [wav, mean, sd, *lines]
+            averaged_data.append(line)
+        return averaged_data
+
+
+
     '''def get_single_gen_scan_from_file(self, file_name):
         with open("ftests/test_data/" + file_name) as f:
             lines = f.readlines()
@@ -202,6 +218,17 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.check_line_matches_data("sample", input_data)
         self.check_area_matches_data("sample_error", input_data)
 
+        # If there are component scans, they're fine too
+        if len(input_data[0]) > 3:
+            for scan_number in range(len(input_data[0]) - 3):
+                scan = [row[scan_number + 3] for row in input_data]
+                self.check_line_matches_data(
+                 "sample_scan_{}".format(scan_number), scan
+                )
+                self.check_area_matches_data(
+                 "sample_scan_{}_error".format(scan_number), scan
+                )
+
 
     def check_chart_config_ok(self, sample_title):
         # The config div has one sample div
@@ -216,16 +243,21 @@ class FunctionalTest(StaticLiveServerTestCase):
         sample_title_div = sample_div.find_element_by_class_name("sample-title")
         self.assertEqual(sample_title_div.text, sample_title)
 
-        # There is a single series config
+        # The sample div has two toggle buttons
+        toggle_series, toggle_error = sample_div.find_elements_by_tag_name("button")[:2]
+
+        # These buttons control the main series
+        self.check_buttons_control_series(toggle_series, toggle_error, "sample", "sample_error")
+
+        '''# There is a main series config
         series_configs_div = sample_div.find_element_by_class_name("series-configs")
         series_configs = series_configs_div.find_elements_by_class_name("series-config")
-        self.assertEqual(len(series_configs), 1)
-        series_config = series_configs[0]
+        main_config = series_configs[0]
 
-        # This series config controls the series
+        # This main config controls the main series
         self.check_config_div_controls_series(
-         chart_div, series_config, "Main Series", "sample", "sample_error"
-        )
+         chart_div, main_config, "Main Series", "sample", "sample_error"
+        )'''
 
 
     def check_file_download_ok(self, filename, file_data):
@@ -316,36 +348,31 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(self.count_visible_areas(chart_div), count)
 
 
-    def check_config_div_controls_series(self, chart_div, config, title_text, series_name, error_name):
+    def check_buttons_control_series(self, series_button, error_button, series_name, error_name):
+        output_div = self.browser.find_element_by_id("output")
+        chart_div = output_div.find_element_by_id("chart")
         lines_at_start = self.count_visible_lines(chart_div)
         areas_at_start = self.count_visible_areas(chart_div)
 
-        # The config div has a title and two buttons
-        title = config.find_element_by_class_name("series-title")
-        self.assertEqual(title.text, title_text)
-        buttons = config.find_elements_by_tag_name("button")
-        self.assertEqual(len(buttons), 2)
-        toggle_series_button, toggle_error_button = buttons
-
         # Tne two buttons are both 'on'
-        self.assertIn("on", toggle_series_button.get_attribute("class"))
-        self.assertIn("on", toggle_error_button.get_attribute("class"))
+        self.assertIn("on", series_button.get_attribute("class"))
+        self.assertIn("on", error_button.get_attribute("class"))
 
         # The error button can make the error disappear and reappear
-        toggle_error_button.click()
+        error_button.click()
         self.assertFalse(self.browser.execute_script(
          "return chart.get('%s').visible" % error_name
         ))
         self.check_visible_area_series_count(chart_div, areas_at_start - 1)
-        self.assertIn("off", toggle_error_button.get_attribute("class"))
-        toggle_error_button.click()
+        self.assertIn("off", error_button.get_attribute("class"))
+        error_button.click()
         self.assertTrue(self.browser.execute_script(
          "return chart.get('%s').visible" % error_name
         ))
         self.check_visible_area_series_count(chart_div, areas_at_start)
-        self.assertIn("on", toggle_error_button.get_attribute("class"))
+        self.assertIn("on", error_button.get_attribute("class"))
 
-        # The series button can make everything disappear and reappear
+        '''# The series button can make everything disappear and reappear
         toggle_series_button.click()
         self.assertFalse(self.browser.execute_script(
          "return chart.get('%s').visible" % error_name
@@ -411,4 +438,4 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.check_visible_area_series_count(chart_div, areas_at_start)
         self.check_visible_line_series_count(chart_div, lines_at_start)
         self.assertIn("on", toggle_series_button.get_attribute("class"))
-        self.assertIn("on", toggle_error_button.get_attribute("class"))
+        self.assertIn("on", toggle_error_button.get_attribute("class"))'''

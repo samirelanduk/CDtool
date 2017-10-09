@@ -2,8 +2,35 @@
 
 from collections import Counter
 from inferi import Dataset, Variable
+from imagipy import Color
 
-def extract_scans(django_file):
+def files_to_sample(files, name=""):
+    """Takes a list of files, extracts the scans from them, averages them, and
+    combines them into a single sample dict that can be passed to the page as
+    JSON."""
+
+    scans = []
+    for f in files:
+        scans += file_to_scans(f)
+    sample = {}
+    if len(scans) == 0:
+        return None
+    elif len(scans) == 1:
+        sample = scan_to_dict(scans[0], linewidth=2, color="#16A085")
+        sample["scans"] = []
+    else:
+        colors = generate_colors(len(scans))
+        average = average_scans(*scans)
+        sample = scan_to_dict(average, linewidth=2, color="#16A085")
+        scans = [scan_to_dict(
+         scan, linewidth=1, color=color
+        ) for scan, color in zip(scans, colors)]
+        sample["scans"] = scans
+    sample["name"] = name
+    return sample
+
+
+def file_to_scans(django_file):
     """Takes a django file object and returns the scans it contains as inferi
     Dataset objects."""
 
@@ -107,7 +134,6 @@ def strip_data_blocks(data_blocks):
     return data_blocks
 
 
-
 def is_possible_error_column(column, absorbance):
     """Checks if a column could be an error column based on the CD values."""
 
@@ -131,16 +157,38 @@ def block_to_dataset(data_block):
     return Dataset(wavelength, cd)
 
 
-def dataset_to_dict(dataset, linewidth=1, color="#000000", name=""):
+def generate_colors(n):
+    """Generates n colors, starting with six basic colours and mutating them."""
+
+    colors = [
+     Color.RED, Color.BLUE, Color.ORANGE,
+     Color.PURPLE, Color.GREEN, Color.BROWN
+    ]
+    color_len = len(colors)
+    while n > len(colors):
+        colors.append(colors[-color_len].mutate())
+    return [color.hex() for color in colors][:n]
+
+
+def average_scans(*scans):
+    """Takes some Datasets and produces a Dataset which has the wavelength
+    column of the first Dataset and the averaged CD column of all of them."""
+
+    averaged_cd = Variable.average(*[
+     scan.variables()[1] for scan in scans
+    ], sd_err=True)
+    return Dataset(scans[0].variables()[0], averaged_cd)
+
+
+def scan_to_dict(scan, linewidth=1, color="#000000"):
     """Takes a scan Dataset and turns into a JSON-valid dict."""
 
-    wav, cd = dataset.variables()
+    wav, cd = scan.variables()
     return {
      "series": [[x, y] for x, y in zip(wav, cd)][::-1],
      "error": [[
       x, *[round(val, 8) for val in y.error_range()]
      ] for x, y in zip(wav, cd.values(error=True))][::-1],
      "linewidth": linewidth,
-     "color": color,
-     "name": name
+     "color": color
     }
