@@ -1,3 +1,13 @@
+.error-message {
+  color: #D8000C;
+  background-color: #FFBABA;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-radius: 30px;
+  padding: 20px;
+  text-align: center;
+}
+
 label {
   display: block;
   margin-top: 30px;
@@ -71,16 +81,6 @@ input[type=submit]:hover {
   transition: 0.5s;
 }
 
-#zoom-instructions {
-  text-align: center;
-  font-size: 70%;
-  color: #888888;
-}
-
-#chart {
-  margin-bottom: 75px;
-}
-
 button {
   display: block;
   width: 100%;
@@ -89,8 +89,22 @@ button {
   font-size: 70%;
   cursor: pointer;
   color: #FFFFFF;
-  border-radius: 15px;
+  border-radius: 10px;
   border: 2px solid #45596d;
+}
+
+button.off {
+  opacity: 0.5;
+}
+
+#zoom-instructions {
+  text-align: center;
+  font-size: 70%;
+  color: #888888;
+}
+
+#chart {
+  margin-bottom: 75px;
 }
 
 .scans-input, #input-config, .sample-config {
@@ -104,7 +118,7 @@ button {
   padding: 0px;
 }
 
-.main-config {
+.main-config, .scan-config {
   padding: 0px;
   display: flex;
   align-items: stretch;
@@ -120,6 +134,7 @@ button {
   font-weight: bold;
   vertical-align: middle;
   border-right: 1.25px solid #D0D0D0;
+  text-align: center;
 }
 
 .series-control {
@@ -138,17 +153,39 @@ button {
   padding: 4px;
 }
 
-.show-more {
+.show-more, .show-all {
   border-left: 1.25px solid #D0D0D0;
   display: flex;
   justify-content: center;
   align-items: center;
+  text-align: center;
   padding-top: 5px;
   padding-bottom: 5px;
-  width: 10%;
+  width: 7%;
   font-weight: bold;
   vertical-align: middle;
   cursor: pointer;
+  transition: 0.3s;
+}
+
+.main-config .show-more:hover {
+  background-color: #ecf1f5;
+}
+
+.scan-config .show-all {
+  border-left: 1.25px solid #FFFFFF;
+}
+
+.show-all {
+  font-size: 50%;
+  padding-right: 4px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.show-all:hover {
+  font-weight: bolder;
+  font-size: 55%;
 }
 
 .scans-config {
@@ -161,40 +198,6 @@ button {
   margin: 0px;
   font-size: 70%;
 }
-
-.series-title {
-  font-weight: bold;
-  margin-top: 10px;
-  margin-bottom: 20px;
-  font-size: 80%;
-  text-align: center;
-}
-
-.series-config {
-  border-radius: 10px;
-  border: 2px solid #4A9586;
-  display: inline-block;
-  padding: 5px;
-}
-
-.series-config button {
-
-}
-
-button.off {
-  opacity: 0.5;
-}
-
-.error-message {
-  color: #D8000C;
-  background-color: #FFBABA;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  border-radius: 30px;
-  padding: 20px;
-  text-align: center;
-}
-
 
 
 @media only screen and (min-width: 568px) {
