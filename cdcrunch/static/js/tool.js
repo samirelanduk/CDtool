@@ -230,7 +230,6 @@ $(document).ready(function() {
 		var visible = ($(this).text() == "hide all");
 		buttons.each(function() {
 			var error = !$(this)[0].hasAttribute("data-series");
-			console.log($(this).text() + " " + error)
 			if (error) {
 				if (visible) {
 					$(this).addClass("on").removeClass("off");
