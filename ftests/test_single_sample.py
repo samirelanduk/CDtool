@@ -28,7 +28,7 @@ class SingleScanTests(FunctionalTest):
         self.check_chart_ok("Test Experiment", 190, 280, input_data[::-1])
 
         # The config section controls the chart
-        self.check_chart_config_ok("A very simple sample")
+        self.check_chart_config_ok("A very simple sample", input_data)
 
         # The download section produces a file
         self.check_file_download_ok("test_experiment.dat", input_data)
@@ -143,7 +143,7 @@ class MultipleScanTests(FunctionalTest):
         self.check_chart_ok("Triple Scan Experiment", 190, 280, input_data[::-1])
 
         # The config section controls the chart
-        self.check_chart_config_ok("A tri-scan sample")
+        self.check_chart_config_ok("A tri-scan sample", input_data)
 
         # The download section produces a file
         self.check_file_download_ok("triple_scan_experiment.dat", input_data)

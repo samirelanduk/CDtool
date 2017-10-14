@@ -91,28 +91,6 @@
     {% csrf_token %}
     <input type="submit" id="download-button" value="Download">
   </div>
-  <!--
-  <div id="chart-config">
-    {% for sample in data %}
-
-
-
-        {% if sample.scans %}
-        <div class="scans-config">
-          <button class="multi-scan-toggle off">Toggle Scans</button>
-          {% for scan in sample.scans %}
-          <div class="series-config">
-            <div class="series-title">Scan #{{forloop.counter0|add:1}}</div>
-            <button class="series-button series-option off" data-series="sample{{forloop.parentloop.counter0}}_scan{{forloop.counter0}}">Toggle Series</button>
-            <button class="series-button error-option off" data-series="sample_error{{forloop.parentloop.counter0}}_scan{{forloop.counter0}}">Toggle Error</button>
-          </div>
-          {% endfor %}
-        </div>
-        {% endif %}
-      </div>
-    </div>
-    {% endfor %}
-  </div>-->
 </div>
 {% endif %}
 {% endblock %}
