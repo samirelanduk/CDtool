@@ -43,16 +43,14 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     # File readers
     def get_aviv_data(self, file_name):
-        """Gets file data in the form [
-         [wav, cd, error, [scans]]
-        ]"""
-
         with open("ftests/files/" + file_name) as f:
             lines = f.readlines()
         lines = [l for l in lines if l[:3].isdigit()]
-        input_data = [[
-         float(l.split()[0]), float(l.split()[1]), float(l.split()[2])
-        ] for l in lines]
+        input_data = [{
+         "wavelength": float(l.split()[0]),
+         "cd": float(l.split()[1]),
+         "error": float(l.split()[2])
+        } for l in lines]
         return input_data
 
 
@@ -60,23 +58,25 @@ class FunctionalTest(StaticLiveServerTestCase):
         with open("ftests/files/" + file_name) as f:
             lines = f.readlines()
         lines = [l for l in lines if l[:3].isdigit()]
-        input_data = [[
-         float(l.split()[0]), float(l.split()[1]), float(l.split()[5])
-        ] for l in lines]
+        input_data = [{
+         "wavelength": float(l.split()[0]),
+         "cd": float(l.split()[1]),
+         "error": float(l.split()[5])
+        } for l in lines]
         return input_data
 
 
     def average(self, data):
         wavelengths = []
         for line in data:
-            if line[0] not in wavelengths:
-                wavelengths.append(line[0])
+            if line["wavelength"] not in wavelengths:
+                wavelengths.append(line["wavelength"])
         averaged_data = []
         for wav in wavelengths:
-            lines = [line for line in data if line[0] == wav]
-            mean = sum([l[1] for l in lines]) / len(lines)
-            sd = sqrt(sum([(val - mean) ** 2 for _, val, error in lines]) / len(lines))
-            line = [wav, mean, sd, *lines]
+            lines = [line for line in data if line["wavelength"] == wav]
+            mean = sum([l["cd"] for l in lines]) / len(lines)
+            sd = sqrt(sum([(l["cd"] - mean) ** 2 for l in lines]) / len(lines))
+            line = {"wavelength": wav, "cd": mean, "error": sd, "scans": lines}
             averaged_data.append(line)
         return averaged_data
 
@@ -171,9 +171,9 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.check_line_matches_data("sample", input_data)
         self.check_area_matches_data("sample_error", input_data)
         # If there are component scans, they're fine too
-        if len(input_data[0]) > 3:
-            for scan_number in range(len(input_data[0]) - 3):
-                scan = [row[scan_number + 3] for row in input_data]
+        if "scans" in input_data[0] and input_data[0]["scans"]:
+            for scan_number in range(len(input_data[0]["scans"])):
+                scan = [row["scans"][scan_number] for row in input_data]
                 self.check_line_matches_data(
                  "sample_scan_{}".format(scan_number), scan
                 )
@@ -204,7 +204,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.check_controller_controls_series(main_series_controller, "sample", data)
 
         # If there is only one one scan, that is it
-        if len(data[0]) == 3:
+        if "scans" not in data[0] or not data[0]["scans"]:
             divs = main_config.find_elements_by_xpath("./*")
             self.assertEqual(len(divs), 2)
             divs = sample_div.find_elements_by_xpath("./*")
@@ -213,7 +213,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             # There are input scans
             show_more = main_config.find_element_by_class_name("show-more")
             show_all = main_config.find_element_by_class_name("show-all")
-            scan_count = len(data[0]) - 3
+            scan_count = len(data[0]["scans"])
 
             # Clicking the show-all button shows all
             lines_at_start = self.count_visible_lines(chart_div)
@@ -365,7 +365,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         output_div = self.browser.find_element_by_id("output")
         download_div = output_div.find_element_by_id("download")
         download_button = download_div.find_element_by_id("download-button")
-        self.browser.execute_script("arguments[0].scrollIntoView();", download_button)
+        self.scroll_to(download_button)
 
         # Clicking does not make the user leave the page
         download_button.click()
@@ -379,8 +379,9 @@ class FunctionalTest(StaticLiveServerTestCase):
         output_data = [tuple([float(c) for c in l.split()]) for l in output_lines]
         self.assertEqual(len(output_lines), len(file_data))
         for index, line in enumerate(output_data):
-            for vindex, value in enumerate(line):
-                self.assertAlmostEqual(value, file_data[index][vindex], delta=0.005)
+            self.assertEqual(line[0], file_data[index]["wavelength"])
+            self.assertAlmostEqual(line[1], file_data[index]["cd"], delta=0.005)
+            self.assertAlmostEqual(line[2], file_data[index]["error"], delta=0.005)
 
 
     def count_visible_lines(self, chart_div):
@@ -402,13 +403,13 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(line_length, len(data))
         for index, datum in enumerate(data):
             self.assertEqual(
-             datum[0],
+             datum["wavelength"],
              self.browser.execute_script(
               "return chart.get('%s').data[%i].x;" % (line, index)
              )
             )
             self.assertAlmostEqual(
-             datum[1],
+             datum["cd"],
              self.browser.execute_script(
               "return chart.get('%s').data[%i].y;" % (line, index)
              ), delta=0.0005
@@ -422,19 +423,19 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(error_length, len(data))
         for index, datum in enumerate(data):
             self.assertEqual(
-             datum[0],
+             datum["wavelength"],
              self.browser.execute_script(
               "return chart.get('%s').data[%i].x;" % (error, index)
              )
             )
             self.assertAlmostEqual(
-             datum[1] - datum[2],
+             datum["cd"] - datum["error"],
              self.browser.execute_script(
               "return chart.get('%s').data[%i].low;" % (error, index)
              ), delta=0.0005
             )
             self.assertAlmostEqual(
-             datum[1] + datum[2],
+             datum["cd"] + datum["error"],
              self.browser.execute_script(
               "return chart.get('%s').data[%i].high;" % (error, index)
              ), delta=0.0005
