@@ -37,6 +37,10 @@ class FunctionalTest(StaticLiveServerTestCase):
         )
 
 
+    def scroll_to(self, element):
+        self.browser.execute_script("arguments[0].scrollIntoView();", element)
+
+
     # File readers
     def get_aviv_data(self, file_name):
         """Gets file data in the form [
@@ -77,65 +81,6 @@ class FunctionalTest(StaticLiveServerTestCase):
         return averaged_data
 
 
-
-    '''def get_single_gen_scan_from_file(self, file_name):
-        with open("ftests/test_data/" + file_name) as f:
-            lines = f.readlines()
-        lines = [l for l in lines if l[:3].isdigit()]
-        input_data =[(
-         float(l.split()[0]), float(l.split()[1]), float(l.split()[5])
-        ) for l in lines]
-        return input_data
-
-
-    def get_multiple_scans_from_file(self, file_name):
-        with open("ftests/test_data/" + file_name) as f:
-            lines = f.readlines()
-        lines = [l for l in lines if l[:3].isdigit()]
-        wavelengths = sorted(list(set([float(l.split()[0]) for l in lines])))[::-1]
-        input_data = []
-        for wav in wavelengths:
-            relevant_lines = [l for l in lines if float(l.split()[0]) == wav]
-            values = [
-             (float(l.split()[1]), float(l.split()[2])) for l in relevant_lines
-            ]
-            mean = sum([v[0] for v in values]) / len(values)
-            sd = sqrt(sum([(val - mean) ** 2 for val, error in values]) / len(values))
-            input_data.append([
-             wav, mean, sd, values
-            ])
-        return input_data
-
-
-    def combine_data_files(self, *data_files):
-        wavelengths = [line[0] for line in data_files[0]]
-        input_data = []
-        for wav in wavelengths:
-            relevant_lines = [[l for l in f if l[0] == wav][0] for f in data_files]
-            values = [l[1] for l in relevant_lines]
-            mean = sum(values) / len(values)
-            sd = sqrt(sum([(val - mean) ** 2 for val in values]) / len(values))
-            input_data.append([
-             wav, mean, sd, values
-            ])
-        return input_data
-
-
-    def subtract_data_files(self, sample, blank):
-        wavelengths = [line[0] for line in sample]
-        input_data = []
-        for wav in wavelengths:
-            sample_line, blank_line = [
-             [l for l in f if l[0] == wav][0] for f in (sample, blank)
-            ]
-            sub = sample_line[1] - blank_line[1]
-            error = sample_line[2] + blank_line[2]
-            input_data.append([
-             wav, sub, error, sample_line, blank_line
-            ])
-        return input_data
-    '''
-
     # Input checks
     def input_data(self, files="", sample_name="", exp_name=""):
         # There is an input section but no output section
@@ -157,7 +102,11 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         # The sample scans are uploaded
         if files:
-            fileinput.send_keys("{}/ftests/files/{}".format(BASE_DIR, files))
+            files = [files] if isinstance(files, str) else files
+            files = "\n".join(
+             ["{}/ftests/files/{}".format(BASE_DIR, f) for f in files]
+            )
+            fileinput.send_keys(files)
         nameinput.send_keys(sample_name)
 
         # There is a configuration div
@@ -296,7 +245,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
             # There are the right number of scan rows
             scan_configs = scans_section.find_elements_by_class_name("scan-config")
-            self.assertEqual(len(scan_configs), 3)
+            self.assertEqual(len(scan_configs), scan_count)
 
             # They all work
             for index, config in enumerate(scan_configs):

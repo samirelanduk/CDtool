@@ -90,6 +90,7 @@ class ChangelogTests(FunctionalTest):
         changelog_link = [a for a in useful_links if "changelog" in a.text.lower()][0]
 
         # They click the changelog link and go to the changelog page
+        self.scroll_to(changelog_link)
         changelog_link.click()
         self.check_page("/changelog/")
 
