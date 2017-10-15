@@ -39,6 +39,7 @@ input[type=file] + label {
   background-color: #45596d;
   display: inline-block;
   cursor: pointer;
+  border-radius: 10px;
 }
 
 input[type=file]:focus + label,
@@ -72,8 +73,7 @@ input[type=submit] {
   margin-right: auto;
   display: block;
   transition: 0.5s;
-  display: inline-block;
-  width:auto;
+  width:fit-content;
 }
 
 input[type=submit]:hover {
@@ -197,6 +197,10 @@ button.off {
   border-top: 1px solid #D0D0D0;
   margin: 0px;
   font-size: 70%;
+}
+
+#download {
+  margin-top: 80px;
 }
 
 
