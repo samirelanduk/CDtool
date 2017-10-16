@@ -184,13 +184,19 @@ class MultipleScanTests(FunctionalTest):
 
 
 
-'''class SingleScanSingleBlankTests(FunctionalTest):
+class SingleScanSingleBlankTests(FunctionalTest):
 
     def test_can_crunch_one_scan_with_one_blank(self):
-        pass
+        # Get expected data
+        input_data = self.get_aviv_data("single-aviv.dat")
+        baseline_data = self.get_aviv_data("single-aviv-baseline.dat")
+        input_data = self.subtract(input_data, baseline_data)
+
+        # The user goes to the main page
+        self.get("/")
 
 
-    def test_can_crunch_scan_and_blank_gens(self):
+    '''def test_can_crunch_scan_and_blank_gens(self):
         pass
 
 

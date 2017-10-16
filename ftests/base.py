@@ -81,6 +81,21 @@ class FunctionalTest(StaticLiveServerTestCase):
         return averaged_data
 
 
+    def subtract(self, minuend, subtrahend):
+        subtracted_data = []
+        for row1, row2 in zip(minuend, subtrahend):
+            self.assertEqual(row1["wavelength"], row2["wavelength"])
+            subtracted_data.append({
+             "wavelength": row1["wavelength"],
+             "cd": row1["cd"] - row2["cd"],
+             "error": sqrt((row1["error"] ** 2) + (row2["error"] ** 2)),
+             "minuend": row1,
+             "subtrahend": row2
+            })
+        return subtracted_data
+
+
+
     # Input checks
     def input_data(self, files="", sample_name="", exp_name=""):
         # There is an input section but no output section
