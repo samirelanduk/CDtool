@@ -1,25 +1,29 @@
 function assignFileListener() {
-	/*
-		By Osvaldas Valutis, www.osvaldas.info
-		Available for use under the MIT License
-	*/
 	// This function deals with the fancy file inputs
-	var inputs = document.querySelectorAll("input[type=file]");
-	Array.prototype.forEach.call(inputs, function(input) {
-		var label	 = input.nextElementSibling, labelVal = label.innerHTML;
-		input.addEventListener("change", function(e) {
+	var inputs = $("input[type=\"file\"]");
+	$(inputs).each(function(index, input) {
+		var label	 = input.nextElementSibling;
+		var labelVal = label.innerHTML;
+		$(input).change(function(e) {
 			var fileName = "";
-			if (this.files && this.files.length > 1)
+			if (this.files && this.files.length > 1) {
 				fileName = (this.getAttribute("data-multiple-caption") || "").replace(
-					 "{count}", this.files.length
+				 "{count}", this.files.length
 				);
-			else
+			} else {
 				fileName = e.target.value.split("\\").pop();
-			if(fileName)
+			}
+			if (fileName) {
 				label.innerHTML = fileName;
-			else
+			} else {
 				label.innerHTML = labelVal;
-			});
+			}
+			if (index == 1) {
+				$(".scans-input").each(function(index, div) {
+					$(div).css("opacity", 1);
+				});
+			}
+		});
 	});
 }
 

@@ -195,6 +195,14 @@ class SingleScanSingleBlankTests(FunctionalTest):
         # The user goes to the main page
         self.get("/")
 
+        # The user inputs a single AVIV scan and a single AVIV baseline scan
+        self.input_data(
+         files="single-aviv.dat",
+         baseline_files="single-aviv-baseline.dat",
+         sample_name="A bi-scan sample",
+         exp_name="Two Scan Subtraction Experiment"
+        )
+
 
     '''def test_can_crunch_scan_and_blank_gens(self):
         pass

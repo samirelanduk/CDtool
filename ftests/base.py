@@ -97,7 +97,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     # Input checks
-    def input_data(self, files="", sample_name="", exp_name=""):
+    def input_data(self, files="", baseline_files="", sample_name="", exp_name=""):
         # There is an input section but no output section
         inputdiv = self.browser.find_element_by_id("input")
         self.assertEqual(len(self.browser.find_elements_by_id("output")), 0)
@@ -107,21 +107,42 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(len(sampleinputs), 1)
         sampleinput = sampleinputs[0]
 
-        # The sample input has a div for uploading scans
+        # The sample input has two divs for uploading scans
         scansinputs = sampleinput.find_elements_by_class_name("scans-input")
-        self.assertEqual(len(scansinputs), 1)
-        scansinput = scansinputs[0]
+        self.assertEqual(len(scansinputs), 2)
 
-        # The scans input has inputs for files and sample name
-        fileinput, nameinput = scansinput.find_elements_by_tag_name("input")[:2]
+        # The second scans input is faded out
+        self.assertLess(float(scansinputs[-1].value_of_css_property("opacity")), 0.5)
 
-        # The sample scans are uploaded
-        if files:
-            files = [files] if isinstance(files, str) else files
-            files = "\n".join(
-             ["{}/ftests/files/{}".format(BASE_DIR, f) for f in files]
-            )
-            fileinput.send_keys(files)
+        for scansinput in scansinputs:
+            # Each scans input has inputs for files and sample name
+            fileinput = scansinput.find_element_by_tag_name("input")
+
+            # The scans are uploaded
+            if files and "Sample" in scansinput.text:
+                files = [files] if isinstance(files, str) else files
+                files = "\n".join(
+                 ["{}/ftests/files/{}".format(BASE_DIR, f) for f in files]
+                )
+                fileinput.send_keys(files)
+                if "\n" in files:
+                    self.assertIn(str(files.count("\n") + 1), scansinput.text)
+                else:
+                    self.assertIn(files.split("/")[-1], scansinput.text)
+            if baseline_files and "Baseline" in scansinput.text:
+                baseline_files = [baseline_files] if isinstance(baseline_files, str) else baseline_files
+                baseline_files = "\n".join(
+                 ["{}/ftests/files/{}".format(BASE_DIR, f) for f in baseline_files]
+                )
+                fileinput.send_keys(baseline_files)
+                if "\n" in baseline_files:
+                    self.assertIn(str(baseline_files.count("\n") + 1), scansinput.text)
+                else:
+                    self.assertIn(baseline_files.split("/")[-1], scansinput.text)
+                self.assertEqual(float(scansinputs[-1].value_of_css_property("opacity")), 1)
+
+        # The sample name is provided
+        nameinput = sampleinput.find_element_by_id("sample-name")
         nameinput.send_keys(sample_name)
 
         # There is a configuration div
