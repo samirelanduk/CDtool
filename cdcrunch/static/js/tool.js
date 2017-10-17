@@ -57,7 +57,57 @@ function makeChart(title, data) {
 		zIndex: 100
   });
 
-	// Add any component scans
+	// Add any components
+	if (data.components.length == 2) {
+		series.push({
+			data: data.components[0].error,
+			id: "sample_raw_error",
+			color: data.components[0].color,
+			type: "arearange",
+			fillOpacity: 0.2,
+			lineWidth: 0,
+			enableMouseTracking: false,
+			zIndex: 99,
+			visible: false
+		});
+		series.push({
+	    data: data.components[0].series,
+	    id: "sample_raw",
+	    color: data.components[0].color,
+	    lineWidth: data.components[0].linewidth,
+	    marker: {
+	      enabled: false,
+	      states: {hover: {enabled: false}}
+			},
+			zIndex: 100,
+			visible: false
+    });
+		series.push({
+			data: data.components[1].error,
+			id: "sample_baseline_error",
+			color: data.components[1].color,
+			type: "arearange",
+			fillOpacity: 0.2,
+			lineWidth: 0,
+			enableMouseTracking: false,
+			zIndex: 99,
+			visible: false
+		});
+		series.push({
+	    data: data.components[1].series,
+	    id: "sample_baseline",
+	    color: data.components[1].color,
+	    lineWidth: data.components[1].linewidth,
+	    marker: {
+	      enabled: false,
+	      states: {hover: {enabled: false}}
+			},
+			zIndex: 100,
+			visible: false
+    });
+	}
+
+	// Add any individual scans
 	for (var s = 0; s < data.scans.length; s++) {
 		series.push({
 			data: data.scans[s].error,

@@ -42,7 +42,9 @@ def root_parse(request):
          "error_text": "You didn't submit any files."
         })
     sample = parse.files_to_sample(
-     request.FILES.getlist("raw-files"), name=request.POST["sample-name"]
+     request.FILES.getlist("raw-files"),
+     request.FILES.getlist("baseline-files"),
+     name=request.POST["sample-name"]
     )
     if sample is None:
         return render(request, "tool.html", {

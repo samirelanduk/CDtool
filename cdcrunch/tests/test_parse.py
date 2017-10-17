@@ -1,59 +1,154 @@
 from inferi import Dataset
 from imagipy import Color
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, MagicMock
 from cdtool.tests import ViewTest
 from cdcrunch.parse import *
 
 class FilesToSampleTests(ViewTest):
 
-    @patch("cdcrunch.parse.file_to_scans")
-    def test_can_convert_files_to_sample_no_scan(self, mock_scans):
-        mock_scans.return_value = []
-        sample = files_to_sample([self.test_file1], name="SSS")
+    @patch("cdcrunch.parse.files_to_one_component_sample")
+    def test_can_convert_one_component_files(self, mock_sample):
+        mock_sample.return_value = {"sample": "yes"}
+        sample = files_to_sample([self.test_file1, self.test_file2], name="S")
+        mock_sample.assert_called_with([self.test_file1, self.test_file2])
+        self.assertEqual(sample, {"sample": "yes", "name": "S"})
+
+
+    @patch("cdcrunch.parse.files_to_one_component_sample")
+    def test_can_convert_one_component_files_no_scans(self, mock_sample):
+        mock_sample.return_value = None
+        sample = files_to_sample([self.test_file1, self.test_file2], name="S")
+        mock_sample.assert_called_with([self.test_file1, self.test_file2])
         self.assertIsNone(sample)
 
 
-    @patch("cdcrunch.parse.file_to_scans")
-    @patch("cdcrunch.parse.average_scans")
+    @patch("cdcrunch.parse.files_to_two_component_sample")
+    def test_can_convert_two_component_files(self, mock_sample):
+        mock_sample.return_value = {"sample": "yes"}
+        sample = files_to_sample([self.test_file1], baseline=[self.test_file2], name="S")
+        mock_sample.assert_called_with([self.test_file1], [self.test_file2])
+        self.assertEqual(sample, {"sample": "yes", "name": "S"})
+
+
+    @patch("cdcrunch.parse.files_to_two_component_sample")
+    def test_can_convert_two_component_files_no_scans(self, mock_sample):
+        mock_sample.return_value = None
+        sample = files_to_sample([self.test_file1], baseline=[self.test_file2], name="S")
+        mock_sample.assert_called_with([self.test_file1], [self.test_file2])
+        self.assertIsNone(sample)
+
+
+
+class FilesToOneComponentSampleTests(ViewTest):
+
+    @patch("cdcrunch.parse.files_to_scans")
+    def test_zero_scans(self, mock_scans):
+        mock_scans.return_value = []
+        sample = files_to_one_component_sample([self.test_file1, self.test_file2])
+        mock_scans.assert_called_with([self.test_file1, self.test_file2])
+        self.assertIsNone(sample)
+
+
+    @patch("cdcrunch.parse.files_to_scans")
     @patch("cdcrunch.parse.scan_to_dict")
-    def test_convert_files_to_sample_1_scan(self, mock_dict, mock_average,
-                                            mock_scans):
-        scan1 =  Mock()
-        mock_scans.return_value = [scan1]
-        mock_dict.return_value = {"scan": "yes"}
-        sample = files_to_sample([self.test_file1], name="SSS")
-        mock_scans.assert_called_with(self.test_file1)
-        self.assertFalse(mock_average.called)
-        mock_dict.assert_any_call(scan1, linewidth=2, color="#16A085")
-        self.assertEqual(sample, {"scan": "yes", "name": "SSS", "scans": []})
+    def test_one_scan(self, mock_dict, mock_scans):
+        mock_scans.return_value = ["scan1"]
+        mock_dict.return_value = {"sample": "yes"}
+        sample = files_to_one_component_sample([self.test_file1, self.test_file2])
+        mock_scans.assert_called_with([self.test_file1, self.test_file2])
+        mock_dict.assert_called_with("scan1", linewidth=2, color="#16A085")
+        self.assertEqual(sample, {"sample": "yes"})
 
 
-    @patch("cdcrunch.parse.file_to_scans")
+    @patch("cdcrunch.parse.files_to_scans")
     @patch("cdcrunch.parse.generate_colors")
-    @patch("cdcrunch.parse.average_scans")
     @patch("cdcrunch.parse.scan_to_dict")
-    def test_convert_files_to_sample_multi_scans(self, mock_dict, mock_average,
-                                                 mock_color, mock_scans):
-        scan1, scan2, scan3 = Mock(), Mock(), Mock()
-        mock_scans.side_effect = [[scan1, scan2], [scan3]]
-        average = Mock()
-        mock_average.return_value = average
-        mock_dict.side_effect = [
-         {"average": "yes"}, {"scan": "1"}, {"scan": "2"}, {"scan": "3"}
-        ]
-        mock_color.return_value = ["RED", "BLUE", "ORANGE"]
-        sample = files_to_sample([self.test_file1, self.test_file2], name="SSS")
-        mock_scans.assert_any_call(self.test_file1)
-        mock_scans.assert_any_call(self.test_file2)
-        mock_average.assert_called_with(scan1, scan2, scan3)
-        mock_color.assert_called_with(3)
-        mock_dict.assert_any_call(average, linewidth=2, color="#16A085")
-        mock_dict.assert_any_call(scan1, linewidth=1, color="RED")
-        mock_dict.assert_any_call(scan2, linewidth=1, color="BLUE")
-        mock_dict.assert_any_call(scan3, linewidth=1, color="ORANGE")
-        self.assertEqual(sample, {"average": "yes", "name": "SSS", "scans": [
-         {"scan": "1"}, {"scan": "2"}, {"scan": "3"}
-        ]})
+    @patch("cdcrunch.parse.average_scans")
+    def test_multiple_scans(self, mock_avg, mock_dict, mock_col, mock_scans):
+        mock_scans.return_value = ["scan1", "scan2"]
+        mock_col.return_value = ["RED", "BLUE"]
+        mock_dict.side_effect = [{"sample": "yes"}, {"sample": "1"}, {"sample": "2"}]
+        mock_avg.return_value = "average_scan"
+        sample = files_to_one_component_sample([self.test_file1, self.test_file2])
+        mock_scans.assert_called_with([self.test_file1, self.test_file2])
+        mock_avg.assert_called_with("scan1", "scan2")
+        mock_dict.assert_any_call("average_scan", linewidth=2, color="#16A085")
+        mock_col.assert_called_with(2)
+        mock_dict.assert_any_call("scan1", linewidth=1, color="RED")
+        mock_dict.assert_any_call("scan2", linewidth=1, color="BLUE")
+        self.assertEqual(sample, {
+         "sample": "yes", "scans": [{"sample": "1"}, {"sample": "2"}]
+        })
+
+
+
+class FilesToTwoComponentSampleTests(ViewTest):
+
+    @patch("cdcrunch.parse.files_to_scans")
+    def test_zero_scans(self, mock_scans):
+        mock_scans.side_effect = [[], []]
+        sample = files_to_two_component_sample([self.test_file1], [self.test_file2])
+        mock_scans.assert_any_call([self.test_file1])
+        mock_scans.assert_any_call([self.test_file2])
+        self.assertIsNone(sample)
+
+
+    @patch("cdcrunch.parse.files_to_scans")
+    def test_zero_raw_scans(self, mock_scans):
+        mock_scans.side_effect = [[], ["scan"]]
+        sample = files_to_two_component_sample([self.test_file1], [self.test_file2])
+        mock_scans.assert_any_call([self.test_file1])
+        mock_scans.assert_any_call([self.test_file2])
+        self.assertIsNone(sample)
+
+
+    @patch("cdcrunch.parse.files_to_scans")
+    def test_zero_baseline_scans(self, mock_scans):
+        mock_scans.side_effect = [["scan"], []]
+        sample = files_to_two_component_sample([self.test_file1], [self.test_file2])
+        mock_scans.assert_any_call([self.test_file1])
+        mock_scans.assert_any_call([self.test_file2])
+        self.assertIsNone(sample)
+
+
+    @patch("cdcrunch.parse.files_to_scans")
+    @patch("cdcrunch.parse.subtract_components")
+    @patch("cdcrunch.parse.scan_to_dict")
+    def test_can_turn_one_raw_one_baseline_to_sample(self, mock_dict, mock_sub, mock_scans):
+        mock_scans.side_effect = [["raw_scan"], ["baseline_scan"]]
+        mock_sub.return_value = "subtracted"
+        mock_dict.side_effect = [{"sample": "yes"}, {"sample": "r"}, {"sample": "b"}]
+        sample = files_to_two_component_sample([self.test_file1], [self.test_file2])
+        mock_scans.assert_any_call([self.test_file1])
+        mock_scans.assert_any_call([self.test_file2])
+        mock_sub.assert_called_with("raw_scan", "baseline_scan")
+        mock_dict.assert_any_call("subtracted", linewidth=2, color="#16A085")
+        mock_dict.assert_any_call("raw_scan", linewidth=1.5, color="#137864")
+        mock_dict.assert_any_call("baseline_scan", linewidth=1.5, color="#A0D6FA")
+        self.assertEqual(sample, {
+         "sample": "yes", "components": [{"sample": "r"}, {"sample": "b"}]
+        })
+
+
+
+class FilesToScansTests(ViewTest):
+
+    @patch("cdcrunch.parse.file_to_scans")
+    def test_can_turn_files_to_no_scans(self, mock_scans):
+        mock_scans.side_effect = [[], []]
+        scans = files_to_scans(["file1", "file2"])
+        mock_scans.assert_any_call("file1")
+        mock_scans.assert_any_call("file2")
+        self.assertEqual(scans, [])
+
+
+    @patch("cdcrunch.parse.file_to_scans")
+    def test_can_turn_files_to_scans(self, mock_scans):
+        mock_scans.side_effect = [["scan1"], ["scan2", "scan3"]]
+        scans = files_to_scans(["file1", "file2"])
+        mock_scans.assert_any_call("file1")
+        mock_scans.assert_any_call("file2")
+        self.assertEqual(scans, ["scan1", "scan2", "scan3"])
 
 
 
@@ -410,6 +505,33 @@ class DatasetAveragingTests(ViewTest):
 
 
 
+class DatasetSubtractionTests(ViewTest):
+
+    def setUp(self):
+        ViewTest.setUp(self)
+        self.wav1, self.wav2 = Mock(Variable), Mock(Variable)
+        self.cd1, self.cd2 = Mock(Variable), Mock(Variable)
+        self.wav1.length.return_value = self.cd1.length.return_value = 5
+        self.wav2.length.return_value = self.cd2.length.return_value = 5
+        self.dataset1 = Dataset(self.wav1, self.cd1)
+        self.dataset2 = Dataset(self.wav2, self.cd2)
+
+
+    @patch("cdcrunch.parse.Variable.__sub__")
+    def test_can_subtract_scans(self, mock_sub):
+        subtracted_cd = Mock(Variable)
+        subtracted_cd.length.return_value = 5
+        self.cd1.__sub__ = MagicMock()
+        self.cd1.__sub__.return_value = subtracted_cd
+        sub = subtract_components(self.dataset1, self.dataset2)
+        self.assertIsInstance(sub, Dataset)
+        self.cd1.__sub__.assert_called_with(self.cd2)
+        self.assertEqual(len(sub.variables()), 2)
+        self.assertIs(sub.variables()[0], self.wav1)
+        self.assertIs(sub.variables()[1], subtracted_cd)
+
+
+
 class ScanToDictTests(ViewTest):
 
     def setUp(self):
@@ -425,7 +547,9 @@ class ScanToDictTests(ViewTest):
          "series": [[178, 4], [179, -1], [180, 1]],
          "error": [[178, 3.8, 4.2], [179, -2.1, 0.1], [180, 0.5, 1.5]],
          "linewidth": 1,
-         "color": "#000000"
+         "color": "#000000",
+         "scans": [],
+         "components": []
         })
 
 
@@ -435,7 +559,9 @@ class ScanToDictTests(ViewTest):
          "series": [[178, 4], [179, -1], [180, 1]],
          "error": [[178, 3.8, 4.2], [179, -2.1, 0.1], [180, 0.5, 1.5]],
          "linewidth": 2,
-         "color": "#000000"
+         "color": "#000000",
+         "scans": [],
+         "components": []
         })
 
 
@@ -445,5 +571,7 @@ class ScanToDictTests(ViewTest):
          "series": [[178, 4], [179, -1], [180, 1]],
          "error": [[178, 3.8, 4.2], [179, -2.1, 0.1], [180, 0.5, 1.5]],
          "linewidth": 1,
-         "color": "#FF00FF"
+         "color": "#FF00FF",
+         "scans": [],
+         "components": []
         })

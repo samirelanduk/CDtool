@@ -57,6 +57,7 @@ class RootParseViewTests(ViewTest):
         ViewTest.setUp(self)
         self.data = {
          "raw-files": [self.test_file1, self.test_file2],
+         "baseline-files": "",
          "exp-name": "Title", "sample-name": "SS"
         }
         self.patcher = patch("cdcrunch.parse.files_to_sample")
@@ -89,13 +90,31 @@ class RootParseViewTests(ViewTest):
         self.assertIn("didn't submit any files", response.context["error_text"])
 
 
-    def test_parse_view_sends_sample(self):
+    def test_parse_view_sends_sample_raw(self):
         response = self.client.post("/", data=self.data)
         args, kwargs = self.mock_sample.call_args_list[0]
         self.assertIsInstance(args[0], list)
         self.assertEqual(len(args[0]), 2)
         self.assertEqual(str(args[0][0]), "single_scan.dat")
         self.assertEqual(str(args[0][1]), "single_scan_two.dat")
+        self.assertIsInstance(args[1], list)
+        self.assertEqual(len(args[1]), 0)
+        self.assertEqual(kwargs, {"name": "SS"})
+        self.assertEqual(response.context["sample"], {"sample": "yes"})
+
+
+    def test_parse_view_sends_sample_raw_baseline(self):
+        self.data["baseline-files"] = [self.test_file1, self.test_file2]
+        response = self.client.post("/", data=self.data)
+        args, kwargs = self.mock_sample.call_args_list[0]
+        self.assertIsInstance(args[0], list)
+        self.assertEqual(len(args[0]), 2)
+        self.assertEqual(str(args[0][0]), "single_scan.dat")
+        self.assertEqual(str(args[0][1]), "single_scan_two.dat")
+        self.assertIsInstance(args[1], list)
+        self.assertEqual(len(args[1]), 2)
+        self.assertEqual(str(args[1][0]), "single_scan.dat")
+        self.assertEqual(str(args[1][1]), "single_scan_two.dat")
         self.assertEqual(kwargs, {"name": "SS"})
         self.assertEqual(response.context["sample"], {"sample": "yes"})
 

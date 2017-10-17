@@ -4,30 +4,60 @@ from collections import Counter
 from inferi import Dataset, Variable
 from imagipy import Color
 
-def files_to_sample(files, name=""):
-    """Takes a list of files, extracts the scans from them, averages them, and
-    combines them into a single sample dict that can be passed to the page as
-    JSON."""
+def files_to_sample(files, baseline=None, name=""):
+    """Takes a list of files, and optionally a list of baseline files. It then
+    turns them into a sample dict."""
+
+    sample = None
+    if baseline:
+        sample = files_to_two_component_sample(files, baseline)
+    else:
+        sample = files_to_one_component_sample(files)
+    if sample: sample["name"] = name
+    return sample
+
+
+
+def files_to_one_component_sample(files):
+    """Takes a list of files, (with no baselines). It then turns them into a
+    sample dict (minus the name)."""
+
+    scans = files_to_scans(files)
+    if len(scans) == 1:
+        return scan_to_dict(scans[0], linewidth=2, color="#16A085")
+    elif len(scans) > 1:
+        average = average_scans(*scans)
+        sample = scan_to_dict(average, linewidth=2, color="#16A085")
+        colors = generate_colors(len(scans))
+        sample["scans"] = [scan_to_dict(
+         scan, linewidth=1, color=color
+        ) for scan, color in zip(scans, colors)]
+        return sample
+
+
+def files_to_two_component_sample(raw_files, baseline_files):
+    """Takes a list of raw files, and a list of baseline files. It then turns
+    them into a sample dict (minus the name)."""
+
+    raw_scans = files_to_scans(raw_files)
+    baseline_scans = files_to_scans(baseline_files)
+    if not raw_scans or not baseline_scans: return None
+    subtracted = subtract_components(raw_scans[0], baseline_scans[0])
+    sample = scan_to_dict(subtracted, linewidth=2, color="#16A085")
+    raw_component = scan_to_dict(raw_scans[0], linewidth=1.5, color="#137864")
+    baseline_component = scan_to_dict(baseline_scans[0], linewidth=1.5, color="#A0D6FA")
+    sample["components"] = [raw_component, baseline_component]
+    return sample
+
+
+def files_to_scans(files):
+    """Takes a list of scans and returns all the scans it finds in them as a
+    single list."""
 
     scans = []
     for f in files:
         scans += file_to_scans(f)
-    sample = {}
-    if len(scans) == 0:
-        return None
-    elif len(scans) == 1:
-        sample = scan_to_dict(scans[0], linewidth=2, color="#16A085")
-        sample["scans"] = []
-    else:
-        colors = generate_colors(len(scans))
-        average = average_scans(*scans)
-        sample = scan_to_dict(average, linewidth=2, color="#16A085")
-        scans = [scan_to_dict(
-         scan, linewidth=1, color=color
-        ) for scan, color in zip(scans, colors)]
-        sample["scans"] = scans
-    sample["name"] = name
-    return sample
+    return scans
 
 
 def file_to_scans(django_file):
@@ -180,6 +210,13 @@ def average_scans(*scans):
     return Dataset(scans[0].variables()[0], averaged_cd)
 
 
+def subtract_components(component1, component2):
+    """Takes two Datasets and subtracts one from the other."""
+
+    subtracted_cd = component1.variables()[1] - component2.variables()[1]
+    return Dataset(component1.variables()[0], subtracted_cd)
+
+
 def scan_to_dict(scan, linewidth=1, color="#000000"):
     """Takes a scan Dataset and turns into a JSON-valid dict."""
 
@@ -190,5 +227,7 @@ def scan_to_dict(scan, linewidth=1, color="#000000"):
       x, *[round(val, 8) for val in y.error_range()]
      ] for x, y in zip(wav, cd.values(error=True))][::-1],
      "linewidth": linewidth,
-     "color": color
+     "color": color,
+     "scans": [],
+     "components": []
     }

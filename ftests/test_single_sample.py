@@ -203,6 +203,21 @@ class SingleScanSingleBlankTests(FunctionalTest):
          exp_name="Two Scan Subtraction Experiment"
         )
 
+        # The user is still on the same page
+        self.check_page("/")
+
+        # There is now an output section
+        self.check_output_section_there()
+
+        # The chart section has a chart in it
+        self.check_chart_ok("Two Scan Subtraction Experiment", 190, 280, input_data[::-1])
+
+        '''# The config section controls the chart
+        self.check_chart_config_ok("A very simple sample", input_data)
+
+        # The download section produces a file
+        self.check_file_download_ok("test_experiment.dat", input_data)'''
+
 
     '''def test_can_crunch_scan_and_blank_gens(self):
         pass

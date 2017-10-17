@@ -206,7 +206,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         # Series are correct
         self.check_line_matches_data("sample", input_data)
         self.check_area_matches_data("sample_error", input_data)
-        # If there are component scans, they're fine too
+        # If there are scans, they're fine too
         if "scans" in input_data[0] and input_data[0]["scans"]:
             for scan_number in range(len(input_data[0]["scans"])):
                 scan = [row["scans"][scan_number] for row in input_data]
