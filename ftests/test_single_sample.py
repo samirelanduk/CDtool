@@ -215,8 +215,8 @@ class SingleScanSingleBlankTests(FunctionalTest):
         # The config section controls the chart
         self.check_chart_config_ok("A bi-scan sample", input_data)
 
-        '''# The download section produces a file
-        self.check_file_download_ok("test_experiment.dat", input_data)'''
+        # The download section produces a file
+        self.check_file_download_ok("two_scan_subtraction_experiment.dat", input_data)
 
 
     '''def test_can_crunch_scan_and_blank_gens(self):
