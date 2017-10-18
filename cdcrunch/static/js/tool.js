@@ -67,7 +67,7 @@ function makeChart(title, data) {
 			fillOpacity: 0.2,
 			lineWidth: 0,
 			enableMouseTracking: false,
-			zIndex: 99,
+			zIndex: 89,
 			visible: false
 		});
 		series.push({
@@ -79,7 +79,7 @@ function makeChart(title, data) {
 	      enabled: false,
 	      states: {hover: {enabled: false}}
 			},
-			zIndex: 100,
+			zIndex: 90,
 			visible: false
     });
 		series.push({
@@ -90,7 +90,7 @@ function makeChart(title, data) {
 			fillOpacity: 0.2,
 			lineWidth: 0,
 			enableMouseTracking: false,
-			zIndex: 99,
+			zIndex: 88,
 			visible: false
 		});
 		series.push({
@@ -102,7 +102,7 @@ function makeChart(title, data) {
 	      enabled: false,
 	      states: {hover: {enabled: false}}
 			},
-			zIndex: 100,
+			zIndex: 88,
 			visible: false
     });
 	}

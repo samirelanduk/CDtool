@@ -259,7 +259,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.check_controller_controls_series(main_series_controller, "sample", data)
 
         # If there is only one one scan, that is it
-        if "scans" not in data[0] or not data[0]["scans"]:
+        if ("scans" not in data[0] or not data[0]["scans"]) and ("subtrahend" not in data[0]):
             divs = main_config.find_elements_by_xpath("./*")
             self.assertEqual(len(divs), 2)
             divs = sample_div.find_elements_by_xpath("./*")
@@ -268,52 +268,102 @@ class FunctionalTest(StaticLiveServerTestCase):
             # There are input scans
             show_more = main_config.find_element_by_class_name("show-more")
             show_all = main_config.find_element_by_class_name("show-all")
-            scan_count = len(data[0]["scans"])
 
-            # Clicking the show-all button shows all
-            lines_at_start = self.count_visible_lines(chart_div)
-            areas_at_start = self.count_visible_areas(chart_div)
-            show_all.click()
-            self.check_visible_area_series_count(chart_div, areas_at_start + scan_count)
-            self.check_visible_line_series_count(chart_div, lines_at_start + scan_count)
-            show_all.click()
-            self.check_visible_area_series_count(chart_div, areas_at_start)
-            self.check_visible_line_series_count(chart_div, lines_at_start)
-            show_all.click()
-            self.check_visible_area_series_count(chart_div, areas_at_start + scan_count)
-            self.check_visible_line_series_count(chart_div, lines_at_start + scan_count)
+            # Are there components?
+            if "subtrahend" in data[0]:
+                # Clicking the show-all button shows all
+                lines_at_start = self.count_visible_lines(chart_div)
+                areas_at_start = self.count_visible_areas(chart_div)
+                show_all.click()
+                self.check_visible_area_series_count(chart_div, areas_at_start + 2)
+                self.check_visible_line_series_count(chart_div, lines_at_start + 2)
+                show_all.click()
+                self.check_visible_area_series_count(chart_div, areas_at_start)
+                self.check_visible_line_series_count(chart_div, lines_at_start)
+                show_all.click()
+                self.check_visible_area_series_count(chart_div, areas_at_start + 2)
+                self.check_visible_line_series_count(chart_div, lines_at_start + 2)
 
-            # There is a hidden scans section
-            scans_section = sample_div.find_element_by_class_name("scans-config")
-            self.assertEqual(
-             scans_section.value_of_css_property("display"),
-             "none"
-            )
+                # There is a hidden components section
+                components_section = sample_div.find_element_by_class_name("scans-config")
+                self.assertEqual(
+                 components_section.value_of_css_property("display"),
+                 "none"
+                )
 
-            # Clicking show-more makes it visible
-            show_more.click()
-            sleep(0.75)
-            self.assertEqual(
-             scans_section.value_of_css_property("display"),
-             "block"
-            )
+                # Clicking show-more makes it visible
+                show_more.click()
+                sleep(0.75)
+                self.assertEqual(
+                 components_section.value_of_css_property("display"),
+                 "block"
+                )
 
-            # There are the right number of scan rows
-            scan_configs = scans_section.find_elements_by_class_name("scan-config")
-            self.assertEqual(len(scan_configs), scan_count)
+                # There are the right number of scan rows
+                component_configs = components_section.find_elements_by_class_name("scan-config")
+                self.assertEqual(len(component_configs), 2)
 
-            # They all work
-            for index, config in enumerate(scan_configs):
-                controller = config.find_element_by_class_name("series-control")
-                self.check_controller_controls_series(controller, "sample_scan_{}".format(index), data)
+                # They all work
+                raw_controller = component_configs[0].find_element_by_class_name("series-control")
+                self.check_controller_controls_series(raw_controller, "sample_raw", data)
+                baseline_controller = component_configs[1].find_element_by_class_name("series-control")
+                self.check_controller_controls_series(baseline_controller, "sample_baseline", data)
 
-            # Clicking show-more again hides it again
-            show_more.click()
-            sleep(0.75)
-            self.assertEqual(
-             scans_section.value_of_css_property("display"),
-             "none"
-            )
+                # Clicking show-more again hides it again
+                show_more.click()
+                sleep(0.75)
+                self.assertEqual(
+                 components_section.value_of_css_property("display"),
+                 "none"
+                )
+            else:
+                # The main series just has component scans
+                scan_count = len(data[0]["scans"])
+
+                # Clicking the show-all button shows all
+                lines_at_start = self.count_visible_lines(chart_div)
+                areas_at_start = self.count_visible_areas(chart_div)
+                show_all.click()
+                self.check_visible_area_series_count(chart_div, areas_at_start + scan_count)
+                self.check_visible_line_series_count(chart_div, lines_at_start + scan_count)
+                show_all.click()
+                self.check_visible_area_series_count(chart_div, areas_at_start)
+                self.check_visible_line_series_count(chart_div, lines_at_start)
+                show_all.click()
+                self.check_visible_area_series_count(chart_div, areas_at_start + scan_count)
+                self.check_visible_line_series_count(chart_div, lines_at_start + scan_count)
+
+                # There is a hidden scans section
+                scans_section = sample_div.find_element_by_class_name("scans-config")
+                self.assertEqual(
+                 scans_section.value_of_css_property("display"),
+                 "none"
+                )
+
+                # Clicking show-more makes it visible
+                show_more.click()
+                sleep(0.75)
+                self.assertEqual(
+                 scans_section.value_of_css_property("display"),
+                 "block"
+                )
+
+                # There are the right number of scan rows
+                scan_configs = scans_section.find_elements_by_class_name("scan-config")
+                self.assertEqual(len(scan_configs), scan_count)
+
+                # They all work
+                for index, config in enumerate(scan_configs):
+                    controller = config.find_element_by_class_name("series-control")
+                    self.check_controller_controls_series(controller, "sample_scan_{}".format(index), data)
+
+                # Clicking show-more again hides it again
+                show_more.click()
+                sleep(0.75)
+                self.assertEqual(
+                 scans_section.value_of_css_property("display"),
+                 "none"
+                )
 
 
     def check_controller_controls_series(self, controller, series_name, data):

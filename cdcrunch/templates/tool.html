@@ -77,22 +77,40 @@
           <button class="on" data-series="sample">Toggle Series</button>
           <button class="on">Toggle Error</button>
         </div>
-        {% if sample.scans %}
+        {% if sample.scans or sample.components %}
         <div class="show-more">v</div>
         <div class="show-all">show all</div>
         {% endif %}
       </div>
-      {% if sample.scans %}
+      {% if sample.scans or sample.components %}
       <div class="scans-config">
-        {% for scan in sample.scans %}<div class="scan-config">
-          <div class="sample-name">{{ sample.name }} #{{ forloop.counter}}</div>
+        {% if sample.components %}<div class="scan-config">
+          <div class="sample-name">{{ sample.name }} Raw</div>
           <div class="series-control">
-            <button class="off"  data-series="sample_scan_{{forloop.counter0}}">Toggle Scan #{{ forloop.counter }}</button>
-            <button class="off">Toggle Scan #{{ forloop.counter }} Error</button>
+            <button class="off"  data-series="sample_raw">Toggle Raw</button>
+            <button class="off">Toggle Raw Error</button>
+          </div>
+          <div class="show-more"> </div>
+          <div class="show-all"> </div></div><div class="scan-config">
+          <div class="sample-name">{{ sample.name }} Baseline</div>
+          <div class="series-control">
+            <button class="off"  data-series="sample_baseline">Toggle Baseline</button>
+            <button class="off">Toggle Baseline Error</button>
           </div>
           <div class="show-more"> </div>
           <div class="show-all"> </div>
-        </div>{% endfor %}
+        </div>{% endif %}
+        {% if sample.scans %}
+          {% for scan in sample.scans %}<div class="scan-config">
+            <div class="sample-name">{{ sample.name }} #{{ forloop.counter}}</div>
+            <div class="series-control">
+              <button class="off"  data-series="sample_scan_{{forloop.counter0}}">Toggle Scan #{{ forloop.counter }}</button>
+              <button class="off">Toggle Scan #{{ forloop.counter }} Error</button>
+            </div>
+            <div class="show-more"> </div>
+            <div class="show-all"> </div>
+          </div>{% endfor %}
+        {% endif %}
       </div>
       {% endif %}
     </div>
