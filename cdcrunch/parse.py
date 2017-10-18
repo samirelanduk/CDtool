@@ -222,7 +222,7 @@ def scan_to_dict(scan, linewidth=1, color="#000000"):
 
     wav, cd = scan.variables()
     return {
-     "series": [[x, y] for x, y in zip(wav, cd)][::-1],
+     "series": [[x, round(y, 8)] for x, y in zip(wav, cd)][::-1],
      "error": [[
       x, *[round(val, 8) for val in y.error_range()]
      ] for x, y in zip(wav, cd.values(error=True))][::-1],

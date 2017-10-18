@@ -206,6 +206,25 @@ class FunctionalTest(StaticLiveServerTestCase):
         # Series are correct
         self.check_line_matches_data("sample", input_data)
         self.check_area_matches_data("sample_error", input_data)
+
+        # If there are components, they're fine too
+        if "minuend" in input_data[0] and input_data[0]["minuend"]:
+            component1 = [row["minuend"] for row in input_data]
+            self.check_line_matches_data(
+             "sample_raw", component1
+            )
+            self.check_area_matches_data(
+             "sample_raw_error", component1
+            )
+        if "subtrahend" in input_data[0] and input_data[0]["subtrahend"]:
+            component2 = [row["subtrahend"] for row in input_data]
+            self.check_line_matches_data(
+             "sample_baseline", component2
+            )
+            self.check_area_matches_data(
+             "sample_baseline_error", component2
+            )
+
         # If there are scans, they're fine too
         if "scans" in input_data[0] and input_data[0]["scans"]:
             for scan_number in range(len(input_data[0]["scans"])):
