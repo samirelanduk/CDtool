@@ -3,6 +3,7 @@ from os.path import expanduser
 from math import sqrt
 from time import sleep
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from cdtool.settings import BASE_DIR
 
@@ -38,7 +39,14 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def scroll_to(self, element):
-        self.browser.execute_script("arguments[0].scrollIntoView();", element)
+        actions = ActionChains(self.browser)
+        actions.move_to_element(element).perform()
+        self.browser.execute_script("arguments[0].scrollIntoView(true);", element)
+
+
+    def click(self, element):
+        self.scroll_to(element)
+        element.click()
 
 
     # File readers
@@ -154,7 +162,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         # The user submits the data
         submit_button = inputdiv.find_elements_by_tag_name("input")[-1]
-        submit_button.click()
+        self.click(submit_button)
 
 
     def check_error_message(self, message):
@@ -470,10 +478,9 @@ class FunctionalTest(StaticLiveServerTestCase):
         output_div = self.browser.find_element_by_id("output")
         download_div = output_div.find_element_by_id("download")
         download_button = download_div.find_element_by_id("download-button")
-        self.scroll_to(download_button)
 
         # Clicking does not make the user leave the page
-        download_button.click()
+        self.click(download_button)
         self.check_page("/")
         self.assertTrue(download_div.is_displayed())
 
