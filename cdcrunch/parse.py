@@ -3,6 +3,7 @@
 from collections import Counter
 from inferi import Dataset, Variable
 from imagipy import Color
+from .exceptions import *
 
 def files_to_sample(files, baseline=None, name=""):
     """Takes a list of files, and optionally a list of baseline files. It then
@@ -13,7 +14,7 @@ def files_to_sample(files, baseline=None, name=""):
         sample = files_to_two_component_sample(files, baseline)
     else:
         sample = files_to_one_component_sample(files)
-    if sample: sample["name"] = name
+    sample["name"] = name
     return sample
 
 
@@ -23,7 +24,9 @@ def files_to_one_component_sample(files):
     sample dict (minus the name)."""
 
     scans = files_to_scans(files)
-    if len(scans) == 1:
+    if len(scans) == 0:
+        raise NoScansError
+    elif len(scans) == 1:
         return scan_to_dict(scans[0], linewidth=2, color="#16A085")
     elif len(scans) > 1:
         average = average_scans(*scans)
@@ -41,7 +44,12 @@ def files_to_two_component_sample(raw_files, baseline_files):
 
     raw_scans = files_to_scans(raw_files)
     baseline_scans = files_to_scans(baseline_files)
-    if not raw_scans or not baseline_scans: return None
+    if not raw_scans and not baseline_scans:
+        raise NoScansError
+    elif not raw_scans:
+        raise NoMinuendScansError
+    elif not baseline_scans:
+        raise NoSubtrahendScansError
     subtracted = subtract_components(raw_scans[0], baseline_scans[0])
     sample = scan_to_dict(subtracted, linewidth=2, color="#16A085")
     raw_component = scan_to_dict(raw_scans[0], linewidth=1.5, color="#137864")

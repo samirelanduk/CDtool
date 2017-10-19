@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.shortcuts import render
 from django.http.response import HttpResponse
-from cdcrunch import parse, downloads
+from cdcrunch import parse, downloads, exceptions
 
 def tool_page(request):
     """The first port of call for requests to the ``/`` URL. It forwards the
@@ -45,15 +45,23 @@ def root_parse(request):
         return render(request, "tool.html", {
          "error_text": "You didn't submit any files."
         })
-    sample = parse.files_to_sample(
-     request.FILES.getlist("raw-files"),
-     request.FILES.getlist("baseline-files"),
-     name=request.POST["sample-name"]
-    )
-
-    if sample is None:
+    try:
+        sample = parse.files_to_sample(
+         request.FILES.getlist("raw-files"),
+         request.FILES.getlist("baseline-files"),
+         name=request.POST["sample-name"]
+        )
+    except exceptions.NoScansError:
         return render(request, "tool.html", {
          "error_text": "There were no scans found in the file(s) provided."
+        })
+    except exceptions.NoMinuendScansError:
+        return render(request, "tool.html", {
+         "error_text": "There were no scans found in the raw file(s) provided."
+        })
+    except exceptions.NoSubtrahendScansError:
+        return render(request, "tool.html", {
+         "error_text": "There were no scans found in the baseline file(s) provided."
         })
     return render(request, "tool.html", {
      "output": True, "title": request.POST["exp-name"], "sample": sample

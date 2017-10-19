@@ -3,6 +3,7 @@ from imagipy import Color
 from unittest.mock import patch, Mock, MagicMock
 from cdtool.tests import ViewTest
 from cdcrunch.parse import *
+from cdcrunch.exceptions import *
 
 class FilesToSampleTests(ViewTest):
 
@@ -14,14 +15,6 @@ class FilesToSampleTests(ViewTest):
         self.assertEqual(sample, {"sample": "yes", "name": "S"})
 
 
-    @patch("cdcrunch.parse.files_to_one_component_sample")
-    def test_can_convert_one_component_files_no_scans(self, mock_sample):
-        mock_sample.return_value = None
-        sample = files_to_sample([self.test_file1, self.test_file2], name="S")
-        mock_sample.assert_called_with([self.test_file1, self.test_file2])
-        self.assertIsNone(sample)
-
-
     @patch("cdcrunch.parse.files_to_two_component_sample")
     def test_can_convert_two_component_files(self, mock_sample):
         mock_sample.return_value = {"sample": "yes"}
@@ -30,23 +23,14 @@ class FilesToSampleTests(ViewTest):
         self.assertEqual(sample, {"sample": "yes", "name": "S"})
 
 
-    @patch("cdcrunch.parse.files_to_two_component_sample")
-    def test_can_convert_two_component_files_no_scans(self, mock_sample):
-        mock_sample.return_value = None
-        sample = files_to_sample([self.test_file1], baseline=[self.test_file2], name="S")
-        mock_sample.assert_called_with([self.test_file1], [self.test_file2])
-        self.assertIsNone(sample)
-
-
 
 class FilesToOneComponentSampleTests(ViewTest):
 
     @patch("cdcrunch.parse.files_to_scans")
     def test_zero_scans(self, mock_scans):
         mock_scans.return_value = []
-        sample = files_to_one_component_sample([self.test_file1, self.test_file2])
-        mock_scans.assert_called_with([self.test_file1, self.test_file2])
-        self.assertIsNone(sample)
+        with self.assertRaises(NoScansError):
+            files_to_one_component_sample([self.test_file1, self.test_file2])
 
 
     @patch("cdcrunch.parse.files_to_scans")
@@ -87,28 +71,22 @@ class FilesToTwoComponentSampleTests(ViewTest):
     @patch("cdcrunch.parse.files_to_scans")
     def test_zero_scans(self, mock_scans):
         mock_scans.side_effect = [[], []]
-        sample = files_to_two_component_sample([self.test_file1], [self.test_file2])
-        mock_scans.assert_any_call([self.test_file1])
-        mock_scans.assert_any_call([self.test_file2])
-        self.assertIsNone(sample)
+        with self.assertRaises(NoScansError):
+            files_to_two_component_sample([self.test_file1], [self.test_file2])
 
 
     @patch("cdcrunch.parse.files_to_scans")
     def test_zero_raw_scans(self, mock_scans):
         mock_scans.side_effect = [[], ["scan"]]
-        sample = files_to_two_component_sample([self.test_file1], [self.test_file2])
-        mock_scans.assert_any_call([self.test_file1])
-        mock_scans.assert_any_call([self.test_file2])
-        self.assertIsNone(sample)
+        with self.assertRaises(NoMinuendScansError):
+            files_to_two_component_sample([self.test_file1], [self.test_file2])
 
 
     @patch("cdcrunch.parse.files_to_scans")
     def test_zero_baseline_scans(self, mock_scans):
         mock_scans.side_effect = [["scan"], []]
-        sample = files_to_two_component_sample([self.test_file1], [self.test_file2])
-        mock_scans.assert_any_call([self.test_file1])
-        mock_scans.assert_any_call([self.test_file2])
-        self.assertIsNone(sample)
+        with self.assertRaises(NoSubtrahendScansError):
+            files_to_two_component_sample([self.test_file1], [self.test_file2])
 
 
     @patch("cdcrunch.parse.files_to_scans")

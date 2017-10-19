@@ -4,6 +4,7 @@ from unittest.mock import patch, Mock
 from django.http.response import HttpResponse
 from cdtool import version
 from cdtool.tests import ViewTest
+from cdcrunch.exceptions import *
 
 class RootViewTests(ViewTest):
 
@@ -127,9 +128,23 @@ class RootParseViewTests(ViewTest):
 
 
     def test_error_on_no_scans_in_file(self):
-        self.mock_sample.return_value = None
+        self.mock_sample.side_effect = NoScansError
         response = self.client.post("/", data=self.data)
         self.assertIn("no scans", response.context["error_text"])
+
+
+    def test_error_on_no_scans_in_raw_file(self):
+        self.mock_sample.side_effect = NoMinuendScansError
+        response = self.client.post("/", data=self.data)
+        self.assertIn("no scans", response.context["error_text"])
+        self.assertIn("raw", response.context["error_text"])
+
+
+    def test_error_on_no_scans_in_raw_file(self):
+        self.mock_sample.side_effect = NoSubtrahendScansError
+        response = self.client.post("/", data=self.data)
+        self.assertIn("no scans", response.context["error_text"])
+        self.assertIn("baseline", response.context["error_text"])
 
 
 
