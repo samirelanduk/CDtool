@@ -38,6 +38,10 @@ def root_parse(request):
     returns the relevant response."""
 
     if not request.FILES.getlist("raw-files"):
+        if request.FILES.getlist("baseline-files"):
+            return render(request, "tool.html", {
+             "error_text": "There were no raw files to subtract baseline from."
+            })
         return render(request, "tool.html", {
          "error_text": "You didn't submit any files."
         })
@@ -46,6 +50,7 @@ def root_parse(request):
      request.FILES.getlist("baseline-files"),
      name=request.POST["sample-name"]
     )
+
     if sample is None:
         return render(request, "tool.html", {
          "error_text": "There were no scans found in the file(s) provided."

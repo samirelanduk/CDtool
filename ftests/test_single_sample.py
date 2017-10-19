@@ -249,11 +249,26 @@ class SingleScanSingleBlankTests(FunctionalTest):
         self.check_file_download_ok("two_gen_subtraction_experiment.dat", input_data)
 
 
-    '''def test_error_on_no_blank_file_given(self):
-        pass
+    def test_error_on_no_raw_file_given(self):
+        # The user goes to the main page
+        self.get("/")
+
+        # The user inputs no files
+        self.input_data(
+         files="",
+         baseline_files="single-old-gen-baseline.gen",
+         sample_name="Gen sample",
+         exp_name="Test Experiment"
+        )
+
+        # The user is still on the same page
+        self.check_page("/")
+
+        # There is an error message
+        self.check_error_message("no raw files")
 
 
-    def test_error_on_no_blank_scans_found(self):
+    '''def test_error_on_no_blank_scans_found(self):
         pass
 
 

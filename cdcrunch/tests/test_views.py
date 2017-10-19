@@ -90,6 +90,13 @@ class RootParseViewTests(ViewTest):
         self.assertIn("didn't submit any files", response.context["error_text"])
 
 
+    def test_error_on_no_raw_but_some_baseline(self):
+        self.data["baseline-files"] = self.data["raw-files"]
+        self.data["raw-files"] = None
+        response = self.client.post("/", data=self.data)
+        self.assertIn("no raw files", response.context["error_text"])
+
+
     def test_parse_view_sends_sample_raw(self):
         response = self.client.post("/", data=self.data)
         args, kwargs = self.mock_sample.call_args_list[0]
