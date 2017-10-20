@@ -50,10 +50,16 @@ def files_to_two_component_sample(raw_files, baseline_files):
         raise NoMinuendScansError
     elif not baseline_scans:
         raise NoSubtrahendScansError
-    subtracted = subtract_components(raw_scans[0], baseline_scans[0])
+    raw = raw_scans[0] if len(raw_scans) == 1 else average_scans(*raw_scans)
+    subtracted = subtract_components(raw, baseline_scans[0])
     sample = scan_to_dict(subtracted, linewidth=2, color="#16A085")
-    raw_component = scan_to_dict(raw_scans[0], linewidth=1.5, color="#137864")
+    raw_component = scan_to_dict(raw, linewidth=1.5, color="#137864")
     baseline_component = scan_to_dict(baseline_scans[0], linewidth=1.5, color="#A0D6FA")
+    if len(raw_scans) > 1:
+        colors = generate_colors(len(raw_scans))
+        raw_component["scans"] = [scan_to_dict(
+         scan, linewidth=1, color=color
+        ) for scan, color in zip(raw_scans, colors)]
     sample["components"] = [raw_component, baseline_component]
     return sample
 

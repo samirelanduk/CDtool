@@ -224,6 +224,15 @@ class FunctionalTest(StaticLiveServerTestCase):
             self.check_area_matches_data(
              "sample_raw_error", component1
             )
+            if "scans" in component1[0] and component1[0]["scans"]:
+                for scan_number in range(len(component1[0]["scans"])):
+                    scan = [row["scans"][scan_number] for row in component1]
+                    self.check_line_matches_data(
+                     "sample_raw_scan_{}".format(scan_number), scan
+                    )
+                    self.check_area_matches_data(
+                     "sample_raw_scan_{}_error".format(scan_number), scan
+                    )
         if "subtrahend" in input_data[0] and input_data[0]["subtrahend"]:
             component2 = [row["subtrahend"] for row in input_data]
             self.check_line_matches_data(

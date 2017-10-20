@@ -82,6 +82,31 @@ function makeChart(title, data) {
 			zIndex: 90,
 			visible: false
     });
+		for (var s = 0; s < data.components[0].scans.length; s++) {
+			series.push({
+				data: data.components[0].scans[s].error,
+				id: "sample_raw_scan_" + s + "_error",
+				color: data.components[0].scans[s].color,
+				type: "arearange",
+				fillOpacity: 0.2,
+				lineWidth: 0,
+				enableMouseTracking: false,
+				zIndex: 49,
+				visible: false
+			});
+			series.push({
+				data: data.components[0].scans[s].series,
+				id: "sample_raw_scan_" + s,
+				color: data.components[0].scans[s].color,
+				lineWidth: data.components[0].scans[s].linewidth,
+				marker: {
+					enabled: false,
+					states: {hover: {enabled: false}}
+				},
+				zIndex: 50,
+				visible: false
+			});
+		}
 		series.push({
 			data: data.components[1].error,
 			id: "sample_baseline_error",
