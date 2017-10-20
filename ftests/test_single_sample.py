@@ -1,6 +1,7 @@
 from datetime import datetime
 from time import sleep
 import shutil
+import os
 from os.path import expanduser
 from .base import FunctionalTest
 
@@ -86,26 +87,29 @@ class SingleScanTests(FunctionalTest):
          expanduser("~") + "/Downloads/test_experiment.dat",
          "ftests/files/test_experiment.dat"
         )
+        try:
+            # The user goes to the main page
+            self.get("/")
 
-        # The user goes to the main page
-        self.get("/")
+            # The user inputs a single cdtool scan
+            self.input_data(
+             files="test_experiment.dat",
+             sample_name="Gen sample",
+             exp_name="Test Experiment 2"
+            )
 
-        # The user inputs a single cdtool scan
-        self.input_data(
-         files="test_experiment.dat",
-         sample_name="Gen sample",
-         exp_name="Test Experiment 2"
-        )
+            # There is now an output section
+            self.check_page("/")
+            self.check_output_section_there()
 
-        # There is now an output section
-        self.check_page("/")
-        self.check_output_section_there()
+            # The chart section has a chart in it
+            self.check_chart_ok("Test Experiment 2", 190, 280, input_data[::-1])
 
-        # The chart section has a chart in it
-        self.check_chart_ok("Test Experiment 2", 190, 280, input_data[::-1])
+            # The download section produces a file
+            self.check_file_download_ok("test_experiment_2.dat", input_data)
+        finally:
+            os.remove("ftests/files/test_experiment.dat")
 
-        # The download section produces a file
-        self.check_file_download_ok("test_experiment_2.dat", input_data)
 
 
     def test_error_on_no_file_sent(self):
