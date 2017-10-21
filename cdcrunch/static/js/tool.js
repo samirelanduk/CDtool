@@ -239,6 +239,10 @@ function submitDownload() {
 	return true;
 }
 
+function getNearestScansConfig(element) {
+	return $(element).parent().next();
+}
+
 
 
 
@@ -253,15 +257,20 @@ $(document).ready(function() {
 	// Assign file input listeners
 	assignFileListener();
 
-	// Make show-more button work
-	$(".show-more").click(function(button) {
-		$(".scans-config").slideToggle("fast");
-		if ($(this).text() == "^") {
-			$(this).text("v");
-		} else {
-			$(this).text("^");
+	// Make show-more buttons work
+	$(".show-more").each(function() {
+		if (!($(this).hasClass("inert"))) {
+			$(this).click(function(button) {
+				var scanLevel = $(this).parent().hasClass("main-series") ? ".scan-1" : ".scan-2";
+				$(scanLevel).toggle(200);
+				if ($(this).text() == "^") {
+					$(this).text("v");
+				} else {
+					$(this).text("^");
+				}
+			})
 		}
-	});
+	})
 
 	// Add event handlers for all the series controllers
 	  $(".series-control").each(function() {
@@ -299,7 +308,43 @@ $(document).ready(function() {
 		});
 
 	// Add event handlers for multi-scan toggle
-	$(".show-all").click(function() {
+	$(".show-all").each(function() {
+		if (!($(this).hasClass("inert"))) {
+			$(this).click(function(button) {
+				if ($(this).text() == "show all") {
+					$(this).text("hide all");
+				} else {
+					$(this).text("show all");
+				}
+				var scanLevel = $(this).parent().hasClass("main-series") ? ".scan-1, .scan-2" : ".scan-2";
+				var buttons = $(scanLevel).find("button");
+				var visible = ($(this).text() == "hide all");
+				buttons.each(function() {
+					var error = !$(this)[0].hasAttribute("data-series");
+					if (error) {
+						if (visible) {
+							$(this).addClass("on").removeClass("off");
+						} else {
+							$(this).addClass("off").removeClass("on");
+						}
+					} else {
+						var series = chart.get($(this).attr("data-series"));
+						var errorSeries = chart.get($(this).attr("data-series") + "_error");
+						if (visible) {
+							$(this).addClass("on").removeClass("off");
+							series.show();
+							errorSeries.show();
+						} else {
+							$(this).addClass("off").removeClass("on");
+							series.hide();
+							errorSeries.hide();
+						}
+					}
+				});
+			})
+		}
+	})
+	$(".shows-all").click(function() {
 		if ($(this).text() == "show all") {
 			$(this).text("hide all");
 		} else {

@@ -1,3 +1,5 @@
+/* INPUT STUFF */
+
 .error-message {
   color: #D8000C;
   background-color: #FFBABA;
@@ -117,21 +119,148 @@ button.off {
   margin-bottom: 75px;
 }
 
-.sample-input, #input-config, .sample-config {
+.sample-input, #input-config {
   border: 1.25px solid #D0D0D0;
   padding: 20px 50px;
   border-radius: 30px;
   margin-bottom: 20px;
 }
 
-.sample-config {
+/* CHART CONFIG STUFF */
+
+table.sample-config {
+  border: 1.25px solid #D0D0D0;
+  border-collapse: separate;
+  border-radius: 30px;
   padding: 0px;
+  width: 100%;
+  border-spacing: 0px;
 }
 
-.main-config, .scan-config {
+tr, td {
+  margin: 0px;
+  border: none;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+td.scan-name {
+  width: 30%;
+  font-weight: bold;
+  border-right: 1.25px solid #D0D0D0;
+  text-align: center;
+}
+
+td.series-control {
+  margin: 0px;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+td.series-control button {
+  display: inline;
+  width: 25%;
+  margin-left: 5%;
+  margin-right: 5%;
+  padding: 4px;
+}
+
+.show-more, .show-all {
+  border-left: 1.25px solid #D0D0D0;
+  text-align: center;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 7%;
+  font-weight: bold;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.show-all {
+  font-size: 50%;
+  padding-right: 4px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.show-more:hover {
+  background-color: #ecf1f5;
+}
+
+.inert:hover {
+  background-color: rgba(255, 255, 255, 0);
+}
+
+.show-all:hover {
+  font-weight: bolder;
+  font-size: 55%;
+}
+
+.inert {
+  cursor: default;
+}
+
+.show-all.inert {
+  border-left-width: 0px;
+}
+
+.scan-1, .scan-2 {
+  display: none;
+  font-size: 70%;
+}
+
+.scan-2 {
+  font-size: 50%;
+}
+
+.scan-1 td, .scan-2 td {
+  border-top: 1.25px solid #D0D0D0;
+}
+
+/*
+
+td.show-more, .show-all {
+  border-left: 1.25px solid #D0D0D0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 7%;
+  font-weight: bold;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+td.show-more {
+
+}
+
+td.show-all {
+
+}
+
+.scan-config {
+  border-top: 1px solid #D0D0D0;
+  margin: 0px;
+  font-size: 70%;
   padding: 0px;
   display: flex;
   align-items: stretch;
+}
+
+.main-config {
+  border-top-width: 0px;
+  font-size: 100%;
+}
+
+.component-config {
+  border-top-width: 1px;
+  font-size: 80%;
 }
 
 .sample-name {
@@ -178,36 +307,23 @@ button.off {
   transition: 0.3s;
 }
 
-.main-config .show-more:hover {
-  background-color: #ecf1f5;
+.inert {
+  cursor: default;
 }
+
+
 
 .scan-config .show-all {
   border-left: 1.25px solid #FFFFFF;
 }
 
-.show-all {
-  font-size: 50%;
-  padding-right: 4px;
-  font-weight: bold;
-  transition: 0.3s;
+.main-config .show-all {
+  border-left: 1.25px solid #D0D0D0;
 }
 
-.show-all:hover {
-  font-weight: bolder;
-  font-size: 55%;
-}
 
-.scans-config {
-  display: none;
-  padding: 0px;
-}
 
-.scan-config {
-  border-top: 1px solid #D0D0D0;
-  margin: 0px;
-  font-size: 70%;
-}
+*/
 
 #download {
   margin-top: 80px;

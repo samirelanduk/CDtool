@@ -70,8 +70,81 @@
   </div>
   <script>var chart = makeChart("{{title}}", sample);</script>
   <div id="chart-config">
-    <div class="sample-config">
-      <div class="main-config">
+    <table class="sample-config">
+      <tr class="main-series">
+        <td class="scan-name">{{ sample.name }}</td>
+        <td class="series-control">
+          <button class="on" data-series="sample">Toggle Series</button>
+          <button class="on">Toggle Error</button>
+        </td>
+        {% if sample.scans or sample.components %}
+        <td class="show-more">v</td>
+        <td class="show-all">show all</td>
+        {% else %}
+        <td class="show-more inert"></td>
+        <td class="show-all inert"></td>
+        {% endif %}
+      </tr>
+      {% if sample.components %}
+      <tr class="scan scan-1">
+        <td class="scan-name">{{ sample.name }} Raw</td>
+        <td class="series-control">
+          <button class="off" data-series="sample_raw">Toggle Raw</button>
+          <button class="off">Toggle Raw Error</button>
+        </td>
+        {% if sample.components.0.scans %}
+        <td class="show-more">v</td>
+        <td class="show-all">show all</td>
+        {% else %}
+        <td class="show-more inert"></td>
+        <td class="show-all inert"></td>
+        {% endif %}
+      </tr>
+      {% if sample.components.0.scans %}
+        {% for scan in sample.components.0.scans %}
+        <tr class="scan-2">
+          <td class="scan-name">{{ sample.name }} Raw #{{ forloop.counter}}</td>
+          <td class="series-control">
+            <button class="off" data-series="sample_raw_scan_{{forloop.counter0}}">Toggle Raw Scan #{{ forloop.counter }}</button>
+            <button class="off">Toggle Raw Scan #{{ forloop.counter }} Error</button>
+          </td>
+          <td class="show-more inert"></td>
+          <td class="show-all inert"></td>
+        </tr>
+        {% endfor %}
+      {% endif %}
+      <tr class="scan-1">
+        <td class="scan-name">{{ sample.name }} Baseline</td>
+        <td class="series-control">
+          <button class="off" data-series="sample_baseline">Toggle Baseline</button>
+          <button class="off">Toggle Baseline Error</button>
+        </td>
+        {% if sample.components.1.scans %}
+        <td class="show-more">v</td>
+        <td class="show-all">show all</td>
+        {% else %}
+        <td class="show-more inert"></td>
+        <td class="show-all inert"></td>
+        {% endif %}
+      </tr>
+      {% endif %}
+      {% if sample.scans %}
+        {% for scan in sample.scans %}
+        <tr class="scan-1">
+          <td class="scan-name">{{ sample.name }} #{{ forloop.counter}}</td>
+          <td class="series-control">
+            <button class="off" data-series="sample_scan_{{forloop.counter0}}">Toggle Scan #{{ forloop.counter }}</button>
+            <button class="off">Toggle Scan #{{ forloop.counter }} Error</button>
+          </td>
+          <td class="show-more inert"></td>
+          <td class="show-all inert"></td>
+        </tr>
+        {% endfor %}
+      {% endif %}
+    </table>
+
+    <!--<div class="sample-config">
+      <div class="scan-config main-config">
         <div class="sample-name">{{ sample.name }}</div>
         <div class="series-control">
           <button class="on" data-series="sample">Toggle Series</button>
@@ -80,25 +153,49 @@
         {% if sample.scans or sample.components %}
         <div class="show-more">v</div>
         <div class="show-all">show all</div>
+        {% else %}
+        <div class="show-more inert"> </div>
+        <div class="show-all inert"> </div>
         {% endif %}
       </div>
       {% if sample.scans or sample.components %}
       <div class="scans-config">
-        {% if sample.components %}<div class="scan-config">
+        {% if sample.components %}<div class="scan-config{% if sample.components.0.scans %} main-config{% endif %} component-config">
           <div class="sample-name">{{ sample.name }} Raw</div>
           <div class="series-control">
             <button class="off"  data-series="sample_raw">Toggle Raw</button>
             <button class="off">Toggle Raw Error</button>
           </div>
-          <div class="show-more"> </div>
-          <div class="show-all"> </div></div><div class="scan-config">
+          {% if sample.components.0.scans %}
+          <div class="show-more">v</div>
+          <div class="show-all">show all</div>
+          {% else %}
+          <div class="show-more inert"> </div>
+          <div class="show-all inert"> </div>
+          {% endif %}
+        </div>{% if sample.components.0.scans %}<div class="scans-config">
+            {% for scan in sample.components.0.scans %}<div class="scan-config">
+              <div class="sample-name">{{ sample.name }} Raw #{{ forloop.counter}}</div>
+              <div class="series-control">
+                <button class="off"  data-series="sample_raw_scan_{{forloop.counter0}}">Toggle Raw Scan #{{ forloop.counter }}</button>
+                <button class="off">Toggle Raw Scan #{{ forloop.counter }} Error</button>
+              </div>
+              <div class="show-more inert"> </div>
+              <div class="show-all inert"> </div>
+            </div>{% endfor %}</div>
+          {% endif %}<div class="scan-config component-config">
           <div class="sample-name">{{ sample.name }} Baseline</div>
           <div class="series-control">
             <button class="off"  data-series="sample_baseline">Toggle Baseline</button>
             <button class="off">Toggle Baseline Error</button>
           </div>
-          <div class="show-more"> </div>
-          <div class="show-all"> </div>
+          {% if sample.components.1.scans %}
+          <div class="show-more">v</div>
+          <div class="show-all">show all</div>
+          {% else %}
+          <div class="show-more inert"> </div>
+          <div class="show-all inert"> </div>
+          {% endif %}
         </div>{% endif %}
         {% if sample.scans %}
           {% for scan in sample.scans %}<div class="scan-config">
@@ -107,13 +204,13 @@
               <button class="off"  data-series="sample_scan_{{forloop.counter0}}">Toggle Scan #{{ forloop.counter }}</button>
               <button class="off">Toggle Scan #{{ forloop.counter }} Error</button>
             </div>
-            <div class="show-more"> </div>
-            <div class="show-all"> </div>
+            <div class="show-more inert"> </div>
+            <div class="show-all inert"> </div>
           </div>{% endfor %}
         {% endif %}
       </div>
       {% endif %}
-    </div>
+    </div>-->
   </div>
   <form id="download" method="POST" onsubmit="submitDownload();">
     <input type="hidden" name="series" value="">

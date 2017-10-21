@@ -407,10 +407,10 @@ class MultipleScanSingleBlankTests(FunctionalTest):
         # The chart section has a chart in it
         self.check_chart_ok("Averaging Subtraction Experiment", 190, 280, input_data[::-1])
 
-        '''# The config section controls the chart
-        self.check_chart_config_ok("A bi-scan sample", input_data)
+        # The config section controls the chart
+        self.check_chart_config_ok("Penta-scan sample", input_data)
 
-        # The download section produces a file
+        '''# The download section produces a file
         self.check_file_download_ok("two_scan_subtraction_experiment.dat", input_data)'''
 
 
