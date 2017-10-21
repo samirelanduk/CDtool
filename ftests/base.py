@@ -325,9 +325,24 @@ class FunctionalTest(StaticLiveServerTestCase):
         sample_divs = config_div.find_elements_by_class_name("sample-config")
         self.assertEqual(len(sample_divs), 1)
         sample_div = sample_divs[0]
-        self.browser.execute_script("arguments[0].scrollIntoView();", sample_div)
+        self.scroll_to(sample_div)
 
-        # The sample div has a main config div
+        # What kind of config is this?
+        one_scan = "scans" not in data[0] and "subtrahend" not in data[0]
+
+        # The main config is ok
+        main_config = sample_div.find_elements_by_tag_name("tr")[0]
+        scan_name_div = main_config.find_element_by_class_name("scan-name")
+        self.assertEqual(scan_name_div.text, sample_name)
+        series_controller = main_config.find_element_by_class_name("series-control")
+        self.check_controller_controls_series(series_controller, "sample", data)
+        show_more = main_config.find_element_by_class_name("show-more")
+        show_all = main_config.find_element_by_class_name("show-all")
+        if one_scan:
+            self.assertIn("inert", show_more.get_attribute("class"))
+            self.assertIn("inert", show_all.get_attribute("class"))
+
+        '''# The sample div has a main config div
         main_config = sample_div.find_element_by_class_name("main-config")
         scans_config, sub_row_count = None, None
         if ("scans" in data[0]) or ("subtrahend" in data[0]):
@@ -374,7 +389,7 @@ class FunctionalTest(StaticLiveServerTestCase):
                 sub_row_count = len(data[0]["subtrahend"]["scans"])
             self.check_scan_config_ok(scan_configs[1], scans_config, sample_name + " Baseline", "sample_baseline", data, sub_row_count)
 
-        '''
+
 
         # If there is only one one scan and no components, that is it
         if ("scans" not in data[0] or not data[0]["scans"]) and ("subtrahend" not in data[0]):
