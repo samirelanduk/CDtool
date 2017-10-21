@@ -168,6 +168,42 @@ class FilesToTwoComponentSampleTests(ViewTest):
         })
 
 
+    @patch("cdcrunch.parse.files_to_scans")
+    @patch("cdcrunch.parse.average_scans")
+    @patch("cdcrunch.parse.subtract_components")
+    @patch("cdcrunch.parse.generate_colors")
+    @patch("cdcrunch.parse.scan_to_dict")
+    def test_can_turn_multi_raw_multi_baseline_to_sample(self, mock_dict, mock_col, mock_sub, mock_avg, mock_scans):
+        mock_scans.side_effect = [["raw_scan1", "raw_scan2"], ["baseline_scan1", "baseline_scan2"]]
+        mock_avg.side_effect = ["raw_average", "baseline_average"]
+        mock_sub.return_value = "subtracted"
+        mock_col.return_value = ["RED", "BLUE", "GREEN", "YELLOW"]
+        mock_dict.side_effect = [
+         {"sample": "yes"}, {"sample": "r"}, {"sample": "b"},
+         {"sample":"r1"}, {"sample":"r2"}, {"sample":"b1"}, {"sample":"b2"}
+        ]
+        sample = files_to_two_component_sample([self.test_file1], [self.test_file2])
+        mock_scans.assert_any_call([self.test_file1])
+        mock_scans.assert_any_call([self.test_file2])
+        mock_avg.assert_any_call("raw_scan1", "raw_scan2")
+        mock_avg.assert_any_call("baseline_scan1", "baseline_scan2")
+        mock_sub.assert_called_with("raw_average", "baseline_average")
+        mock_col.assert_called_with(4)
+        mock_dict.assert_any_call("subtracted", linewidth=2, color="#16A085")
+        mock_dict.assert_any_call("raw_average", linewidth=1.5, color="#137864")
+        mock_dict.assert_any_call("baseline_average", linewidth=1.5, color="#A0D6FA")
+        mock_dict.assert_any_call("raw_scan1", linewidth=1, color="RED")
+        mock_dict.assert_any_call("raw_scan2", linewidth=1, color="BLUE")
+        mock_dict.assert_any_call("baseline_scan1", linewidth=1, color="GREEN")
+        mock_dict.assert_any_call("baseline_scan2", linewidth=1, color="YELLOW")
+        self.assertEqual(sample, {
+         "sample": "yes", "components": [
+          {"sample": "r", "scans": [{"sample":"r1"}, {"sample":"r2"}]},
+          {"sample": "b", "scans": [{"sample":"b1"}, {"sample":"b2"}]}
+         ]
+        })
+
+
 
 class FilesToScansTests(ViewTest):
 

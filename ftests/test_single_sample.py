@@ -488,7 +488,38 @@ class SingleScanMultipleBlankTests(FunctionalTest):
 
 
 
-'''class MultipleScanMultipleBlankTests(FunctionalTest):
+class MultipleScanMultipleBlankTests(FunctionalTest):
 
     def test_can_submit_multiple_scans_with_multiple_blanks(self):
-        pass'''
+        # Get expected data
+        input_data = self.get_aviv_data("three-aviv.dat")
+        input_data = self.average(input_data)
+        baseline_data = self.get_aviv_data("three-aviv-baseline.dat")
+        baseline_data = self.average(baseline_data)
+        input_data = self.subtract(input_data, baseline_data)
+
+        # The user goes to the main page
+        self.get("/")
+
+        # The user inputs a single AVIV scan and a single AVIV baseline scan
+        self.input_data(
+         files="three-aviv.dat",
+         baseline_files="three-aviv-baseline.dat",
+         sample_name="Hexa-scan sample",
+         exp_name="Averaging Subtraction Experiment"
+        )
+
+        # The user is still on the same page
+        self.check_page("/")
+
+        # There is now an output section
+        self.check_output_section_there()
+
+        # The chart section has a chart in it
+        self.check_chart_ok("Averaging Subtraction Experiment", 190, 280, input_data[::-1])
+
+        # The config section controls the chart
+        self.check_chart_config_ok("Hexa-scan sample", input_data)
+
+        # The download section produces a file
+        self.check_file_download_ok("averaging_subtraction_experiment.dat", input_data)

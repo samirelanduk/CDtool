@@ -58,16 +58,16 @@ def files_to_two_component_sample(raw_files, baseline_files):
     sample = scan_to_dict(subtracted, linewidth=2, color="#16A085")
     raw_component = scan_to_dict(raw, linewidth=1.5, color="#137864")
     baseline_component = scan_to_dict(baseline, linewidth=1.5, color="#A0D6FA")
+    total_colors_needed = (0 if len(raw_scans) == 1 else len(raw_scans)) + (0 if len(baseline_scans) == 1 else len(baseline_scans))
+    colors = generate_colors(total_colors_needed)
     if len(raw_scans) > 1:
-        colors = generate_colors(len(raw_scans))
         raw_component["scans"] = [scan_to_dict(
-         scan, linewidth=1, color=color
-        ) for scan, color in zip(raw_scans, colors)]
+         scan, linewidth=1, color=colors.pop(0)
+        ) for scan in raw_scans]
     if len(baseline_scans) > 1:
-        colors = generate_colors(len(baseline_scans))
         baseline_component["scans"] = [scan_to_dict(
-         scan, linewidth=1, color=color
-        ) for scan, color in zip(baseline_scans, colors)]
+         scan, linewidth=1, color=colors.pop(0)
+        ) for scan in baseline_scans]
     sample["components"] = [raw_component, baseline_component]
     return sample
 
