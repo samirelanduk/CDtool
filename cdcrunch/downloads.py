@@ -7,7 +7,7 @@ DATA_FILE = """CDtool {}
 Date generated: {}
 Time generated: {}
 
-Wavelength (nm)   Absorbance   Absorbance Error
+Wavelength (nm)   CD           CD Error
 """
 
 
