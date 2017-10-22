@@ -64,6 +64,35 @@ class SingleScanTests(FunctionalTest):
         self.check_file_download_ok("test_experiment.dat", input_data)
 
 
+    def test_can_crunch_pcddb_gen_scan(self):
+        # Get expected data
+        input_data = self.get_old_gen_data("single-pcddb-gen.gen")
+        for line in input_data:
+            line["error"] = 0
+
+        # The user goes to the main page
+        self.get("/")
+
+        # The user inputs a single .gen scan
+        self.input_data(
+         files="single-pcddb-gen.gen",
+         sample_name="PCDDB sample",
+         exp_name="Test Experiment"
+        )
+
+        # The user is still on the same page
+        self.check_page("/")
+
+        # There is now an output section
+        self.check_output_section_there()
+
+        # The chart section has a chart in it
+        self.check_chart_ok("Test Experiment", 175, 300, input_data[::-1])
+
+        # The download section produces a file
+        self.check_file_download_ok("test_experiment.dat", input_data)
+
+
     def test_can_crunch_own_output_scan(self):
         # Get expected data
         input_data = self.get_old_gen_data("single-old-gen.gen")

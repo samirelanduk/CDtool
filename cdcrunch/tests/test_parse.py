@@ -501,10 +501,10 @@ class ErrorColumnValidationTests(ViewTest):
 
     def test_discarding_of_too_large_values(self):
         self.assertFalse(is_possible_error_column(
-         [0.6, 0.4, 0.3, 1.8, 0.6], [0.1, 0.6, -0.3, 0.01, -0.2]
+         [0.2, 0.4, 0.3, 0.45, 0.06], [0.1, 0.6, -0.3, 0.01, -0.2]
         ))
         self.assertTrue(is_possible_error_column(
-         [0.6, 0.4, 0.3, 1.7, 0.6], [0.1, 0.6, -0.3, 0.01, -0.2]
+         [0.2, 0.4, 0.3, 0.44, 0.06], [0.1, 0.6, -0.3, 0.01, -0.2]
         ))
 
 

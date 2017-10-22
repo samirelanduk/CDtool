@@ -192,7 +192,7 @@ def is_possible_error_column(column, absorbance):
     if set(column) == set([0]): return False
     delta_abs = max(absorbance) - min(absorbance)
     for val in column:
-        if val < 0 or val > delta_abs * 2:
+        if val < 0 or val > delta_abs * 0.5:
             return False
     return True
 
