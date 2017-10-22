@@ -287,11 +287,22 @@ $(document).ready(function() {
 		if (!($(this).hasClass("inert"))) {
 			$(this).click(function(button) {
 				var scanLevel = $(this).parent().hasClass("main-series") ? ".scan-1" : ".scan-2";
-				$(scanLevel).toggle(200);
+				if ($(this).parent().hasClass("raw")) {
+					scanLevel = scanLevel + ".raw";
+				}
+				if ($(this).parent().hasClass("baseline")) {
+					scanLevel = scanLevel + ".baseline";
+				}
 				if ($(this).text() == "^") {
 					$(this).text("v");
+					if (scanLevel == ".scan-1") {
+						$(".scan-2").hide();
+						$(".show-more:not(.inert)").text("v");
+					}
+					$(scanLevel).hide(200);
 				} else {
 					$(this).text("^");
+					$(scanLevel).show(200);
 				}
 			})
 		}
@@ -342,6 +353,12 @@ $(document).ready(function() {
 					$(this).text("show all");
 				}
 				var scanLevel = $(this).parent().hasClass("main-series") ? ".scan-1, .scan-2" : ".scan-2";
+				if ($(this).parent().hasClass("raw")) {
+					scanLevel = scanLevel + ".raw";
+				}
+				if ($(this).parent().hasClass("baseline")) {
+					scanLevel = scanLevel + ".baseline";
+				}
 				var buttons = $(scanLevel).find("button");
 				var visible = ($(this).text() == "hide all");
 				buttons.each(function() {

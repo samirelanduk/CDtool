@@ -86,7 +86,7 @@
         {% endif %}
       </tr>
       {% if sample.components %}
-      <tr class="scan scan-1">
+      <tr class="scan-1 raw">
         <td class="scan-name">{{ sample.name }} Raw</td>
         <td class="series-control">
           <button class="off" data-series="sample_raw">Toggle Raw</button>
@@ -102,7 +102,7 @@
       </tr>
       {% if sample.components.0.scans %}
         {% for scan in sample.components.0.scans %}
-        <tr class="scan-2">
+        <tr class="scan-2 raw">
           <td class="scan-name">{{ sample.name }} Raw #{{ forloop.counter}}</td>
           <td class="series-control">
             <button class="off" data-series="sample_raw_scan_{{forloop.counter0}}">Toggle Raw Scan #{{ forloop.counter }}</button>
@@ -113,7 +113,7 @@
         </tr>
         {% endfor %}
       {% endif %}
-      <tr class="scan-1">
+      <tr class="scan-1 baseline">
         <td class="scan-name">{{ sample.name }} Baseline</td>
         <td class="series-control">
           <button class="off" data-series="sample_baseline">Toggle Baseline</button>
@@ -127,6 +127,19 @@
         <td class="show-all inert"></td>
         {% endif %}
       </tr>
+      {% if sample.components.1.scans %}
+        {% for scan in sample.components.1.scans %}
+        <tr class="scan-2 baseline">
+          <td class="scan-name">{{ sample.name }} Baseline #{{ forloop.counter}}</td>
+          <td class="series-control">
+            <button class="off" data-series="sample_baseline_scan_{{forloop.counter0}}">Toggle Baseline Scan #{{ forloop.counter }}</button>
+            <button class="off">Toggle Baseline Scan #{{ forloop.counter }} Error</button>
+          </td>
+          <td class="show-more inert"></td>
+          <td class="show-all inert"></td>
+        </tr>
+        {% endfor %}
+      {% endif %}
       {% endif %}
       {% if sample.scans %}
         {% for scan in sample.scans %}

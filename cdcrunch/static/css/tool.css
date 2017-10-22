@@ -140,8 +140,8 @@ table.sample-config {
 tr, td {
   margin: 0px;
   border: none;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 
 td.scan-name {
@@ -200,15 +200,21 @@ td.series-control button {
 
 .inert {
   cursor: default;
+  border-left-width: 0px;
 }
 
 .show-all.inert {
-  border-left-width: 0px;
 }
 
 .scan-1, .scan-2 {
   display: none;
   font-size: 70%;
+  line-height: 90%;
+}
+
+.scan-1 td, .scan-2 td {
+  padding-top: 3px;
+  padding-bottom: 3px;
 }
 
 .scan-2 {
