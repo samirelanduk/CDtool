@@ -41,6 +41,10 @@ function makeChart(title, data) {
 		color: data.color,
 		type: "arearange",
 		fillOpacity: 0.2,
+		marker: {
+			enabled: false,
+			states: {hover: {enabled: false}}
+		},
 		lineWidth: 0,
 		enableMouseTracking: false,
 		zIndex: 99
@@ -63,6 +67,10 @@ function makeChart(title, data) {
 			data: data.components[0].error,
 			id: "sample_raw_error",
 			color: data.components[0].color,
+			marker: {
+	      enabled: false,
+	      states: {hover: {enabled: false}}
+			},
 			type: "arearange",
 			fillOpacity: 0.2,
 			lineWidth: 0,
@@ -89,6 +97,10 @@ function makeChart(title, data) {
 				color: data.components[0].scans[s].color,
 				type: "arearange",
 				fillOpacity: 0.2,
+				marker: {
+		      enabled: false,
+		      states: {hover: {enabled: false}}
+				},
 				lineWidth: 0,
 				enableMouseTracking: false,
 				zIndex: 49,
@@ -113,6 +125,10 @@ function makeChart(title, data) {
 			color: data.components[1].color,
 			type: "arearange",
 			fillOpacity: 0.2,
+			marker: {
+	      enabled: false,
+	      states: {hover: {enabled: false}}
+			},
 			lineWidth: 0,
 			enableMouseTracking: false,
 			zIndex: 88,
@@ -137,6 +153,10 @@ function makeChart(title, data) {
 				color: data.components[1].scans[s].color,
 				type: "arearange",
 				fillOpacity: 0.2,
+				marker: {
+		      enabled: false,
+		      states: {hover: {enabled: false}}
+				},
 				lineWidth: 0,
 				enableMouseTracking: false,
 				zIndex: 49,
@@ -165,6 +185,10 @@ function makeChart(title, data) {
 			color: data.scans[s].color,
 			type: "arearange",
 			fillOpacity: 0.2,
+			marker: {
+				enabled: false,
+				states: {hover: {enabled: false}}
+			},
 			lineWidth: 0,
 			enableMouseTracking: false,
 			zIndex: 99,
