@@ -280,7 +280,40 @@ class FunctionalTest(StaticLiveServerTestCase):
         raw_scans = components and "scans" in data[0]["minuend"]
         baseline_scans = components and "scans" in data[0]["subtrahend"]
 
-        # The main config is ok
+        # Open all rows
+        rows = sample_div.find_elements_by_tag_name("tr")
+        while any([row.value_of_css_property("display") == "none" for row in rows]):
+            show_mores = sample_div.find_elements_by_class_name("show-more")
+            unclicked = [sm for sm in show_mores if sm.text == "v"]
+            self.click(unclicked[0])
+
+        # Check each row is ok
+        self.check_config_row_ok(rows[0], sample_name, "sample", not one_scan)
+        if just_scans:
+            for i, row in enumerate(rows[1:len(data[0]["scans"]) + 1]):
+                self.check_config_row_ok(
+                 row, "{} #{}".format(sample_name, i + 1), "sample_scan_" + str(i), False
+                )
+        if components:
+            self.check_config_row_ok(
+             rows[1], "{} Raw".format(sample_name), "sample_raw", raw_scans
+            )
+            baseline_row = [row for row in rows if row.get_attribute("class") == "scan-1 baseline"][0]
+            self.check_config_row_ok(
+             baseline_row, "{} Baseline".format(sample_name), "sample_baseline", baseline_scans
+            )
+        if raw_scans:
+            for i, row in enumerate(rows[2:len(data[0]["minuend"]["scans"]) + 2]):
+                self.check_config_row_ok(
+                 row, "{} Raw #{}".format(sample_name, i + 1), "sample_raw_scan_" + str(i), False
+                )
+        if baseline_scans:
+            for i, row in enumerate(   rows[-len(data[0]["subtrahend"]["scans"]):]   ):
+                self.check_config_row_ok(
+                 row, "{} Baseline #{}".format(sample_name, i + 1), "sample_baseline_scan_" + str(i), False
+                )
+
+        '''# The main config is ok
         main_config = sample_div.find_elements_by_tag_name("tr")[0]
         scan_name_div = main_config.find_element_by_class_name("scan-name")
         self.assertEqual(scan_name_div.text, sample_name)
@@ -293,7 +326,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             self.assertIn("inert", show_all.get_attribute("class"))
         else:
             self.assertIn("v", show_more.text)
-            self.assertIn("show", show_all.text)
+            self.assertIn("show", show_all.text)'''
 
 
         '''# If this is a multi-scans one-component config, it works
@@ -468,7 +501,24 @@ class FunctionalTest(StaticLiveServerTestCase):
                 )'''
 
 
-    def check_controller_controls_series(self, controller, series_name, data):
+    def check_config_row_ok(self, row, row_name, series_name, dropdown):
+        scan_name_div = row.find_element_by_class_name("scan-name")
+        self.assertEqual(scan_name_div.text, row_name)
+        series_controller = row.find_element_by_class_name("series-control")
+        for button in series_controller.find_elements_by_tag_name("button"):
+            if "off" in button.get_attribute("class"): self.click(button)
+        self.check_controller_controls_series(series_controller, series_name)
+        show_more = row.find_element_by_class_name("show-more")
+        show_all = row.find_element_by_class_name("show-all")
+        if dropdown:
+            self.assertIn("^", show_more.text)
+            self.assertIn("show", show_all.text)
+        else:
+            self.assertIn("inert", show_more.get_attribute("class"))
+            self.assertIn("inert", show_all.get_attribute("class"))
+
+
+    def check_controller_controls_series(self, controller, series_name):
         output_div = self.browser.find_element_by_id("output")
         chart_div = output_div.find_element_by_id("chart")
         lines_at_start = self.count_visible_lines(chart_div)
@@ -485,7 +535,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertIn("on", error_button.get_attribute("class"))
 
         # The error button can make the error disappear and reappear
-        error_button.click()
+        self.click(error_button)
         self.assertFalse(self.browser.execute_script(
          "return chart.get('%s').visible" % error_name
         ))
