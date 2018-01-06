@@ -47,13 +47,14 @@ function makeChart(title, data) {
 		},
 		lineWidth: 0,
 		enableMouseTracking: false,
-		zIndex: 99
+		zIndex: 99,
 	});
 	series.push({
     data: data.series,
     id: "sample",
     color: data.color,
     lineWidth: data.linewidth,
+    name: data.name,
     marker: {
       enabled: false,
       states: {hover: {enabled: false}}
@@ -83,13 +84,14 @@ function makeChart(title, data) {
 	    id: "sample_raw",
 	    color: data.components[0].color,
 	    lineWidth: data.components[0].linewidth,
+        name: data.name + ": Raw",
 	    marker: {
 	      enabled: false,
 	      states: {hover: {enabled: false}}
 			},
 			zIndex: 90,
 			visible: false
-    });
+        });
 		for (var s = 0; s < data.components[0].scans.length; s++) {
 			series.push({
 				data: data.components[0].scans[s].error,
@@ -111,6 +113,7 @@ function makeChart(title, data) {
 				id: "sample_raw_scan_" + s,
 				color: data.components[0].scans[s].color,
 				lineWidth: data.components[0].scans[s].linewidth,
+                name: data.name + ": Raw (scan " + (s + 1) + ")",
 				marker: {
 					enabled: false,
 					states: {hover: {enabled: false}}
@@ -139,6 +142,7 @@ function makeChart(title, data) {
 	    id: "sample_baseline",
 	    color: data.components[1].color,
 	    lineWidth: data.components[1].linewidth,
+        name: data.name + ": Baseline",
 	    marker: {
 	      enabled: false,
 	      states: {hover: {enabled: false}}
@@ -167,6 +171,7 @@ function makeChart(title, data) {
 				id: "sample_baseline_scan_" + s,
 				color: data.components[1].scans[s].color,
 				lineWidth: data.components[1].scans[s].linewidth,
+                name: data.name + ": Baseline (scan " + (s + 1) + ")",
 				marker: {
 					enabled: false,
 					states: {hover: {enabled: false}}
@@ -199,6 +204,7 @@ function makeChart(title, data) {
 	    id: "sample_scan_" + s,
 	    color: data.scans[s].color,
 	    lineWidth: data.scans[s].linewidth,
+        name: data.name + " (scan " + (s + 1) + ")",
 	    marker: {
 	      enabled: false,
 	      states: {hover: {enabled: false}}
@@ -265,8 +271,8 @@ function makeChart(title, data) {
     },
     tooltip: {
       enabled: true,
-      headerFormat: '<span style="padding:0">{point.x} nm<br></span>',
-      pointFormat: '<span style="padding:0"><b>{point.y:.2f}</b></span>',
+      headerFormat: '<span style="padding:0"><b>{series.name}</b><br></span>',
+      pointFormat: '<span style="padding:0">{point.x} nm: {point.y:.2f}</span>',
     },
     series: series
   });
