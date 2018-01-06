@@ -274,7 +274,31 @@ function makeChart(title, data) {
       headerFormat: '<span style="padding:0"><b>{series.name}</b><br></span>',
       pointFormat: '<span style="padding:0">{point.x} nm: {point.y:.2f}</span>',
     },
-    series: series
+    series: series,
+    responsive: {
+      rules: [{
+        condition: {
+          maxWidth: 568
+        },
+        chartOptions: {
+            chart: {
+              height: "80%",
+          },
+          xAxis: {
+            title: {
+              style: {"font-weight": "normal", "font-size": "10px"}
+          },
+            plotBorderWidth: 1,
+        },
+        yAxis: {
+          title: {
+            style: {"font-weight": "normal", "font-size": "10px"}
+        },
+            plotBorderWidth: 1,
+        }
+        }
+      }]
+    }
   });
   return chart;
 }
